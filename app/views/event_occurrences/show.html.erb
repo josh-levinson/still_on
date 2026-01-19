@@ -1,0 +1,124 @@
+<div class="event-occurrence-show">
+  <div class="breadcrumb">
+    <%= link_to "Groups", groups_path %> &gt;
+    <%= link_to @group.name, group_path(@group.slug) %> &gt;
+    <%= link_to @event.title, group_event_path(@group.slug, @event) %> &gt;
+    <%= @event_occurrence.start_time.strftime("%B %d, %Y") %>
+  </div>
+
+  <div class="occurrence-header">
+    <h1><%= @event.title %></h1>
+    <div class="occurrence-time">
+      <h2><%= @event_occurrence.start_time.strftime("%A, %B %d, %Y") %></h2>
+      <p><%= @event_occurrence.start_time.strftime("%l:%M %p") %> - <%= @event_occurrence.end_time.strftime("%l:%M %p") %></p>
+    </div>
+    <% if @event_occurrence.location.present? %>
+      <div class="occurrence-location">
+        <strong>Location:</strong> <%= @event_occurrence.location %>
+      </div>
+    <% end %>
+    <% if @event_occurrence.notes.present? %>
+      <div class="occurrence-notes">
+        <strong>Notes:</strong> <%= @event_occurrence.notes %>
+      </div>
+    <% end %>
+    <div class="occurrence-meta">
+      <span class="badge badge-<%= @event_occurrence.status %>"><%= @event_occurrence.status.titleize %></span>
+      <% if @event_occurrence.max_attendees.present? %>
+        <span><strong>Capacity:</strong> <%= @event_occurrence.attending_count %> / <%= @event_occurrence.max_attendees %></span>
+        <% if @event_occurrence.full? %>
+          <span class="badge badge-full">Full</span>
+        <% end %>
+      <% else %>
+        <span><strong>Attendees:</strong> <%= @event_occurrence.attending_count %></span>
+      <% end %>
+    </div>
+    <div class="occurrence-actions">
+      <% if @event.created_by == current_user || @group.created_by == current_user %>
+        <%= link_to "Edit Occurrence", edit_group_event_event_occurrence_path(@group.slug, @event, @event_occurrence), class: "btn btn-secondary" %>
+        <%= button_to "Delete Occurrence",
+            group_event_event_occurrence_path(@group.slug, @event, @event_occurrence),
+            method: :delete,
+            data: { confirm: "Are you sure?" },
+            class: "btn btn-danger" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="rsvp-section">
+    <h2>RSVP</h2>
+    <% if @user_rsvp.present? %>
+      <div class="current-rsvp">
+        <p>Your current RSVP: <strong><%= @user_rsvp.status.titleize %></strong></p>
+        <% if @user_rsvp.guest_count > 0 %>
+          <p>Guests: <%= @user_rsvp.guest_count %></p>
+        <% end %>
+        <% if @user_rsvp.notes.present? %>
+          <p>Notes: <%= @user_rsvp.notes %></p>
+        <% end %>
+        <%= button_to "Remove RSVP",
+            event_occurrence_rsvp_path(@event_occurrence, @user_rsvp),
+            method: :delete,
+            class: "btn btn-secondary" %>
+      </div>
+    <% else %>
+      <%= form_with model: [@event_occurrence, Rsvp.new], url: event_occurrence_rsvps_path(@event_occurrence), local: true do |f| %>
+        <div class="form-group">
+          <%= f.label :status, "Your Response" %>
+          <%= f.select :status,
+              [["Attending", "attending"], ["Maybe", "maybe"], ["Declined", "declined"]],
+              {},
+              class: "form-control" %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :guest_count, "Number of Guests" %>
+          <%= f.number_field :guest_count, value: 0, min: 0, class: "form-control" %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :notes, "Notes (optional)" %>
+          <%= f.text_area :notes, rows: 2, class: "form-control" %>
+        </div>
+
+        <%= f.submit "Submit RSVP", class: "btn btn-primary" %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="attendees-section">
+    <h2>Attendees (<%= @rsvps.where(status: 'attending').count %>)</h2>
+    <% attending = @rsvps.select { |r| r.status == "attending" } %>
+    <% if attending.any? %>
+      <div class="attendees-list">
+        <% attending.each do |rsvp| %>
+          <div class="attendee-card">
+            <div class="attendee-info">
+              <strong><%= rsvp.user.full_name %></strong>
+              <% if rsvp.guest_count > 0 %>
+                <span>+<%= rsvp.guest_count %> <%= "guest".pluralize(rsvp.guest_count) %></span>
+              <% end %>
+            </div>
+            <% if rsvp.notes.present? %>
+              <div class="attendee-notes"><%= rsvp.notes %></div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="empty-state">No attendees yet.</p>
+    <% end %>
+
+    <% maybe = @rsvps.select { |r| r.status == "maybe" } %>
+    <% if maybe.any? %>
+      <h3>Maybe (<%= maybe.count %>)</h3>
+      <div class="attendees-list">
+        <% maybe.each do |rsvp| %>
+          <div class="attendee-card maybe">
+            <strong><%= rsvp.user.full_name %></strong>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -8,3 +8,33 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+/* ========================================
+   IMPORTS - Order matters!
+   ======================================== */
+
+/* Base styles - Variables, resets, and typography */
+@import "base/variables.css";
+@import "base/reset.css";
+@import "base/typography.css";
+
+/* Layout components - Structure and containers */
+@import "layout/container.css";
+@import "layout/navigation.css";
+@import "layout/header.css";
+
+/* UI Components - Reusable interface elements */
+@import "components/buttons.css";
+@import "components/cards.css";
+@import "components/forms.css";
+@import "components/badges.css";
+@import "components/alerts.css";
+@import "components/breadcrumbs.css";
+@import "components/tables.css";
+
+/* Page-specific styles */
+@import "pages/groups.css";
+
+/* Utilities - Helpers and responsive styles (should load last) */
+@import "utilities/helpers.css";
+@import "utilities/responsive.css";

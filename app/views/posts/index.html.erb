@@ -1,0 +1,79 @@
+<div class="home">
+  <% if user_signed_in? %>
+    <div class="dashboard">
+      <h1>Welcome, <%= current_user.full_name %>!</h1>
+
+      <div class="upcoming-events-section">
+        <div class="section-header">
+          <h2>Upcoming Events</h2>
+          <%= link_to "View All Groups", groups_path, class: "btn btn-secondary" %>
+        </div>
+
+        <% if @upcoming_occurrences.any? %>
+          <div class="occurrences-list">
+            <% @upcoming_occurrences.each do |occurrence| %>
+              <div class="occurrence-card">
+                <%= link_to group_event_event_occurrence_path(
+                      occurrence.event.group.slug,
+                      occurrence.event,
+                      occurrence
+                    ) do %>
+                  <div class="occurrence-group">
+                    <strong><%= occurrence.event.group.name %></strong>
+                  </div>
+                  <h3><%= occurrence.event.title %></h3>
+                  <div class="occurrence-time">
+                    <span class="date"><%= occurrence.start_time.strftime("%B %d, %Y") %></span>
+                    <span class="time"><%= occurrence.start_time.strftime("%l:%M %p") %> - <%= occurrence.end_time.strftime("%l:%M %p") %></span>
+                  </div>
+                  <% if occurrence.location.present? %>
+                    <div class="occurrence-location"><%= occurrence.location %></div>
+                  <% end %>
+                  <div class="occurrence-meta">
+                    <span><%= pluralize(occurrence.attending_count, 'attendee') %></span>
+                    <% user_rsvp = occurrence.rsvps.find_by(user: current_user) %>
+                    <% if user_rsvp.present? %>
+                      <span class="badge badge-<%= user_rsvp.status %>">
+                        You: <%= user_rsvp.status.titleize %>
+                      </span>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="empty-state">No upcoming events in your groups.</p>
+        <% end %>
+      </div>
+
+      <div class="groups-section">
+        <h2>Your Groups</h2>
+        <% if @groups.any? %>
+          <div class="groups-grid">
+            <% @groups.each do |group| %>
+              <div class="group-card-small">
+                <%= link_to group_path(group.slug) do %>
+                  <h3><%= group.name %></h3>
+                  <span><%= pluralize(group.members.count, 'member') %></span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="empty-state">You're not part of any groups yet.</p>
+          <%= link_to "Create a Group", new_group_path, class: "btn btn-primary" %>
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <div class="welcome">
+      <h1>Welcome to Still On</h1>
+      <p>Manage your group events and RSVPs with ease.</p>
+      <div class="auth-actions">
+        <%= link_to "Sign In", new_user_session_path, class: "btn btn-primary" %>
+        <%= link_to "Sign Up", new_user_registration_path, class: "btn btn-secondary" %>
+      </div>
+    </div>
+  <% end %>
+</div>

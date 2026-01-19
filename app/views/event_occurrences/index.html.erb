@@ -1,0 +1,41 @@
+<div class="event-occurrences-index">
+  <div class="breadcrumb">
+    <%= link_to "Groups", groups_path %> &gt;
+    <%= link_to @group.name, group_path(@group.slug) %> &gt;
+    <%= link_to @event.title, group_event_path(@group.slug, @event) %> &gt;
+    All Occurrences
+  </div>
+
+  <div class="header">
+    <h1>All Occurrences for <%= @event.title %></h1>
+    <% if @event.created_by == current_user || @group.created_by == current_user %>
+      <%= link_to "Create New Occurrence", new_group_event_event_occurrence_path(@group.slug, @event), class: "btn btn-primary" %>
+    <% end %>
+  </div>
+
+  <div class="occurrences-section">
+    <h2>Upcoming</h2>
+    <% if @upcoming_occurrences.any? %>
+      <div class="occurrences-list">
+        <% @upcoming_occurrences.each do |occurrence| %>
+          <%= render partial: "occurrence_card", locals: { occurrence: occurrence } %>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="empty-state">No upcoming occurrences.</p>
+    <% end %>
+  </div>
+
+  <div class="occurrences-section">
+    <h2>Past</h2>
+    <% if @past_occurrences.any? %>
+      <div class="occurrences-list">
+        <% @past_occurrences.each do |occurrence| %>
+          <%= render partial: "occurrence_card", locals: { occurrence: occurrence, past: true } %>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="empty-state">No past occurrences.</p>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,69 @@
+<div class="container container-md">
+  <div class="breadcrumb">
+    <%= link_to "Groups", groups_path %> &gt; <%= link_to @group.name, group_path(@group.slug) %> &gt; New Event
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h1>Create New Event</h1>
+    </div>
+
+    <div class="card-body">
+      <%= form_with model: [@group, @event], local: true do |f| %>
+        <% if @event.errors.any? %>
+          <div class="alert alert-danger">
+            <strong><%= pluralize(@event.errors.count, "error") %> prohibited this event from being saved:</strong>
+            <ul>
+              <% @event.errors.each do |error| %>
+                <li><%= error.full_message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div class="form-group">
+          <%= f.label :title %>
+          <%= f.text_field :title, required: true %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :description %>
+          <%= f.text_area :description, rows: 4 %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :location, "Default Location" %>
+          <%= f.text_field :location %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :default_duration_minutes, "Default Duration (minutes)" %>
+          <%= f.number_field :default_duration_minutes, value: 60 %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :recurrence_type, "Recurrence" %>
+          <%= f.select :recurrence_type,
+              [["Does not repeat", "none"], ["Daily", "daily"], ["Weekly", "weekly"], ["Monthly", "monthly"]],
+              {} %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :recurrence_rule, "Recurrence Rule (advanced)" %>
+          <%= f.text_field :recurrence_rule, placeholder: "e.g., FREQ=WEEKLY;BYDAY=MO,WE,FR" %>
+          <small class="text-gray">Optional: RFC 5545 recurrence rule format</small>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <%= f.check_box :is_active, checked: true %>
+          <%= f.label :is_active, "Active" %>
+        </div>
+
+        <div class="form-actions flex gap-2">
+          <%= f.submit "Create Event", class: "btn btn-primary" %>
+          <%= link_to "Cancel", group_path(@group.slug), class: "btn btn-outline" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

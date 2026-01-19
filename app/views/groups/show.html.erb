@@ -1,0 +1,58 @@
+<div class="group-show">
+  <div class="group-header">
+    <% if @group.avatar_url.present? %>
+      <%= image_tag @group.avatar_url, alt: @group.name, class: "group-avatar-large" %>
+    <% end %>
+    <div class="group-info">
+      <h1><%= @group.name %></h1>
+      <% if @group.description.present? %>
+        <p class="group-description"><%= @group.description %></p>
+      <% end %>
+      <div class="group-meta">
+        <span><%= pluralize(@group.members.count, 'member') %></span>
+        <% if @group.is_private %>
+          <span class="badge">Private</span>
+        <% end %>
+      </div>
+    </div>
+    <div class="group-actions">
+      <% if @group.created_by == current_user %>
+        <%= link_to "Edit Group", edit_group_path(@group.slug), class: "btn btn-secondary" %>
+        <%= button_to "Delete Group", group_path(@group.slug), method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="events-section">
+    <div class="section-header">
+      <h2>Events</h2>
+      <%= link_to "Create Event", new_group_event_path(@group.slug), class: "btn btn-primary" %>
+    </div>
+
+    <% if @events.any? %>
+      <div class="events-list">
+        <% @events.each do |event| %>
+          <div class="event-card">
+            <%= link_to group_event_path(@group.slug, event) do %>
+              <h3><%= event.title %></h3>
+              <% if event.description.present? %>
+                <p><%= truncate(event.description, length: 150) %></p>
+              <% end %>
+              <div class="event-meta">
+                <% if event.recurrence_type != "none" %>
+                  <span class="badge"><%= event.recurrence_type.titleize %></span>
+                <% end %>
+                <span><%= pluralize(event.event_occurrences.upcoming.count, 'upcoming occurrence') %></span>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-state">
+        <p>No events yet.</p>
+        <%= link_to "Create the first event", new_group_event_path(@group.slug), class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

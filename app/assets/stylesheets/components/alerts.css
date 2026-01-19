@@ -1,0 +1,46 @@
+/* ========================================
+   ALERTS & NOTIFICATIONS
+   ======================================== */
+
+.alert {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid transparent;
+}
+
+.alert-success {
+  background-color: #d1fae5;
+  color: #065f46;
+  border-color: #6ee7b7;
+}
+
+.alert-danger {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+.alert-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+.alert-info {
+  background-color: #cffafe;
+  color: #164e63;
+  border-color: #67e8f9;
+}
+
+.notice {
+  composes: alert alert-success;
+}
+
+.alert-message {
+  composes: alert alert-info;
+}
+
+.error {
+  composes: alert alert-danger;
+}

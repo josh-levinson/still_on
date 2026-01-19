@@ -1,0 +1,20 @@
+/* ========================================
+   BREADCRUMBS
+   ======================================== */
+
+.breadcrumb {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+}
+
+.breadcrumb a {
+  color: var(--color-gray-600);
+}
+
+.breadcrumb a:hover {
+  color: var(--color-primary);
+}

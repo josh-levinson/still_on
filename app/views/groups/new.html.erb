@@ -1,0 +1,47 @@
+<div class="container container-md">
+  <div class="card">
+    <div class="card-header">
+      <h1>Create New Group</h1>
+    </div>
+
+    <div class="card-body">
+      <%= form_with model: @group, local: true do |f| %>
+        <% if @group.errors.any? %>
+          <div class="alert alert-danger">
+            <strong><%= pluralize(@group.errors.count, "error") %> prohibited this group from being saved:</strong>
+            <ul>
+              <% @group.errors.each do |error| %>
+                <li><%= error.full_message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div class="form-group">
+          <%= f.label :name %>
+          <%= f.text_field :name, required: true %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :description %>
+          <%= f.text_area :description, rows: 4 %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :avatar_url, "Avatar URL (optional)" %>
+          <%= f.text_field :avatar_url %>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <%= f.check_box :is_private %>
+          <%= f.label :is_private, "Make this group private" %>
+        </div>
+
+        <div class="form-actions flex gap-2">
+          <%= f.submit "Create Group", class: "btn btn-primary" %>
+          <%= link_to "Cancel", groups_path, class: "btn btn-outline" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

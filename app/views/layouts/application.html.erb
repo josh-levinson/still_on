@@ -24,6 +24,38 @@
   </head>
 
   <body>
+    <nav class="navbar">
+      <div class="container">
+        <%= link_to root_path, class: "navbar-brand" do %>
+          <span class="logo-still">Still</span>
+          <%= image_tag "bonfire.png", alt: "bonfire", class: "logo-fire-img" %>
+          <span class="logo-on">On</span>
+        <% end %>
+        <ul class="navbar-nav">
+          <% if user_signed_in? %>
+            <li><%= link_to "My Groups", groups_path %></li>
+            <li><%= link_to current_user.username, edit_user_registration_path %></li>
+            <li><%= button_to "Sign Out", destroy_user_session_path, method: :delete, class: "btn btn-sm btn-outline" %></li>
+          <% else %>
+            <li><%= link_to "Sign In", new_user_session_path %></li>
+            <li><%= link_to "Sign Up", new_user_registration_path, class: "btn btn-sm btn-primary" %></li>
+          <% end %>
+        </ul>
+      </div>
+    </nav>
+
+    <% if notice.present? %>
+      <div class="container">
+        <div class="alert alert-success"><%= notice %></div>
+      </div>
+    <% end %>
+
+    <% if alert.present? %>
+      <div class="container">
+        <div class="alert alert-danger"><%= alert %></div>
+      </div>
+    <% end %>
+
     <%= yield %>
   </body>
 </html>

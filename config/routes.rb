@@ -12,4 +12,18 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "posts#index"
+
+  # Nested resources for groups, events, occurrences, and RSVPs
+  resources :groups, param: :slug do
+    resources :events do
+      resources :event_occurrences do
+        resources :rsvps, only: [:create, :update, :destroy]
+      end
+    end
+  end
+
+  # Shortcut for RSVPs (accessible directly via occurrence ID)
+  resources :event_occurrences, only: [] do
+    resources :rsvps, only: [:create, :update, :destroy]
+  end
 end

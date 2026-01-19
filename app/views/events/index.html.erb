@@ -1,0 +1,39 @@
+<div class="events-index">
+  <div class="breadcrumb">
+    <%= link_to "Groups", groups_path %> &gt; <%= link_to @group.name, group_path(@group.slug) %> &gt; Events
+  </div>
+
+  <div class="header">
+    <h1>Events for <%= @group.name %></h1>
+    <%= link_to "Create New Event", new_group_event_path(@group.slug), class: "btn btn-primary" %>
+  </div>
+
+  <% if @events.any? %>
+    <div class="events-list">
+      <% @events.each do |event| %>
+        <div class="event-card">
+          <%= link_to group_event_path(@group.slug, event) do %>
+            <h2><%= event.title %></h2>
+            <% if event.description.present? %>
+              <p><%= truncate(event.description, length: 200) %></p>
+            <% end %>
+            <div class="event-meta">
+              <% if event.recurrence_type != "none" %>
+                <span class="badge badge-recurring"><%= event.recurrence_type.titleize %></span>
+              <% end %>
+              <% if event.location.present? %>
+                <span><%= event.location %></span>
+              <% end %>
+              <span><%= pluralize(event.event_occurrences.upcoming.count, 'upcoming occurrence') %></span>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="empty-state">
+      <p>No events in this group yet.</p>
+      <%= link_to "Create the first event", new_group_event_path(@group.slug), class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>

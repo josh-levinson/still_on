@@ -1,0 +1,62 @@
+<div class="event-occurrence-form">
+  <div class="breadcrumb">
+    <%= link_to "Groups", groups_path %> &gt;
+    <%= link_to @group.name, group_path(@group.slug) %> &gt;
+    <%= link_to @event.title, group_event_path(@group.slug, @event) %> &gt;
+    <%= link_to @event_occurrence.start_time.strftime("%B %d, %Y"), group_event_event_occurrence_path(@group.slug, @event, @event_occurrence) %> &gt;
+    Edit
+  </div>
+
+  <h1>Edit Occurrence</h1>
+
+  <%= form_with model: [@group, @event, @event_occurrence], local: true do |f| %>
+    <% if @event_occurrence.errors.any? %>
+      <div class="error-messages">
+        <h2><%= pluralize(@event_occurrence.errors.count, "error") %> prohibited this occurrence from being saved:</h2>
+        <ul>
+          <% @event_occurrence.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="form-group">
+      <%= f.label :start_time, "Start Time" %>
+      <%= f.datetime_local_field :start_time, required: true, class: "form-control" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :end_time, "End Time" %>
+      <%= f.datetime_local_field :end_time, required: true, class: "form-control" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :location %>
+      <%= f.text_field :location, class: "form-control" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :max_attendees, "Maximum Attendees (optional)" %>
+      <%= f.number_field :max_attendees, class: "form-control", min: 1 %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :notes %>
+      <%= f.text_area :notes, rows: 3, class: "form-control" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :status %>
+      <%= f.select :status,
+          [["Scheduled", "scheduled"], ["Cancelled", "cancelled"], ["Completed", "completed"]],
+          {},
+          class: "form-control" %>
+    </div>
+
+    <div class="form-actions">
+      <%= f.submit "Update Occurrence", class: "btn btn-primary" %>
+      <%= link_to "Cancel", group_event_event_occurrence_path(@group.slug, @event, @event_occurrence), class: "btn btn-secondary" %>
+    </div>
+  <% end %>
+</div>
