@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Still On" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="apple-touch-icon" href="/icon.png">
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="onboarding-body">
+    <div class="onboarding-shell">
+      <div class="onboarding-logo">
+        <%= link_to root_path do %>
+          <span class="logo-still">Still</span>
+          <%= image_tag "bonfire.png", alt: "bonfire", class: "logo-fire-img" %>
+          <span class="logo-on">On</span>
+        <% end %>
+      </div>
+
+      <% if local_assigns[:step].present? || @step.present? %>
+        <% current_step = local_assigns[:step] || @step %>
+        <div class="onboarding-progress">
+          <% 4.times do |i| %>
+            <div class="progress-dot <%= i < current_step ? 'active' : '' %> <%= i == current_step - 1 ? 'current' : '' %>"></div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <% if notice.present? %>
+        <div class="onboarding-notice"><%= notice %></div>
+      <% end %>
+
+      <% if alert.present? %>
+        <div class="onboarding-error"><%= alert %></div>
+      <% end %>
+
+      <%= yield %>
+    </div>
+  </body>
+</html>

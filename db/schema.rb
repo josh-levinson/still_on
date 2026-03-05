@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_18_184453) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_05_202352) do
 # Could not dump table "event_occurrences" because of following StandardError
 #   Unknown type 'uuid' for column 'event_id'
 
@@ -38,6 +38,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_18_184453) do
     t.string "encrypted_password", default: "", null: false
     t.string "first_name"
     t.string "last_name"
+    t.string "phone_number"
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"

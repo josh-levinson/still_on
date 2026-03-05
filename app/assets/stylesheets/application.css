@@ -34,6 +34,7 @@
 
 /* Page-specific styles */
 @import "pages/groups.css";
+@import "pages/onboarding.css";
 
 /* Utilities - Helpers and responsive styles (should load last) */
 @import "utilities/helpers.css";

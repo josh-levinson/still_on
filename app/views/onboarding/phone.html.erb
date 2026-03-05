@@ -1,0 +1,26 @@
+<div class="onboarding-card" data-controller="phone-input">
+  <div class="onboarding-card-header">
+    <h2>What's your number?</h2>
+    <p>We'll text you a quick verification code. No passwords, ever.</p>
+  </div>
+
+  <% if flash[:error].present? %>
+    <div class="onboarding-error"><%= flash[:error] %></div>
+  <% end %>
+
+  <%= form_with url: onboarding_submit_phone_path, method: :post, class: "onboarding-form" do |f| %>
+    <div class="phone-input-wrapper">
+      <span class="phone-flag">US +1</span>
+      <%= f.telephone_field :phone,
+            placeholder: "(555) 555-5555",
+            inputmode: "tel",
+            autocomplete: "tel-national",
+            class: "onboarding-input phone-field",
+            data: { action: "input->phone-input#format", phone_input_target: "display" },
+            required: true,
+            autofocus: true %>
+    </div>
+
+    <%= f.submit "Send Code", class: "btn-onboarding-primary" %>
+  <% end %>
+</div>

@@ -1,5 +1,20 @@
 Rails.application.routes.draw do
   devise_for :users
+
+  # Onboarding flow
+  get  "onboarding",          to: "onboarding#splash",         as: :onboarding_splash
+  get  "onboarding/phone",    to: "onboarding#phone",          as: :onboarding_phone
+  post "onboarding/phone",    to: "onboarding#submit_phone",   as: :onboarding_submit_phone
+  post "onboarding/resend",   to: "onboarding#resend_otp",     as: :onboarding_resend_otp
+  get  "onboarding/verify",   to: "onboarding#verify",         as: :onboarding_verify
+  post "onboarding/verify",   to: "onboarding#submit_verify",  as: :onboarding_submit_verify
+  get  "onboarding/name",     to: "onboarding#name",           as: :onboarding_name
+  post "onboarding/name",     to: "onboarding#submit_name",    as: :onboarding_submit_name
+  get  "onboarding/date",     to: "onboarding#date_step",      as: :onboarding_date
+  post "onboarding/date",     to: "onboarding#submit_date",    as: :onboarding_submit_date
+  get  "onboarding/cadence",  to: "onboarding#cadence",        as: :onboarding_cadence
+  post "onboarding/cadence",  to: "onboarding#submit_cadence", as: :onboarding_submit_cadence
+  get  "onboarding/invite",   to: "onboarding#invite",         as: :onboarding_invite
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -11,7 +26,7 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
-  root "posts#index"
+  root "onboarding#splash"
 
   # Nested resources for groups, events, occurrences, and RSVPs
   resources :groups, param: :slug do
