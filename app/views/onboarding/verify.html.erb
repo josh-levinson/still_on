@@ -1,7 +1,10 @@
-<div class="onboarding-card" data-controller="otp" data-otp-length-value="6">
+<div data-controller="otp" data-otp-length-value="6">
+  <%= link_to "\u2190 back", onboarding_phone_path, class: "back-btn" %>
+
+  <p class="ob-label">Verification</p>
   <div class="onboarding-card-header">
     <h2>Check your texts</h2>
-    <p>We sent a 6-digit code to <%= session[:ob_phone]&.then { |p| "(#{p[0..2]}) #{p[3..5]}-#{p[6..9]}" } %></p>
+    <p>Sent to <%= session[:ob_phone]&.then { |p| "(#{p[0..2]}) #{p[3..5]}-#{p[6..9]}" } %></p>
   </div>
 
   <% if flash[:error].present? %>
@@ -34,7 +37,8 @@
   <% end %>
 
   <div class="onboarding-secondary-action">
-    Wrong number? <%= link_to "Go back", onboarding_phone_path %> &nbsp;&middot;&nbsp;
     <%= link_to "Resend code", onboarding_resend_otp_path, data: { turbo_method: :post } %>
+    &nbsp;&middot;&nbsp;
+    <%= link_to "Wrong number?", onboarding_phone_path %>
   </div>
 </div>

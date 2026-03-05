@@ -1,65 +1,47 @@
-<div class="onboarding-card onboarding-invite" data-controller="clipboard">
-  <div class="invite-success-badge">
-    <span class="invite-checkmark">&#10003;</span>
-  </div>
-
+<div data-controller="clipboard">
+  <p class="ob-label">Step 4 of 4 &middot; Invite</p>
   <div class="onboarding-card-header">
-    <h2>You're all set, <%= @first_name %>!</h2>
-    <p>Here's everything coming up for <strong><%= @hangout_name %></strong>.</p>
+    <h2>Bring your people in.</h2>
+    <p>Share a link &mdash; they can RSVP without signing up.</p>
   </div>
 
-  <div class="invite-summary">
-    <div class="summary-row">
-      <span class="summary-icon">&#128197;</span>
-      <span class="summary-text">
-        First meetup: <strong><%= @date.strftime("%A, %B %-d") %></strong>
-      </span>
-    </div>
-    <div class="summary-row">
-      <span class="summary-icon">&#128259;</span>
-      <span class="summary-text">
-        <% case @cadence
-           when "weekly" %>Repeats every week
-        <% when "monthly" %>Repeats every month
-        <% else %>One-time event
-        <% end %>
-      </span>
-    </div>
-    <div class="summary-row">
-      <span class="summary-icon">&#128241;</span>
-      <span class="summary-text">
-        We'll text everyone "Still on?" 2 days before each meetup
-      </span>
-    </div>
+  <div class="invite-hangout-card">
+    <p class="invite-hangout-label">Your hangout</p>
+    <p class="invite-hangout-name"><%= @hangout_name %></p>
+    <p class="invite-hangout-meta">
+      <%= @date.strftime("%A, %B %-d") %> &middot;
+      <% case @cadence
+         when "weekly" %>Weekly
+      <% when "monthly" %>Monthly
+      <% else %>One-time
+      <% end %>
+    </p>
   </div>
 
-  <div class="invite-section">
-    <p class="invite-section-label">Share with your crew</p>
-
-    <div class="invite-link-box">
-      <span class="invite-link-text" data-clipboard-target="source"><%= @invite_url %></span>
-      <button class="invite-copy-btn"
-              data-action="click->clipboard#copy"
-              data-clipboard-target="button">
-        Copy
-      </button>
-    </div>
-
-    <div class="invite-share-btns">
-      <a href="sms:&body=<%= ERB::Util.url_encode("Hey! RSVP for #{@hangout_name} here: #{@invite_url}") %>"
-         class="share-btn share-imessage">
-        iMessage
-      </a>
-      <a href="https://wa.me/?text=<%= ERB::Util.url_encode("Hey! RSVP for #{@hangout_name} here: #{@invite_url}") %>"
-         target="_blank"
-         rel="noopener"
-         class="share-btn share-whatsapp">
-        WhatsApp
-      </a>
-    </div>
+  <div class="invite-link-box">
+    <span class="invite-link-text" data-clipboard-target="source"><%= @invite_url %></span>
+    <button class="invite-copy-btn"
+            data-action="click->clipboard#copy"
+            data-clipboard-target="button">
+      Copy
+    </button>
   </div>
 
-  <div class="onboarding-actions">
-    <%= link_to "Go to my hangout", group_event_event_occurrence_path(@occurrence.event.group, @occurrence.event, @occurrence), class: "btn-onboarding-primary" %>
+  <div class="invite-share-btns">
+    <a href="sms:&body=<%= ERB::Util.url_encode("Hey! RSVP for #{@hangout_name} here: #{@invite_url}") %>"
+       class="share-btn">
+      📱 iMessage
+    </a>
+    <a href="https://wa.me/?text=<%= ERB::Util.url_encode("Hey! RSVP for #{@hangout_name} here: #{@invite_url}") %>"
+       target="_blank"
+       rel="noopener"
+       class="share-btn">
+      💬 WhatsApp
+    </a>
   </div>
+
+  <%= link_to "Go to my hangout \u2192",
+        group_event_event_occurrence_path(@occurrence.event.group, @occurrence.event, @occurrence),
+        class: "btn-onboarding-primary" %>
+  <p class="ob-annotation">Takes 5 seconds to RSVP</p>
 </div>

@@ -1,14 +1,14 @@
+<% content_for :hide_logo, true %>
+
 <div class="onboarding-splash">
   <div class="splash-hero">
-    <div class="splash-fire">
-      <%= image_tag "bonfire.png", alt: "bonfire", class: "splash-fire-img" %>
-    </div>
-    <h1 class="splash-title">Keep the hangout alive.</h1>
-    <p class="splash-subtitle">StillOn sends automatic "Still on?" reminders before every meetup — so you spend less time coordinating and more time actually hanging out.</p>
+    <span class="splash-fire-img"></span>
+    <h1 class="splash-title">StillOn</h1>
+    <p class="splash-subtitle">keep the plans alive</p>
   </div>
 
   <div class="onboarding-actions">
-    <%= link_to "Get Started", onboarding_phone_path, class: "btn-onboarding-primary" %>
+    <%= link_to "Get started \u2192", onboarding_phone_path, class: "btn-onboarding-primary" %>
     <p class="splash-signin">Already have an account? <%= link_to "Sign in", new_user_session_path %></p>
   </div>
 </div>

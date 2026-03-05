@@ -14,20 +14,21 @@
 
   <body class="onboarding-body">
     <div class="onboarding-shell">
-      <div class="onboarding-logo">
-        <%= link_to root_path do %>
-          <span class="logo-still">Still</span>
-          <%= image_tag "bonfire.png", alt: "bonfire", class: "logo-fire-img" %>
-          <span class="logo-on">On</span>
-        <% end %>
-      </div>
+      <% unless content_for?(:hide_logo) %>
+        <div class="onboarding-logo">
+          <%= link_to root_path do %>
+            <span class="logo-fire-img"></span>
+            <span class="logo-still">StillOn</span>
+          <% end %>
+        </div>
+      <% end %>
 
       <% if local_assigns[:step].present? || @step.present? %>
         <% current_step = local_assigns[:step] || @step %>
         <div class="onboarding-progress">
-          <% 4.times do |i| %>
-            <div class="progress-dot <%= i < current_step ? 'active' : '' %> <%= i == current_step - 1 ? 'current' : '' %>"></div>
-          <% end %>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" style="width: <%= (current_step.to_f / 4 * 100).round %>%"></div>
+          </div>
         </div>
       <% end %>
 

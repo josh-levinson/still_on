@@ -1,7 +1,10 @@
-<div class="onboarding-card" data-controller="date-picker">
+<div data-controller="date-picker">
+  <%= link_to "\u2190 back", onboarding_name_path, class: "back-btn" %>
+
+  <p class="ob-label">Step 2 of 4 &middot; When</p>
   <div class="onboarding-card-header">
-    <h2>When's the first one?</h2>
-    <p>Pick a date for the first meetup.</p>
+    <h2>First one's when?</h2>
+    <p>You can always adjust later.</p>
   </div>
 
   <% if flash[:error].present? %>
@@ -11,28 +14,34 @@
   <%= form_with url: onboarding_submit_date_path, method: :post, class: "onboarding-form" do |f| %>
     <%= f.hidden_field :date, value: session[:ob_date], data: { date_picker_target: "value" } %>
 
-    <div class="quick-date-options">
+    <div class="card-options">
       <button type="button"
               class="quick-date-btn"
               data-action="click->date-picker#selectQuick"
               data-date="<%= @this_friday.to_s %>">
-        <span class="quick-date-label">This Friday</span>
-        <span class="quick-date-sub"><%= @this_friday.strftime("%b %-d") %></span>
+        <div class="card-option-body">
+          <span class="quick-date-label">This Friday</span>
+          <span class="quick-date-sub"><%= @this_friday.strftime("%b %-d") %></span>
+        </div>
       </button>
 
       <button type="button"
               class="quick-date-btn"
               data-action="click->date-picker#selectQuick"
               data-date="<%= @next_friday.to_s %>">
-        <span class="quick-date-label">Next Friday</span>
-        <span class="quick-date-sub"><%= @next_friday.strftime("%b %-d") %></span>
+        <div class="card-option-body">
+          <span class="quick-date-label">Next Friday</span>
+          <span class="quick-date-sub"><%= @next_friday.strftime("%b %-d") %></span>
+        </div>
       </button>
 
       <button type="button"
               class="quick-date-btn"
               data-action="click->date-picker#showCustom">
-        <span class="quick-date-label">Pick a date</span>
-        <span class="quick-date-sub">Custom</span>
+        <div class="card-option-body">
+          <span class="quick-date-label">Pick a date&hellip;</span>
+          <span class="quick-date-sub">Choose from calendar</span>
+        </div>
       </button>
     </div>
 
@@ -47,6 +56,6 @@
       Selected: <strong data-date-picker-target="label"></strong>
     </div>
 
-    <%= f.submit "Continue", class: "btn-onboarding-primary", data: { date_picker_target: "submit" }, disabled: session[:ob_date].blank? %>
+    <%= f.submit "Next \u2192", class: "btn-onboarding-primary", data: { date_picker_target: "submit" }, disabled: session[:ob_date].blank? %>
   <% end %>
 </div>
