@@ -1,0 +1,680 @@
+/* ========================================
+   ONBOARDING FLOW
+   ======================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
+
+.onboarding-body {
+  background: #0d0d0d;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.onboarding-shell {
+  width: 100%;
+  max-width: 420px;
+  padding: 28px 0 40px;
+}
+
+/* Logo */
+.onboarding-logo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.onboarding-logo a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.onboarding-logo .logo-still {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #f0e8d8;
+}
+
+.onboarding-logo .logo-on {
+  display: none;
+}
+
+.onboarding-logo .logo-fire-img {
+  width: 8px;
+  height: 8px;
+}
+
+/* Progress bar */
+.onboarding-progress {
+  margin-bottom: 36px;
+}
+
+.progress-step-label {
+  display: none;
+}
+
+.progress-bar-track {
+  height: 2px;
+  background: #1a1a1a;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #e8d5b0;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* Card — transparent, layout-only container */
+.onboarding-card {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+/* Step label (small uppercase) */
+.ob-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: #555;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* Card header */
+.onboarding-card-header {
+  margin-bottom: 32px;
+}
+
+.onboarding-card-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #f0e8d8;
+  margin-bottom: 8px;
+  line-height: 1.25;
+}
+
+.onboarding-card-header p {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+/* Flash messages */
+.onboarding-notice {
+  background: #0f1f18;
+  color: #6ee7b7;
+  border: 1px solid #1a3d2b;
+  border-radius: 12px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  font-size: 0.9rem;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.onboarding-error {
+  background: #1f0f0f;
+  color: #fca5a5;
+  border: 1px solid #3d1a1a;
+  border-radius: 12px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  font-size: 0.9rem;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* Forms */
+.onboarding-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Inputs — scoped to .onboarding-body to beat global forms.css specificity */
+.onboarding-body .onboarding-input {
+  width: 100%;
+  padding: 18px 20px;
+  border: 1px solid #2a2a2a;
+  border-radius: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  color: #fff;
+  background: #141414;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+  outline: none;
+  box-shadow: none;
+}
+
+.onboarding-body .onboarding-input::placeholder {
+  color: #444;
+}
+
+.onboarding-body .onboarding-input:focus {
+  border-color: #e8d5b0;
+  box-shadow: none;
+}
+
+/* Phone input — centered, large */
+.phone-input-wrapper {
+  display: block;
+}
+
+.phone-flag {
+  display: none;
+}
+
+.onboarding-body .phone-field {
+  border: 1px solid #2a2a2a;
+  border-radius: 14px;
+  padding: 18px 20px;
+  text-align: center;
+  font-size: 22px;
+  letter-spacing: 0.05em;
+  background: #141414;
+  color: #fff;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+  font-family: 'DM Sans', sans-serif;
+  box-shadow: none;
+}
+
+.onboarding-body .phone-field::placeholder {
+  color: #444;
+}
+
+.onboarding-body .phone-field:focus {
+  border-color: #e8d5b0;
+  box-shadow: none;
+}
+
+/* Annotation text */
+.ob-annotation {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: #555;
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* Back button */
+.back-btn {
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  margin-bottom: 24px;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.back-btn:hover {
+  color: #999;
+}
+
+/* Primary pill button */
+.btn-onboarding-primary {
+  display: block;
+  width: 100%;
+  padding: 16px 40px;
+  background: #e8d5b0;
+  color: #0d0d0d;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: background 0.15s ease, transform 0.15s ease;
+  margin-top: var(--spacing-sm);
+}
+
+.btn-onboarding-primary:hover {
+  background: #f5e8cc;
+  transform: translateY(-1px);
+}
+
+.btn-onboarding-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-onboarding-primary:disabled {
+  background: #2a2a2a;
+  color: #555;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Ghost button */
+.btn-onboarding-ghost {
+  display: block;
+  width: 100%;
+  padding: 14px 28px;
+  background: transparent;
+  color: #888;
+  border: 1px solid #2a2a2a;
+  border-radius: 100px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btn-onboarding-ghost:hover {
+  border-color: #555;
+  color: #ccc;
+}
+
+/* OTP digits */
+.otp-inputs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.onboarding-body .otp-digit {
+  width: 44px;
+  height: 56px;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+  text-align: center;
+  color: #fff;
+  background: #141414;
+  outline: none;
+  transition: border-color 0.15s;
+  caret-color: transparent;
+  box-shadow: none;
+}
+
+.onboarding-body .otp-digit:focus {
+  border-color: #e8d5b0;
+  box-shadow: none;
+}
+
+/* Chips (preset hangout name selection) */
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.chip {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  color: #ccc;
+  border-radius: 100px;
+  padding: 12px 22px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  border-color: #e8d5b0;
+  color: #e8d5b0;
+}
+
+.chip.active {
+  background: #e8d5b0;
+  color: #0d0d0d;
+  border-color: #e8d5b0;
+  font-weight: 500;
+}
+
+/* Card options (date / cadence selection) */
+.card-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.card-option,
+.quick-date-btn,
+.cadence-btn {
+  background: #141414;
+  border: 1px solid #252525;
+  border-radius: 16px;
+  padding: 18px 22px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+}
+
+.card-option:hover,
+.quick-date-btn:hover,
+.cadence-btn:hover {
+  border-color: #e8d5b0;
+}
+
+.card-option.selected,
+.quick-date-btn.selected,
+.cadence-btn.selected {
+  border-color: #e8d5b0;
+  background: #1c1a14;
+}
+
+.card-option-body {
+  flex: 1;
+}
+
+.card-option-main,
+.quick-date-label,
+.cadence-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: #e8d5b0;
+  font-weight: 500;
+  display: block;
+}
+
+.card-option-sub,
+.quick-date-sub,
+.cadence-sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: #555;
+  margin-top: 2px;
+  display: block;
+}
+
+.card-option-check {
+  color: #e8d5b0;
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+/* Hide old cadence icon since we're using text-only layout */
+.cadence-icon {
+  display: none;
+}
+
+/* Custom date wrapper */
+.custom-date-wrapper {
+  margin-top: 10px;
+}
+
+.selected-date-display {
+  margin-top: 10px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: #1c1a14;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: #e8d5b0;
+}
+
+/* Secondary action */
+.onboarding-secondary-action {
+  text-align: center;
+  margin-top: var(--spacing-lg);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem;
+  color: #555;
+}
+
+.onboarding-secondary-action a {
+  color: #888;
+  text-decoration: none;
+}
+
+.onboarding-secondary-action a:hover {
+  color: #ccc;
+}
+
+/* Invite / confirmation */
+.invite-hangout-card {
+  background: #141414;
+  border: 1px solid #252525;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.invite-hangout-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: #555;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.invite-hangout-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: #f0e8d8;
+  margin-bottom: 6px;
+}
+
+.invite-hangout-meta {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #888;
+}
+
+.invite-link-box {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.invite-link-text {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: #555;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.invite-copy-btn {
+  background: #e8d5b0;
+  color: #0d0d0d;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.invite-copy-btn:hover,
+.invite-copy-btn.copied {
+  background: var(--color-success);
+  color: #fff;
+}
+
+.invite-share-btns {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.share-btn {
+  flex: 1;
+  padding: 14px 12px;
+  border-radius: 100px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid #2a2a2a;
+  background: transparent;
+  color: #888;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.share-btn:hover {
+  border-color: #555;
+  color: #ccc;
+}
+
+/* Splash */
+.onboarding-splash {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xl);
+}
+
+.splash-hero {
+  text-align: center;
+  padding: 60px 0 var(--spacing-xl);
+}
+
+.splash-fire-img {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e8b86d;
+  box-shadow: 0 0 18px #e8a030, 0 0 40px #e87010;
+  animation: ember-pulse 2.2s ease-in-out infinite;
+  margin: 0 auto 24px;
+}
+
+@keyframes ember-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 14px #e8a030, 0 0 28px #e87010;
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 8px #e8a030, 0 0 16px #e87010;
+  }
+}
+
+.splash-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  font-weight: 500;
+  color: #f0e8d8;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+  line-height: 1.15;
+}
+
+.splash-subtitle {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.onboarding-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.splash-signin {
+  text-align: center;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem;
+  color: #555;
+}
+
+.splash-signin a {
+  color: #888;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.splash-signin a:hover {
+  color: #ccc;
+}
+
+/* Mobile tweaks */
+@media (max-width: 440px) {
+  .onboarding-body {
+    padding: var(--spacing-md);
+  }
+
+  .otp-digit {
+    width: 40px;
+    height: 52px;
+    font-size: 1.25rem;
+  }
+
+  .otp-inputs {
+    gap: 6px;
+  }
+
+  .splash-title {
+    font-size: 28px;
+  }
+
+  .onboarding-card-header h2 {
+    font-size: 24px;
+  }
+}

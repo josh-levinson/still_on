@@ -1,0 +1,56 @@
+<div data-controller="hangout-name">
+  <p class="ob-label">Step 1 of 4 &middot; Name it</p>
+  <div class="onboarding-card-header">
+    <h2>Let's get started</h2>
+    <p>What's your name, and what's the hangout?</p>
+  </div>
+
+  <% if flash[:error].present? %>
+    <div class="onboarding-error"><%= flash[:error] %></div>
+  <% end %>
+
+  <%= form_with url: onboarding_submit_name_path, method: :post, class: "onboarding-form" do |f| %>
+    <div class="form-group">
+      <%= f.label :first_name, "Your first name" %>
+      <%= f.text_field :first_name,
+            placeholder: "Alex",
+            class: "onboarding-input",
+            value: session[:ob_first_name],
+            autocomplete: "given-name",
+            required: true,
+            autofocus: true %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :hangout_name, "What's the hangout?" %>
+      <%= f.hidden_field :hangout_name,
+            value: session[:ob_hangout_name],
+            data: { hangout_name_target: "input" } %>
+
+      <div class="chip-group">
+        <% ["Drinks", "Dinner", "Game night", "Gym", "Hike", "Movie night", "Coffee"].each do |preset| %>
+          <button type="button"
+                  class="chip <%= session[:ob_hangout_name] == preset ? 'active' : '' %>"
+                  data-hangout-name-value="<%= preset %>"
+                  data-action="click->hangout-name#select"><%= preset %></button>
+        <% end %>
+        <button type="button"
+                class="chip <%= session[:ob_hangout_name].present? && !["Drinks","Dinner","Game night","Gym","Hike","Movie night","Coffee"].include?(session[:ob_hangout_name]) ? 'active' : '' %>"
+                data-hangout-name-value="custom"
+                data-action="click->hangout-name#select">Custom&hellip;</button>
+      </div>
+
+      <div data-hangout-name-target="customWrapper"
+           style="display: <%= session[:ob_hangout_name].present? && !["Drinks","Dinner","Game night","Gym","Hike","Movie night","Coffee"].include?(session[:ob_hangout_name]) ? 'block' : 'none' %>;">
+        <input type="text"
+               class="onboarding-input"
+               placeholder="Name your hangout"
+               value="<%= session[:ob_hangout_name].present? && !["Drinks","Dinner","Game night","Gym","Hike","Movie night","Coffee"].include?(session[:ob_hangout_name]) ? session[:ob_hangout_name] : '' %>"
+               data-hangout-name-target="customInput"
+               data-action="input->hangout-name#updateCustom" />
+      </div>
+    </div>
+
+    <%= f.submit "Next \u2192", class: "btn-onboarding-primary" %>
+  <% end %>
+</div>

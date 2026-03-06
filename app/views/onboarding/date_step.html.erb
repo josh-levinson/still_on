@@ -1,0 +1,61 @@
+<div data-controller="date-picker">
+  <%= link_to "\u2190 back", onboarding_name_path, class: "back-btn" %>
+
+  <p class="ob-label">Step 2 of 4 &middot; When</p>
+  <div class="onboarding-card-header">
+    <h2>First one's when?</h2>
+    <p>You can always adjust later.</p>
+  </div>
+
+  <% if flash[:error].present? %>
+    <div class="onboarding-error"><%= flash[:error] %></div>
+  <% end %>
+
+  <%= form_with url: onboarding_submit_date_path, method: :post, class: "onboarding-form" do |f| %>
+    <%= f.hidden_field :date, value: session[:ob_date], data: { date_picker_target: "value" } %>
+
+    <div class="card-options">
+      <button type="button"
+              class="quick-date-btn"
+              data-action="click->date-picker#selectQuick"
+              data-date="<%= @this_friday.to_s %>">
+        <div class="card-option-body">
+          <span class="quick-date-label">This Friday</span>
+          <span class="quick-date-sub"><%= @this_friday.strftime("%b %-d") %></span>
+        </div>
+      </button>
+
+      <button type="button"
+              class="quick-date-btn"
+              data-action="click->date-picker#selectQuick"
+              data-date="<%= @next_friday.to_s %>">
+        <div class="card-option-body">
+          <span class="quick-date-label">Next Friday</span>
+          <span class="quick-date-sub"><%= @next_friday.strftime("%b %-d") %></span>
+        </div>
+      </button>
+
+      <button type="button"
+              class="quick-date-btn"
+              data-action="click->date-picker#showCustom">
+        <div class="card-option-body">
+          <span class="quick-date-label">Pick a date&hellip;</span>
+          <span class="quick-date-sub">Choose from calendar</span>
+        </div>
+      </button>
+    </div>
+
+    <div class="custom-date-wrapper" data-date-picker-target="custom" style="display:none;">
+      <%= f.date_field :custom_date,
+            class: "onboarding-input",
+            min: Date.today.to_s,
+            data: { action: "change->date-picker#selectCustom", date_picker_target: "customInput" } %>
+    </div>
+
+    <div class="selected-date-display" data-date-picker-target="display" style="display:none;">
+      Selected: <strong data-date-picker-target="label"></strong>
+    </div>
+
+    <%= f.submit "Next \u2192", class: "btn-onboarding-primary", data: { date_picker_target: "submit" }, disabled: session[:ob_date].blank? %>
+  <% end %>
+</div>

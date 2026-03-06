@@ -33,10 +33,27 @@
   color: #10b981;
 }
 
+@keyframes ember-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 10px #e8a030, 0 0 22px #e87010;
+  }
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 5px #e8a030, 0 0 10px #e87010;
+  }
+}
+
 .logo-fire-img {
-  height: 1.75rem;
-  width: auto;
-  display: block;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e8b86d;
+  box-shadow: 0 0 10px #e8a030, 0 0 22px #e87010;
+  animation: ember-pulse 2.2s ease-in-out infinite;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .logo-on {

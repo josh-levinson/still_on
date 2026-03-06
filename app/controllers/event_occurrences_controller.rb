@@ -2,8 +2,8 @@ class EventOccurrencesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_group
   before_action :set_event
-  before_action :set_event_occurrence, only: [:show, :edit, :update, :destroy]
-  before_action :authorize_occurrence_admin, only: [:edit, :update, :destroy]
+  before_action :set_event_occurrence, only: [ :show, :edit, :update, :destroy ]
+  before_action :authorize_occurrence_admin, only: [ :edit, :update, :destroy ]
 
   def index
     @upcoming_occurrences = @event.event_occurrences.upcoming
@@ -27,7 +27,7 @@ class EventOccurrencesController < ApplicationController
     @event_occurrence = @event.event_occurrences.new(event_occurrence_params)
 
     if @event_occurrence.save
-      redirect_to [@group, @event, @event_occurrence], notice: "Event occurrence was successfully created."
+      redirect_to [ @group, @event, @event_occurrence ], notice: "Event occurrence was successfully created."
     else
       render :new, status: :unprocessable_entity
     end
@@ -38,7 +38,7 @@ class EventOccurrencesController < ApplicationController
 
   def update
     if @event_occurrence.update(event_occurrence_params)
-      redirect_to [@group, @event, @event_occurrence], notice: "Event occurrence was successfully updated."
+      redirect_to [ @group, @event, @event_occurrence ], notice: "Event occurrence was successfully updated."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -65,7 +65,7 @@ class EventOccurrencesController < ApplicationController
 
   def authorize_occurrence_admin
     unless @event.created_by == current_user || @group.created_by == current_user
-      redirect_to [@group, @event, @event_occurrence], alert: "You are not authorized to perform this action."
+      redirect_to [ @group, @event, @event_occurrence ], alert: "You are not authorized to perform this action."
     end
   end
 

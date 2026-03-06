@@ -1,8 +1,8 @@
 class RsvpsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_event_occurrence
-  before_action :set_rsvp, only: [:edit, :update, :destroy]
-  before_action :authorize_rsvp_owner, only: [:edit, :update, :destroy]
+  before_action :set_rsvp, only: [ :edit, :update, :destroy ]
+  before_action :authorize_rsvp_owner, only: [ :edit, :update, :destroy ]
 
   def create
     @rsvp = @event_occurrence.rsvps.new(rsvp_params)

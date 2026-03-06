@@ -2,9 +2,29 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## Product Overview
 
-"Still On" is a Rails 8.1 application for managing recurring group events with RSVP functionality. The application uses Devise for authentication and follows Rails Omakase conventions.
+**StillOn** is a social coordination app that solves adult friend group entropy — the slow death of recurring hangouts due to coordination friction. The app keeps plans alive by automating "Still on?" reminders, tracking RSVPs, and reducing the organizational burden on whoever is running the group.
+
+### Core loop
+1. An organizer creates a hangout (name, date, cadence)
+2. They share an invite link with their friend group
+3. StillOn sends an SMS reminder before each occurrence ("Still on for Friday?")
+4. Friends RSVP via the link — no account required
+5. The organizer sees who's in
+
+### Who the users are
+- **Organizers** are the only people who need an account. There's roughly one per friend group.
+- **Guests** are the majority of people who touch the app. They receive a text, tap a link, and RSVP. They never sign up. Optimize heavily for this experience — it must be fast, mobile-friendly, and require zero friction.
+
+### Key product decisions
+- Phone number + SMS verification for organizer signup (no password)
+- Guest RSVPs via signed token links — no account required
+- Guests can optionally claim a full account later
+- The RSVP page is the most important surface in the app — most people only ever see this
+- Reminder timing: 2 days before each occurrence via SMS
+
+---
 
 ## Development Commands
 
@@ -44,29 +64,27 @@ bin/rails db:seed            # Seed database
 bin/rails db:seed:replant    # Drop, create, migrate, and seed
 ```
 
+---
+
 ## Architecture
 
 ### Data Model
 
 The application is built around a hierarchical event management system:
 
-**Groups → Events → Event Occurrences → RSVPs**
+**Groups → Events → EventOccurrences → RSVPs**
 
-- **Users**: Authenticated via Devise with username, email, first_name, last_name, avatar_url
+- **Users**: Authenticated via Devise with username, email, first_name, last_name, avatar_url. Only organizers have accounts.
 - **Groups**: Collections of members (id: uuid, slug: unique, is_private flag, created_by references Users)
-- **Events**: Belong to Groups, can be recurring (recurrence_type: none/daily/weekly/monthly, recurrence_rule stores pattern)
-- **EventOccurrences**: Specific instances of Events (start_time, end_time, status: scheduled/cancelled/completed, max_attendees)
-- **RSVPs**: User responses to EventOccurrences (status: attending/declined/maybe, guest_count)
+- **Events**: Templates/series belonging to Groups. Can be recurring (recurrence_type: none/daily/weekly/monthly, recurrence_rule stores pattern)
+- **EventOccurrences**: Specific instances of Events (start_time, end_time, status: scheduled/cancelled/completed, max_attendees). Can override parent Event's location.
+- **RSVPs**: Responses scoped to specific EventOccurrences, not Events — enables per-instance attendance tracking (status: attending/declined/maybe, guest_count for +1s)
 - **GroupMemberships**: Join table connecting Users to Groups
 
-All core domain tables (Groups, Events, EventOccurrences, RSVPs) use UUID primary keys for scalability and security.
+All core domain tables use UUID primary keys for scalability and security.
 
-### Key Relationships
-
-- Events have a `recurrence_type` that determines if they repeat, and a `recurrence_rule` for storing the pattern
-- EventOccurrences can override the parent Event's location
-- RSVPs are scoped to specific EventOccurrences, not Events (allowing per-instance attendance tracking)
-- Users can have guest_count in RSVPs for "+1" functionality
+### Guest RSVP flow (no account required)
+Guests receive a signed token link. The token encodes the EventOccurrence and optionally a phone number. RSVPs from guests are stored with a lightweight guest record that can be claimed/merged if they later create an account. This is the primary interaction path for most people who use the app.
 
 ### Rails Stack
 
@@ -87,6 +105,8 @@ All core domain tables (Groups, Events, EventOccurrences, RSVPs) use UUID primar
 - Tests run in parallel (`:number_of_processors`)
 - System tests available via Capybara + Selenium
 
+---
+
 ## CI Pipeline
 
 The CI pipeline (`bin/ci`) runs:
@@ -100,10 +120,15 @@ The CI pipeline (`bin/ci`) runs:
 
 All steps must pass for CI to succeed.
 
+---
+
 ## Code Style
 
 Follows **rubocop-rails-omakase** conventions. The `.rubocop.yml` inherits from the omakase gem with minimal overrides.
 
-## Database Schema Issue
+---
 
-The schema currently has UUID type detection issues with SQLite3. The migrations use `type: :uuid` for foreign keys, but `db/schema.rb` shows "Unknown type 'uuid'" errors. This is a known SQLite UUID configuration issue that needs resolution for proper schema dumping.
+## Known Issues
+
+### UUID type detection with SQLite3
+The schema currently has UUID type detection issues with SQLite3. Migrations use `type: :uuid` for foreign keys, but `db/schema.rb` shows "Unknown type 'uuid'" errors. This is a known SQLite UUID configuration issue that needs resolution for proper schema dumping.

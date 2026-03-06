@@ -1,0 +1,14 @@
+<% content_for :hide_logo, true %>
+
+<div class="onboarding-splash">
+  <div class="splash-hero">
+    <span class="splash-fire-img"></span>
+    <h1 class="splash-title">StillOn</h1>
+    <p class="splash-subtitle">keep the plans alive</p>
+  </div>
+
+  <div class="onboarding-actions">
+    <%= link_to "Get started \u2192", onboarding_phone_path, class: "btn-onboarding-primary" %>
+    <p class="splash-signin">Already have an account? <%= link_to "Sign in", new_user_session_path %></p>
+  </div>
+</div>
