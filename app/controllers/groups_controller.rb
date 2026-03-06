@@ -1,7 +1,7 @@
 class GroupsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_group, only: [:show, :edit, :update, :destroy]
-  before_action :authorize_group_admin, only: [:edit, :update, :destroy]
+  before_action :set_group, only: [ :show, :edit, :update, :destroy ]
+  before_action :authorize_group_admin, only: [ :edit, :update, :destroy ]
 
   def index
     @groups = current_user.groups.order(name: :asc)

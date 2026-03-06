@@ -7,7 +7,9 @@
       "Bash(bin/rubocop:*)",
       "Bash(bin/rails routes:*)",
       "Bash(bin/rails runner:*)",
-      "Bash(bin/rails test:*)"
+      "Bash(bin/rails test:*)",
+      "Bash(bin/bundler-audit:*)",
+      "Bash(bundle update:*)"
     ]
   }
 }

@@ -32,13 +32,13 @@ Rails.application.routes.draw do
   resources :groups, param: :slug do
     resources :events do
       resources :event_occurrences do
-        resources :rsvps, only: [:create, :update, :destroy]
+        resources :rsvps, only: [ :create, :update, :destroy ]
       end
     end
   end
 
   # Shortcut for RSVPs (accessible directly via occurrence ID)
   resources :event_occurrences, only: [] do
-    resources :rsvps, only: [:create, :update, :destroy]
+    resources :rsvps, only: [ :create, :update, :destroy ]
   end
 end

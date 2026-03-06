@@ -6,7 +6,7 @@ class Group < ApplicationRecord
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
-  validates :is_private, inclusion: { in: [true, false] }
+  validates :is_private, inclusion: { in: [ true, false ] }
 
   before_validation :generate_slug, on: :create
 
