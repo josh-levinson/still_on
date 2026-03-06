@@ -9,7 +9,11 @@
       "Bash(bin/rails runner:*)",
       "Bash(bin/rails test:*)",
       "Bash(bin/bundler-audit:*)",
-      "Bash(bundle update:*)"
+      "Bash(bundle update:*)",
+      "Bash(RAILS_ENV=test bin/rails db:migrate:*)",
+      "Bash(RAILS_ENV=test bin/rails db:drop:*)",
+      "Bash(git stash:*)",
+      "Bash(bin/rails db:schema:dump:*)"
     ]
   }
 }

@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  devise_for :users
+  delete "sign_out", to: "sessions#destroy", as: :sign_out
 
   # Onboarding flow
   get  "onboarding",          to: "onboarding#splash",         as: :onboarding_splash

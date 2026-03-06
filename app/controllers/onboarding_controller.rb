@@ -139,7 +139,7 @@ class OnboardingController < ApplicationController
     session[:ob_cadence] = cadence
 
     user = create_or_find_user!
-    sign_in(user)
+    session[:user_id] = user.id
 
     _group, occurrence = create_hangout!(user)
 
@@ -169,12 +169,9 @@ class OnboardingController < ApplicationController
   def create_or_find_user!
     phone      = session[:ob_phone]
     first_name = session[:ob_first_name]
-    email      = "#{phone}@phone.stilon.app"
 
     User.find_or_initialize_by(phone_number: phone).tap do |user|
       user.first_name = first_name
-      user.email      = email unless user.persisted?
-      user.password   = SecureRandom.hex(16) unless user.persisted?
       user.save!
     end
   end
