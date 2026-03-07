@@ -1,7 +1,7 @@
 <div data-controller="cadence">
   <%= link_to "\u2190 back", onboarding_date_path, class: "back-btn" %>
 
-  <p class="ob-label">Step 3 of 4 &middot; Cadence</p>
+  <p class="ob-label">Step <%= @step %> of 6 &middot; Cadence</p>
   <div class="onboarding-card-header">
     <h2>How often?</h2>
     <p>StillOn will ping everyone before each one.</p>

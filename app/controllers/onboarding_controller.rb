@@ -7,69 +7,7 @@ class OnboardingController < ApplicationController
     redirect_to groups_path if user_signed_in?
   end
 
-  def phone
-    redirect_to groups_path if user_signed_in?
-  end
-
-  def submit_phone
-    phone = params[:phone].to_s.gsub(/\D/, "")
-
-    if phone.length < 10
-      flash.now[:error] = "Please enter a valid 10-digit phone number."
-      render :phone, status: :unprocessable_entity
-      return
-    end
-
-    otp = rand(100_000..999_999).to_s
-    Rails.cache.write("otp:#{phone}", otp, expires_in: 10.minutes)
-
-    begin
-      SmsService.send_message(to: "+1#{phone}", body: "Your StillOn code is #{otp}. It expires in 10 minutes.")
-    rescue => e
-      Rails.logger.error("[Onboarding] OTP send failed: #{e.message}")
-    end
-
-    session[:ob_phone] = phone
-    redirect_to onboarding_verify_path
-  end
-
-  def verify
-    redirect_to onboarding_phone_path unless session[:ob_phone]
-  end
-
-  def submit_verify
-    phone = session[:ob_phone]
-    code  = params[:code].to_s.strip
-    stored = Rails.cache.read("otp:#{phone}")
-
-    if stored && code == stored
-      Rails.cache.delete("otp:#{phone}")
-      session[:ob_verified] = true
-      redirect_to onboarding_name_path
-    else
-      flash.now[:error] = "That code didn't match. Please try again."
-      render :verify, status: :unprocessable_entity
-    end
-  end
-
-  def resend_otp
-    phone = session[:ob_phone]
-    redirect_to onboarding_phone_path and return unless phone
-
-    otp = rand(100_000..999_999).to_s
-    Rails.cache.write("otp:#{phone}", otp, expires_in: 10.minutes)
-
-    begin
-      SmsService.send_message(to: "+1#{phone}", body: "Your StillOn code is #{otp}. It expires in 10 minutes.")
-    rescue => e
-      Rails.logger.error("[Onboarding] OTP resend failed: #{e.message}")
-    end
-
-    redirect_to onboarding_verify_path, notice: "Code resent!"
-  end
-
   def name
-    redirect_to onboarding_phone_path unless session[:ob_verified]
     @step = 1
   end
 
@@ -90,7 +28,6 @@ class OnboardingController < ApplicationController
   end
 
   def date_step
-    redirect_to onboarding_phone_path unless session[:ob_verified]
     @step = 2
     today = Date.today
     days_until_friday = (5 - today.wday) % 7
@@ -122,7 +59,6 @@ class OnboardingController < ApplicationController
   end
 
   def cadence
-    redirect_to onboarding_phone_path unless session[:ob_verified]
     @step = 3
   end
 
@@ -138,18 +74,90 @@ class OnboardingController < ApplicationController
 
     session[:ob_cadence] = cadence
 
-    user = create_or_find_user!
+    # Create user without phone number first
+    user = create_user_without_phone!
     session[:user_id] = user.id
 
     _group, occurrence = create_hangout!(user)
 
     session[:ob_occurrence_id] = occurrence.id.to_s
-    redirect_to onboarding_invite_path
+    redirect_to onboarding_phone_path
+  end
+
+  def phone
+    redirect_to groups_path if current_user&.phone_verified_at.present?
+    redirect_to onboarding_splash_path unless session[:ob_occurrence_id]
+    @step = 4
+  end
+
+  def submit_phone
+    phone = params[:phone].to_s.gsub(/\D/, "")
+
+    if phone.length < 10
+      flash.now[:error] = "Please enter a valid 10-digit phone number."
+      @step = 4
+      render :phone, status: :unprocessable_entity
+      return
+    end
+
+    otp = rand(100_000..999_999).to_s
+    Rails.cache.write("otp:#{phone}", otp, expires_in: 10.minutes)
+
+    begin
+      SmsService.send_message(to: "+1#{phone}", body: "Your StillOn code is #{otp}. It expires in 10 minutes.")
+    rescue => e
+      Rails.logger.error("[Onboarding] OTP send failed: #{e.message}")
+    end
+
+    session[:ob_phone] = phone
+    redirect_to onboarding_verify_path
+  end
+
+  def verify
+    redirect_to onboarding_phone_path unless session[:ob_phone]
+    @step = 5
+  end
+
+  def submit_verify
+    phone = session[:ob_phone]
+    code  = params[:code].to_s.strip
+    stored = Rails.cache.read("otp:#{phone}")
+
+    if stored && code == stored
+      Rails.cache.delete("otp:#{phone}")
+
+      # Update the user's phone number and mark as verified
+      if current_user
+        current_user.update!(phone_number: phone, phone_verified_at: Time.current)
+      end
+
+      redirect_to onboarding_invite_path
+    else
+      flash.now[:error] = "That code didn't match. Please try again."
+      @step = 5
+      render :verify, status: :unprocessable_entity
+    end
+  end
+
+  def resend_otp
+    phone = session[:ob_phone]
+    redirect_to onboarding_phone_path and return unless phone
+
+    otp = rand(100_000..999_999).to_s
+    Rails.cache.write("otp:#{phone}", otp, expires_in: 10.minutes)
+
+    begin
+      SmsService.send_message(to: "+1#{phone}", body: "Your StillOn code is #{otp}. It expires in 10 minutes.")
+    rescue => e
+      Rails.logger.error("[Onboarding] OTP resend failed: #{e.message}")
+    end
+
+    redirect_to onboarding_verify_path, notice: "Code resent!"
   end
 
   def invite
     occurrence_id = session[:ob_occurrence_id]
-    redirect_to onboarding_phone_path and return unless occurrence_id
+    redirect_to onboarding_splash_path and return unless occurrence_id
 
     @occurrence   = EventOccurrence.find(occurrence_id)
     @hangout_name = session[:ob_hangout_name]
@@ -161,19 +169,15 @@ class OnboardingController < ApplicationController
       @occurrence.event,
       @occurrence
     )
-    @step = 4
+    @step = 6
   end
 
   private
 
-  def create_or_find_user!
-    phone      = session[:ob_phone]
+  def create_user_without_phone!
     first_name = session[:ob_first_name]
 
-    User.find_or_initialize_by(phone_number: phone).tap do |user|
-      user.first_name = first_name
-      user.save!
-    end
+    User.create!(first_name: first_name)
   end
 
   def create_hangout!(user)

@@ -1,19 +1,19 @@
 Rails.application.routes.draw do
   delete "sign_out", to: "sessions#destroy", as: :sign_out
 
-  # Onboarding flow
+  # Onboarding flow (new order: splash -> name -> date -> cadence -> phone -> verify -> invite)
   get  "onboarding",          to: "onboarding#splash",         as: :onboarding_splash
-  get  "onboarding/phone",    to: "onboarding#phone",          as: :onboarding_phone
-  post "onboarding/phone",    to: "onboarding#submit_phone",   as: :onboarding_submit_phone
-  post "onboarding/resend",   to: "onboarding#resend_otp",     as: :onboarding_resend_otp
-  get  "onboarding/verify",   to: "onboarding#verify",         as: :onboarding_verify
-  post "onboarding/verify",   to: "onboarding#submit_verify",  as: :onboarding_submit_verify
   get  "onboarding/name",     to: "onboarding#name",           as: :onboarding_name
   post "onboarding/name",     to: "onboarding#submit_name",    as: :onboarding_submit_name
   get  "onboarding/date",     to: "onboarding#date_step",      as: :onboarding_date
   post "onboarding/date",     to: "onboarding#submit_date",    as: :onboarding_submit_date
   get  "onboarding/cadence",  to: "onboarding#cadence",        as: :onboarding_cadence
   post "onboarding/cadence",  to: "onboarding#submit_cadence", as: :onboarding_submit_cadence
+  get  "onboarding/phone",    to: "onboarding#phone",          as: :onboarding_phone
+  post "onboarding/phone",    to: "onboarding#submit_phone",   as: :onboarding_submit_phone
+  post "onboarding/resend",   to: "onboarding#resend_otp",     as: :onboarding_resend_otp
+  get  "onboarding/verify",   to: "onboarding#verify",         as: :onboarding_verify
+  post "onboarding/verify",   to: "onboarding#submit_verify",  as: :onboarding_submit_verify
   get  "onboarding/invite",   to: "onboarding#invite",         as: :onboarding_invite
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

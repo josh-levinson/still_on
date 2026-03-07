@@ -1,8 +1,8 @@
 <div data-controller="phone-input">
-  <p class="ob-label">Get started</p>
+  <p class="ob-label">Step <%= @step %> of 6</p>
   <div class="onboarding-card-header">
     <h2>What's your number?</h2>
-    <p>We'll send a quick code. No spam &mdash; just your hangout reminders.</p>
+    <p>We'll send reminders via SMS. No spam &mdash; just your hangout updates.</p>
   </div>
 
   <% if flash[:error].present? %>

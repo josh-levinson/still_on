@@ -45,9 +45,10 @@ CREATE INDEX "index_rsvps_on_event_occurrence_id" ON "rsvps" ("event_occurrence_
 CREATE INDEX "index_rsvps_on_user_id" ON "rsvps" ("user_id") /*application='StillOn'*/;
 CREATE UNIQUE INDEX "index_rsvps_on_event_occurrence_id_and_user_id" ON "rsvps" ("event_occurrence_id", "user_id") /*application='StillOn'*/;
 CREATE INDEX "index_rsvps_on_status" ON "rsvps" ("status") /*application='StillOn'*/;
-CREATE TABLE IF NOT EXISTS "users" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "first_name" varchar, "last_name" varchar, "avatar_url" varchar, "username" varchar, "phone_number" varchar);
+CREATE TABLE IF NOT EXISTS "users" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "first_name" varchar, "last_name" varchar, "avatar_url" varchar, "username" varchar, "phone_number" varchar, "phone_verified_at" datetime(6) /*application='StillOn'*/);
 CREATE UNIQUE INDEX "index_users_on_username" ON "users" ("username") /*application='StillOn'*/;
 INSERT INTO "schema_migrations" (version) VALUES
+('20260307045353'),
 ('20260306153350'),
 ('20260305202352'),
 ('20260118184453'),

@@ -1,7 +1,7 @@
 <div data-controller="otp" data-otp-length-value="6">
   <%= link_to "\u2190 back", onboarding_phone_path, class: "back-btn" %>
 
-  <p class="ob-label">Verification</p>
+  <p class="ob-label">Step <%= @step %> of 6</p>
   <div class="onboarding-card-header">
     <h2>Check your texts</h2>
     <p>Sent to <%= session[:ob_phone]&.then { |p| "(#{p[0..2]}) #{p[3..5]}-#{p[6..9]}" } %></p>

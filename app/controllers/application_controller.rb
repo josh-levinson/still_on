@@ -17,7 +17,7 @@ class ApplicationController < ActionController::Base
 
   def authenticate_user!
     unless user_signed_in?
-      redirect_to onboarding_phone_path, alert: "Please sign in to continue."
+      redirect_to onboarding_splash_path, alert: "Please sign in to continue."
     end
   end
 end
