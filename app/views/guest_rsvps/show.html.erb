@@ -1,0 +1,128 @@
+<% content_for :title, "#{@event.title} – RSVP" %>
+
+<div class="rsvp-page">
+  <div class="rsvp-shell">
+
+    <%# ── Event header ── %>
+    <div class="rsvp-event-header">
+      <div class="rsvp-fire"></div>
+      <p class="rsvp-group-name"><%= @group.name %></p>
+      <h1 class="rsvp-event-title"><%= @event.title %></h1>
+      <div class="rsvp-event-meta">
+        <span class="rsvp-date"><%= @event_occurrence.start_time.strftime("%A, %B %-d") %></span>
+        <span class="rsvp-dot">&middot;</span>
+        <span class="rsvp-time">
+          <%= @event_occurrence.start_time.strftime("%-l:%M %p") %> &ndash;
+          <%= @event_occurrence.end_time.strftime("%-l:%M %p") %>
+        </span>
+      </div>
+      <% if @event_occurrence.location.present? %>
+        <p class="rsvp-location"><%= @event_occurrence.location %></p>
+      <% end %>
+    </div>
+
+    <%# ── Capacity warning ── %>
+    <% if @event_occurrence.full? %>
+      <div class="rsvp-capacity-warning">This event is full.</div>
+    <% elsif @event_occurrence.max_attendees.present? %>
+      <% spots_left = @event_occurrence.max_attendees - @event_occurrence.attending_count %>
+      <% if spots_left <= 3 %>
+        <div class="rsvp-capacity-warning"><%= spots_left %> <%= "spot".pluralize(spots_left) %> left!</div>
+      <% end %>
+    <% end %>
+
+    <%# ── Flash messages ── %>
+    <% if notice.present? %>
+      <div class="rsvp-notice"><%= notice %></div>
+    <% end %>
+    <% if alert.present? %>
+      <div class="rsvp-error"><%= alert %></div>
+    <% end %>
+
+    <%# ── Existing RSVP confirmation ── %>
+    <% if @existing_rsvp %>
+      <div class="rsvp-confirmed">
+        <div class="rsvp-confirmed-status rsvp-confirmed-<%= @existing_rsvp.status %>">
+          <% case @existing_rsvp.status
+             when "attending" %><span class="rsvp-confirmed-icon">&#10003;</span> You're in!
+          <% when "maybe" %><span class="rsvp-confirmed-icon">&#8764;</span> You're a maybe
+          <% when "declined" %><span class="rsvp-confirmed-icon">&times;</span> You declined
+          <% end %>
+        </div>
+        <p class="rsvp-confirmed-sub">Change your mind?</p>
+      </div>
+    <% end %>
+
+    <%# ── RSVP form ── %>
+    <%= form_with url: guest_rsvp_path(@token), method: :post, local: true, class: "rsvp-form" do |f| %>
+      <% if @rsvp.errors.any? %>
+        <div class="rsvp-error">
+          <%= @rsvp.errors.full_messages.to_sentence %>
+        </div>
+      <% end %>
+
+      <%# Name — required for guests, hidden for signed-in users %>
+      <% unless current_user %>
+        <div class="rsvp-field">
+          <label class="rsvp-label" for="rsvp_guest_name">Your name</label>
+          <%= f.text_field :guest_name,
+                value: @rsvp.guest_name || @prefilled_name,
+                placeholder: "First name",
+                autocomplete: "given-name",
+                class: "rsvp-input",
+                required: true %>
+        </div>
+      <% end %>
+
+      <%# RSVP status — big tap targets %>
+      <fieldset class="rsvp-status-group">
+        <legend class="rsvp-label">Are you coming?</legend>
+        <div class="rsvp-status-options">
+          <% [["attending", "Yes, I'm in"], ["maybe", "Maybe"], ["declined", "Can't make it"]].each do |value, label| %>
+            <label class="rsvp-status-option rsvp-status-<%= value %> <%= 'selected' if @rsvp.status == value %>">
+              <%= f.radio_button :status, value, class: "rsvp-status-radio" %>
+              <span class="rsvp-status-label"><%= label %></span>
+            </label>
+          <% end %>
+        </div>
+      </fieldset>
+
+      <%# Guest count %>
+      <div class="rsvp-field rsvp-field-inline">
+        <label class="rsvp-label" for="rsvp_guest_count">Bringing guests?</label>
+        <div class="rsvp-stepper">
+          <button type="button" class="rsvp-stepper-btn" data-action="click->stepper#decrement">−</button>
+          <%= f.number_field :guest_count,
+                value: @rsvp.guest_count || 0,
+                min: 0, max: 20,
+                class: "rsvp-stepper-input",
+                data: { stepper_target: "value" } %>
+          <button type="button" class="rsvp-stepper-btn" data-action="click->stepper#increment">+</button>
+        </div>
+      </div>
+
+      <% unless current_user %>
+        <%= f.hidden_field :guest_phone, value: @prefilled_phone %>
+      <% end %>
+
+      <%= f.submit(@existing_rsvp ? "Update RSVP" : "RSVP", class: "rsvp-submit-btn") %>
+    <% end %>
+
+    <%# ── Attendee count pill ── %>
+    <% attending = @event_occurrence.attending_count %>
+    <% if attending > 0 %>
+      <p class="rsvp-attendee-count">
+        <%= attending %> <%= "person".pluralize(attending) %> going
+      </p>
+    <% end %>
+
+    <%# ── Soft sign-up prompt ── %>
+    <% unless current_user %>
+      <div class="rsvp-signup-nudge">
+        Want reminders for future hangouts?
+        <%= link_to "Create an account \u2192", onboarding_name_path %>
+      </div>
+    <% end %>
+
+  </div>
+</div>

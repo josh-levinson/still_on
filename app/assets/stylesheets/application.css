@@ -31,6 +31,7 @@
 @import "pages/groups.css";
 @import "pages/events.css";
 @import "pages/onboarding.css";
+@import "pages/rsvp.css";
 
 /* Utilities - Helpers and responsive styles (should load last) */
 @import "utilities/helpers.css";

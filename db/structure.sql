@@ -34,21 +34,23 @@ CREATE INDEX "index_event_occurrences_on_event_id" ON "event_occurrences" ("even
 CREATE INDEX "index_event_occurrences_on_event_id_and_start_time" ON "event_occurrences" ("event_id", "start_time") /*application='StillOn'*/;
 CREATE INDEX "index_event_occurrences_on_start_time" ON "event_occurrences" ("start_time") /*application='StillOn'*/;
 CREATE INDEX "index_event_occurrences_on_status" ON "event_occurrences" ("status") /*application='StillOn'*/;
-CREATE TABLE IF NOT EXISTS "rsvps" ("id" uuid NOT NULL PRIMARY KEY, "event_occurrence_id" uuid NOT NULL, "user_id" uuid NOT NULL, "status" varchar NOT NULL, "guest_count" integer DEFAULT 0 NOT NULL, "notes" text, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_3960e5b383"
-FOREIGN KEY ("event_occurrence_id")
-  REFERENCES "event_occurrences" ("id")
-, CONSTRAINT "fk_rails_4ab9d5c589"
+CREATE TABLE IF NOT EXISTS "users" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "first_name" varchar, "last_name" varchar, "avatar_url" varchar, "username" varchar, "phone_number" varchar, "phone_verified_at" datetime(6) /*application='StillOn'*/);
+CREATE UNIQUE INDEX "index_users_on_username" ON "users" ("username") /*application='StillOn'*/;
+CREATE TABLE IF NOT EXISTS "rsvps" ("id"  NOT NULL PRIMARY KEY, "event_occurrence_id"  NOT NULL, "user_id" , "status" varchar NOT NULL, "guest_count" integer DEFAULT 0 NOT NULL, "notes" text, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "guest_name" varchar /*application='StillOn'*/, "guest_phone" varchar /*application='StillOn'*/, CONSTRAINT "fk_rails_4ab9d5c589"
 FOREIGN KEY ("user_id")
   REFERENCES "users" ("id")
+, CONSTRAINT "fk_rails_3960e5b383"
+FOREIGN KEY ("event_occurrence_id")
+  REFERENCES "event_occurrences" ("id")
 );
 CREATE INDEX "index_rsvps_on_event_occurrence_id" ON "rsvps" ("event_occurrence_id") /*application='StillOn'*/;
 CREATE INDEX "index_rsvps_on_user_id" ON "rsvps" ("user_id") /*application='StillOn'*/;
-CREATE UNIQUE INDEX "index_rsvps_on_event_occurrence_id_and_user_id" ON "rsvps" ("event_occurrence_id", "user_id") /*application='StillOn'*/;
 CREATE INDEX "index_rsvps_on_status" ON "rsvps" ("status") /*application='StillOn'*/;
-CREATE TABLE IF NOT EXISTS "users" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "first_name" varchar, "last_name" varchar, "avatar_url" varchar, "username" varchar, "phone_number" varchar, "phone_verified_at" datetime(6) /*application='StillOn'*/);
-CREATE UNIQUE INDEX "index_users_on_username" ON "users" ("username") /*application='StillOn'*/;
+CREATE UNIQUE INDEX "index_rsvps_on_occurrence_and_user" ON "rsvps" ("event_occurrence_id", "user_id") WHERE user_id IS NOT NULL /*application='StillOn'*/;
+CREATE UNIQUE INDEX "index_rsvps_on_occurrence_and_guest_phone" ON "rsvps" ("event_occurrence_id", "guest_phone") WHERE guest_phone IS NOT NULL /*application='StillOn'*/;
 INSERT INTO "schema_migrations" (version) VALUES
 ('20260308010626'),
+('20260307234840'),
 ('20260307045353'),
 ('20260306153350'),
 ('20260305202352'),

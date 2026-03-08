@@ -1,11 +1,16 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+alice:
+  first_name: Alice
+  last_name: Smith
+  username: alice_smith
+  phone_number: "+15551234567"
 
-# This model initially had no columns defined. If you add columns to the
-# model remove the "{}" from the fixture names and add the columns immediately
-# below each fixture, per the syntax in the comments below
-#
-one: {}
-# column: value
-#
-two: {}
-# column: value
+bob:
+  first_name: Bob
+  last_name: Jones
+  username: bob_jones
+  phone_number: "+15559876543"
+
+charlie:
+  first_name: Charlie
+  username: charlie_doe
+  phone_number: "+15550001111"

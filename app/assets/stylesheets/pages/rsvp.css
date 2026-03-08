@@ -1,0 +1,392 @@
+/* ========================================
+   GUEST RSVP PAGE
+   Mobile-first, zero friction
+   ======================================== */
+
+.rsvp-page {
+  background: #0d0d0d;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.rsvp-shell {
+  width: 100%;
+  max-width: 420px;
+  padding: 28px 0 60px;
+}
+
+/* ── Event header ── */
+
+.rsvp-event-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.rsvp-fire {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #e8b86d;
+  box-shadow: 0 0 12px #e8a030, 0 0 28px #e87010;
+  animation: ember-pulse 2.2s ease-in-out infinite;
+  margin: 0 auto 16px;
+}
+
+.rsvp-group-name {
+  font-size: 12px;
+  color: #555;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.rsvp-event-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #f0e8d8;
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.rsvp-event-meta {
+  font-size: 15px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rsvp-dot {
+  color: #333;
+}
+
+.rsvp-location {
+  font-size: 14px;
+  color: #666;
+  margin-top: 6px;
+}
+
+/* ── Capacity warning ── */
+
+.rsvp-capacity-warning {
+  background: #1f1200;
+  color: #fbbf24;
+  border: 1px solid #3d2500;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* ── Flash messages ── */
+
+.rsvp-notice {
+  background: #0f1f18;
+  color: #6ee7b7;
+  border: 1px solid #1a3d2b;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.rsvp-error {
+  background: #1f0f0f;
+  color: #fca5a5;
+  border: 1px solid #3d1a1a;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ── Existing RSVP confirmation ── */
+
+.rsvp-confirmed {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.rsvp-confirmed-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 100px;
+  margin-bottom: 6px;
+}
+
+.rsvp-confirmed-attending {
+  background: #0f1f18;
+  color: #6ee7b7;
+  border: 1px solid #1a3d2b;
+}
+
+.rsvp-confirmed-maybe {
+  background: #1f1a0f;
+  color: #fcd34d;
+  border: 1px solid #3d3010;
+}
+
+.rsvp-confirmed-declined {
+  background: #1a1a1a;
+  color: #6b7280;
+  border: 1px solid #2a2a2a;
+}
+
+.rsvp-confirmed-icon {
+  font-size: 16px;
+}
+
+.rsvp-confirmed-sub {
+  font-size: 13px;
+  color: #555;
+}
+
+/* ── Form ── */
+
+.rsvp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rsvp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rsvp-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.rsvp-input {
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid #2a2a2a;
+  border-radius: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  color: #fff;
+  background: #141414;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.rsvp-input::placeholder {
+  color: #444;
+}
+
+.rsvp-input:focus {
+  border-color: #e8d5b0;
+}
+
+/* ── Status options ── */
+
+.rsvp-status-group {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rsvp-status-group legend {
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+.rsvp-status-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rsvp-status-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border: 1px solid #252525;
+  border-radius: 14px;
+  background: #141414;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  font-size: 16px;
+  color: #ccc;
+}
+
+.rsvp-status-option:hover {
+  border-color: #e8d5b0;
+}
+
+.rsvp-status-option.selected,
+.rsvp-status-option:has(input:checked) {
+  border-color: #e8d5b0;
+  background: #1c1a14;
+  color: #f0e8d8;
+}
+
+.rsvp-status-radio {
+  /* visually hidden but focusable */
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* ── Stepper ── */
+
+.rsvp-field-inline {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rsvp-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.rsvp-stepper-btn {
+  width: 44px;
+  height: 44px;
+  background: #141414;
+  color: #888;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rsvp-stepper-btn:hover {
+  background: #1e1e1e;
+  color: #e8d5b0;
+}
+
+.rsvp-stepper-input {
+  width: 48px;
+  background: #141414;
+  color: #fff;
+  border: none;
+  border-left: 1px solid #2a2a2a;
+  border-right: 1px solid #2a2a2a;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  text-align: center;
+  padding: 10px 0;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.rsvp-stepper-input::-webkit-outer-spin-button,
+.rsvp-stepper-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+/* ── Submit button ── */
+
+.rsvp-submit-btn {
+  display: block;
+  width: 100%;
+  padding: 16px 40px;
+  background: #e8d5b0;
+  color: #0d0d0d;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  text-align: center;
+  letter-spacing: 0.02em;
+  transition: background 0.15s ease, transform 0.15s ease;
+  margin-top: 4px;
+}
+
+.rsvp-submit-btn:hover {
+  background: #f5e8cc;
+  transform: translateY(-1px);
+}
+
+.rsvp-submit-btn:active {
+  transform: scale(0.98);
+}
+
+/* ── Attendee count ── */
+
+.rsvp-attendee-count {
+  text-align: center;
+  font-size: 13px;
+  color: #555;
+  margin-top: 24px;
+}
+
+/* ── Sign-up nudge ── */
+
+.rsvp-signup-nudge {
+  text-align: center;
+  font-size: 13px;
+  color: #444;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #1a1a1a;
+}
+
+.rsvp-signup-nudge a {
+  color: #888;
+  text-decoration: none;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.rsvp-signup-nudge a:hover {
+  color: #ccc;
+}
+
+/* ── Mobile tweaks ── */
+
+@media (max-width: 440px) {
+  .rsvp-page {
+    padding: var(--spacing-md);
+  }
+
+  .rsvp-event-title {
+    font-size: 24px;
+  }
+
+  .rsvp-status-option {
+    padding: 14px 16px;
+  }
+}

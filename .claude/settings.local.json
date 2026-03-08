@@ -15,7 +15,8 @@
       "Bash(git stash:*)",
       "Bash(bin/rails db:schema:dump:*)",
       "Bash(rsvg-convert:*)",
-      "Bash(bin/rails db:migrate:status)"
+      "Bash(bin/rails db:migrate:status)",
+      "Bash(bin/rails db:test:prepare)"
     ]
   }
 }

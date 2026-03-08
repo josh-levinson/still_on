@@ -19,6 +19,25 @@ class EventOccurrence < ApplicationRecord
     max_attendees.present? && attending_count >= max_attendees
   end
 
+  # Signed invite token — encodes this occurrence's ID and an optional phone
+  # number for SMS recipients. URL-safe via outer Base64 encoding.
+  def invite_token(phone: nil)
+    payload = { oid: id.to_s }
+    payload[:phone] = phone if phone.present?
+    raw = Rails.application.message_verifier(:guest_rsvp).generate(payload)
+    Base64.urlsafe_encode64(raw, padding: false)
+  end
+
+  def self.find_by_invite_token(token)
+    raw = Base64.urlsafe_decode64(token)
+    payload = Rails.application.message_verifier(:guest_rsvp).verify(raw)
+    occurrence = find(payload["oid"])
+    [ occurrence, payload["phone"] ]
+  rescue ActiveSupport::MessageVerifier::InvalidSignature, ArgumentError,
+         ActiveRecord::RecordNotFound
+    [ nil, nil ]
+  end
+
   private
 
   def end_time_after_start_time

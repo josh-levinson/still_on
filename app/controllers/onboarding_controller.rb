@@ -164,11 +164,7 @@ class OnboardingController < ApplicationController
     @first_name   = session[:ob_first_name]
     @cadence      = session[:ob_cadence]
     @date         = Date.parse(session[:ob_date])
-    @invite_url   = group_event_event_occurrence_url(
-      @occurrence.event.group,
-      @occurrence.event,
-      @occurrence
-    )
+    @invite_url   = guest_rsvp_url(@occurrence.invite_token)
     @step = 6
   end
 

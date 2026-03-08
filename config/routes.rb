@@ -1,6 +1,11 @@
 Rails.application.routes.draw do
   delete "sign_out", to: "sessions#destroy", as: :sign_out
 
+  # Test-only sign-in backdoor (never available in production)
+  if Rails.env.test?
+    post "test/sign_in", to: "test/sessions#create", as: :test_sign_in
+  end
+
   # Onboarding flow (new order: splash -> name -> date -> cadence -> phone -> verify -> invite)
   get  "onboarding",          to: "onboarding#splash",         as: :onboarding_splash
   get  "onboarding/name",     to: "onboarding#name",           as: :onboarding_name
@@ -27,6 +32,10 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "onboarding#splash"
+
+  # Public guest RSVP — no account required
+  get  "rsvp/:token", to: "guest_rsvps#show",   as: :guest_rsvp
+  post "rsvp/:token", to: "guest_rsvps#create"
 
   # Nested resources for groups, events, occurrences, and RSVPs
   resources :groups, param: :slug do

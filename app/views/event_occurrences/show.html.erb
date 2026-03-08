@@ -94,7 +94,7 @@
         <% attending.each do |rsvp| %>
           <div class="attendee-card">
             <div class="attendee-info">
-              <strong><%= rsvp.user.full_name %></strong>
+              <strong><%= rsvp.display_name %></strong>
               <% if rsvp.guest_count > 0 %>
                 <span>+<%= rsvp.guest_count %> <%= "guest".pluralize(rsvp.guest_count) %></span>
               <% end %>
@@ -115,7 +115,7 @@
       <div class="attendees-list">
         <% maybe.each do |rsvp| %>
           <div class="attendee-card maybe">
-            <strong><%= rsvp.user.full_name %></strong>
+            <strong><%= rsvp.display_name %></strong>
           </div>
         <% end %>
       </div>
