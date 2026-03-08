@@ -5,6 +5,7 @@ class Event < ApplicationRecord
 
   validates :title, presence: true
   validates :recurrence_type, presence: true, inclusion: { in: %w[none daily weekly monthly] }
+  validates :quorum, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
 
   scope :active, -> { where(is_active: true) }
   scope :recurring, -> { where.not(recurrence_type: "none") }

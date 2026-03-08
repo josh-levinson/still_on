@@ -47,7 +47,7 @@ class EventsController < ApplicationController
   private
 
   def set_group
-    @group = Group.find_by!(slug: params[:group_id])
+    @group = Group.find_by!(slug: params[:group_slug])
   end
 
   def set_event
@@ -63,7 +63,7 @@ class EventsController < ApplicationController
   def event_params
     params.require(:event).permit(
       :title, :description, :location, :default_duration_minutes,
-      :recurrence_type, :recurrence_rule, :is_active
+      :recurrence_type, :recurrence_rule, :is_active, :quorum
     )
   end
 end

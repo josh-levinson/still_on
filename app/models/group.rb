@@ -10,6 +10,10 @@ class Group < ApplicationRecord
 
   before_validation :generate_slug, on: :create
 
+  def to_param
+    slug
+  end
+
   private
 
   def generate_slug

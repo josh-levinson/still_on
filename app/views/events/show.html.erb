@@ -18,6 +18,9 @@
       <% if @event.default_duration_minutes.present? %>
         <span><strong>Duration:</strong> <%= @event.default_duration_minutes %> minutes</span>
       <% end %>
+      <% if @event.quorum.present? %>
+        <span><strong>Quorum:</strong> <%= @event.quorum %> <%= "person".pluralize(@event.quorum) %> required</span>
+      <% end %>
     </div>
     <div class="event-actions">
       <% if @event.created_by == current_user || @group.created_by == current_user %>

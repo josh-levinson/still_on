@@ -25,50 +25,48 @@
 }
 
 .btn-primary {
-  background-color: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
+  background-color: #e8d5b0;
+  color: #0d0d0d;
+  border-color: #e8d5b0;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: var(--color-primary-dark);
-  border-color: var(--color-primary-dark);
-  color: white;
+  background-color: #f5e8cc;
+  border-color: #f5e8cc;
+  color: #0d0d0d;
 }
 
 .btn-secondary {
-  background-color: var(--color-secondary);
-  color: white;
-  border-color: var(--color-secondary);
+  background-color: transparent;
+  color: #888;
+  border-color: #2a2a2a;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: #7c3aed;
-  border-color: #7c3aed;
-  color: white;
+  border-color: #555;
+  color: #ccc;
 }
 
 .btn-outline {
   background-color: transparent;
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+  color: #888;
+  border-color: #2a2a2a;
 }
 
 .btn-outline:hover:not(:disabled) {
-  background-color: var(--color-primary);
-  color: white;
+  border-color: #555;
+  color: #ccc;
 }
 
 .btn-danger {
-  background-color: var(--color-danger);
-  color: white;
-  border-color: var(--color-danger);
+  background-color: transparent;
+  color: #fca5a5;
+  border-color: #3d1a1a;
 }
 
 .btn-danger:hover:not(:disabled) {
-  background-color: #dc2626;
-  border-color: #dc2626;
-  color: white;
+  background-color: #3d1a1a;
+  color: #fca5a5;
 }
 
 .btn-sm {

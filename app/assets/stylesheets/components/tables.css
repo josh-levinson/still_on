@@ -5,30 +5,32 @@
 table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
+  background-color: #141414;
+  border: 1px solid #252525;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
 }
 
 thead {
-  background-color: var(--color-gray-50);
-  border-bottom: 2px solid var(--color-gray-200);
+  background-color: #0d0d0d;
+  border-bottom: 1px solid #252525;
 }
 
 th {
   padding: var(--spacing-md) var(--spacing-lg);
   text-align: left;
-  font-weight: 600;
-  color: var(--color-gray-700);
-  font-size: 0.875rem;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  color: #555;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
 td {
   padding: var(--spacing-md) var(--spacing-lg);
-  border-bottom: 1px solid var(--color-gray-200);
+  border-bottom: 1px solid #1a1a1a;
+  color: #888;
 }
 
 tbody tr:last-child td {
@@ -36,5 +38,5 @@ tbody tr:last-child td {
 }
 
 tbody tr:hover {
-  background-color: var(--color-gray-50);
+  background-color: #1a1a1a;
 }

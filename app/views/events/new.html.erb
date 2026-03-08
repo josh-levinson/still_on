@@ -54,6 +54,12 @@
           <small class="text-gray">Optional: RFC 5545 recurrence rule format</small>
         </div>
 
+        <div class="form-group">
+          <%= f.label :quorum, "Quorum (minimum attendees)" %>
+          <%= f.number_field :quorum, min: 1 %>
+          <small class="text-gray">Optional: minimum RSVPs needed for this event to happen</small>
+        </div>
+
         <div class="form-group checkbox-group">
           <%= f.check_box :is_active, checked: true %>
           <%= f.label :is_active, "Active" %>

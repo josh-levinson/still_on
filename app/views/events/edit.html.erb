@@ -52,6 +52,12 @@
     </div>
 
     <div class="form-group">
+      <%= f.label :quorum, "Quorum (minimum attendees)" %>
+      <%= f.number_field :quorum, min: 1, class: "form-control" %>
+      <small class="form-text">Optional: minimum RSVPs needed for this event to happen</small>
+    </div>
+
+    <div class="form-group">
       <%= f.label :is_active, "Active" %>
       <%= f.check_box :is_active %>
     </div>

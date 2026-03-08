@@ -52,7 +52,7 @@ class EventOccurrencesController < ApplicationController
   private
 
   def set_group
-    @group = Group.find_by!(slug: params[:group_id])
+    @group = Group.find_by!(slug: params[:group_slug])
   end
 
   def set_event

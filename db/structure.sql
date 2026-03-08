@@ -16,7 +16,7 @@ FOREIGN KEY ("user_id")
 CREATE INDEX "index_group_memberships_on_group_id" ON "group_memberships" ("group_id") /*application='StillOn'*/;
 CREATE INDEX "index_group_memberships_on_user_id" ON "group_memberships" ("user_id") /*application='StillOn'*/;
 CREATE UNIQUE INDEX "index_group_memberships_on_group_id_and_user_id" ON "group_memberships" ("group_id", "user_id") /*application='StillOn'*/;
-CREATE TABLE IF NOT EXISTS "events" ("id" uuid NOT NULL PRIMARY KEY, "group_id" uuid NOT NULL, "title" varchar NOT NULL, "description" text, "location" varchar, "default_duration_minutes" integer, "recurrence_rule" varchar, "recurrence_type" varchar DEFAULT 'none' NOT NULL, "created_by_id" uuid NOT NULL, "is_active" boolean DEFAULT TRUE NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_61fbf6ca48"
+CREATE TABLE IF NOT EXISTS "events" ("id" uuid NOT NULL PRIMARY KEY, "group_id" uuid NOT NULL, "title" varchar NOT NULL, "description" text, "location" varchar, "default_duration_minutes" integer, "recurrence_rule" varchar, "recurrence_type" varchar DEFAULT 'none' NOT NULL, "created_by_id" uuid NOT NULL, "is_active" boolean DEFAULT TRUE NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "quorum" integer /*application='StillOn'*/, CONSTRAINT "fk_rails_61fbf6ca48"
 FOREIGN KEY ("group_id")
   REFERENCES "groups" ("id")
 , CONSTRAINT "fk_rails_1f2fddcdaa"
@@ -48,6 +48,7 @@ CREATE INDEX "index_rsvps_on_status" ON "rsvps" ("status") /*application='StillO
 CREATE TABLE IF NOT EXISTS "users" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "first_name" varchar, "last_name" varchar, "avatar_url" varchar, "username" varchar, "phone_number" varchar, "phone_verified_at" datetime(6) /*application='StillOn'*/);
 CREATE UNIQUE INDEX "index_users_on_username" ON "users" ("username") /*application='StillOn'*/;
 INSERT INTO "schema_migrations" (version) VALUES
+('20260308010626'),
 ('20260307045353'),
 ('20260306153350'),
 ('20260305202352'),

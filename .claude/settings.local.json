@@ -14,7 +14,8 @@
       "Bash(RAILS_ENV=test bin/rails db:drop:*)",
       "Bash(git stash:*)",
       "Bash(bin/rails db:schema:dump:*)",
-      "Bash(rsvg-convert:*)"
+      "Bash(rsvg-convert:*)",
+      "Bash(bin/rails db:migrate:status)"
     ]
   }
 }
