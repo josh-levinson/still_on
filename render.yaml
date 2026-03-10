@@ -2,7 +2,8 @@ services:
   - type: web
     name: still-on
     runtime: ruby
-    buildCommand: bundle install && bundle exec rails assets:precompile && bundle exec rails db:prepare
+    buildCommand: bundle install && bundle exec rails assets:precompile
+    preDeployCommand: bundle exec rails db:prepare
     startCommand: bundle exec thrust rails server -b 0.0.0.0
     healthCheckPath: /up
     envVars:
