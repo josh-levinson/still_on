@@ -4,6 +4,7 @@ class GuestRsvpsController < ApplicationController
   def show
     @existing_rsvp = find_existing_rsvp
     @rsvp = @existing_rsvp || @event_occurrence.rsvps.new(status: "attending")
+    @cookie_phone = cookies[:guest_phone]
   end
 
   def create
@@ -11,9 +12,11 @@ class GuestRsvpsController < ApplicationController
 
     if @existing_rsvp
       if @existing_rsvp.update(rsvp_params)
+        save_phone_cookie(@existing_rsvp.guest_phone)
         redirect_to guest_rsvp_path(@token), notice: "RSVP updated!"
       else
         @rsvp = @existing_rsvp
+        @cookie_phone = cookies[:guest_phone]
         render :show, status: :unprocessable_entity
       end
       return
@@ -26,8 +29,10 @@ class GuestRsvpsController < ApplicationController
     end
 
     if @rsvp.save
+      save_phone_cookie(@rsvp.guest_phone)
       redirect_to guest_rsvp_path(@token), notice: rsvp_confirmation_message(@rsvp)
     else
+      @cookie_phone = cookies[:guest_phone]
       render :show, status: :unprocessable_entity
     end
   end
@@ -49,8 +54,17 @@ class GuestRsvpsController < ApplicationController
   def find_existing_rsvp
     if current_user
       @event_occurrence.rsvps.find_by(user_id: current_user.id)
-    elsif @prefilled_phone.present?
-      @event_occurrence.rsvps.find_by(guest_phone: @prefilled_phone)
+    else
+      phone = @prefilled_phone.presence || cookies[:guest_phone].presence
+      @event_occurrence.rsvps.find_by(guest_phone: phone) if phone.present?
+    end
+  end
+
+  def save_phone_cookie(phone)
+    if phone.present?
+      cookies[:guest_phone] = { value: phone, expires: 1.year.from_now, same_site: :lax }
+    else
+      cookies.delete(:guest_phone)
     end
   end
 

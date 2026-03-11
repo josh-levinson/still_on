@@ -22,7 +22,8 @@ Rails.application.routes.draw do
   get  "onboarding/invite",   to: "onboarding#invite",         as: :onboarding_invite
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
-  get "sms", to: "pages#sms", as: :sms_info
+  get "sms",     to: "pages#sms",     as: :sms_info
+  get "privacy", to: "pages#privacy", as: :privacy
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.

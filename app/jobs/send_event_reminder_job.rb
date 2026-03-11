@@ -14,19 +14,17 @@ class SendEventReminderJob < ApplicationJob
     location = occurrence.location.presence || event.location.presence
     message = build_message(event.title, time_str, location)
 
-    confirmed_attendees(occurrence).each do |user|
-      SmsService.send_message(to: user.phone_number, body: message)
+    confirmed_phones(occurrence).each do |phone|
+      SmsService.send_message(to: phone, body: message)
     end
   end
 
   private
 
-  def confirmed_attendees(occurrence)
-    occurrence.rsvps
-      .where(status: %w[attending maybe])
-      .includes(:user)
-      .map(&:user)
-      .select { |u| u.phone_number.present? }
+  def confirmed_phones(occurrence)
+    occurrence.rsvps.where(status: %w[attending maybe]).includes(:user).filter_map do |rsvp|
+      rsvp.user&.phone_number.presence || rsvp.guest_phone.presence
+    end
   end
 
   def build_message(title, time_str, location)
