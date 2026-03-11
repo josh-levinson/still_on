@@ -2,7 +2,7 @@
  * This is a manifest file that'll be compiled into application.css.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
 
 /* ========================================
    CSS VARIABLES
@@ -80,8 +80,7 @@
 
 html {
   font-size: 16px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: subpixel-antialiased;
 }
 
 body {
@@ -101,9 +100,10 @@ body {
    ======================================== */
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'DM Serif Display', serif;
   font-weight: 700;
   line-height: 1.2;
+  letter-spacing: 0.02em;
   margin-bottom: var(--spacing-md);
   color: #f0e8d8;
 }
@@ -182,9 +182,10 @@ a:hover {
 }
 
 .logo-still {
-  font-family: 'Playfair Display', serif;
+  font-family: 'DM Serif Display', serif;
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: 0.03em;
   color: #f0e8d8;
 }
 
@@ -997,9 +998,10 @@ tbody tr:hover {
 }
 
 .onboarding-logo .logo-still {
-  font-family: 'Playfair Display', serif;
+  font-family: 'DM Serif Display', serif;
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: 0.03em;
   color: #f0e8d8;
 }
 
@@ -1056,7 +1058,7 @@ tbody tr:hover {
 }
 
 .onboarding-card-header h2 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'DM Serif Display', serif;
   font-size: 28px;
   font-weight: 700;
   color: #f0e8d8;
@@ -1159,7 +1161,7 @@ tbody tr:hover {
 }
 
 .ob-annotation {
-  font-family: 'Playfair Display', serif;
+  font-family: 'DM Serif Display', serif;
   font-style: italic;
   font-size: 12px;
   color: #555;
@@ -1432,7 +1434,7 @@ tbody tr:hover {
 }
 
 .invite-hangout-name {
-  font-family: 'Playfair Display', serif;
+  font-family: 'DM Serif Display', serif;
   font-size: 20px;
   color: #f0e8d8;
   margin-bottom: 6px;
@@ -1548,11 +1550,11 @@ tbody tr:hover {
 }
 
 .splash-title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'DM Serif Display', serif;
   font-size: 32px;
   font-weight: 500;
   color: #f0e8d8;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
   margin-bottom: 8px;
   line-height: 1.15;
 }
@@ -1657,9 +1659,10 @@ tbody tr:hover {
 }
 
 .rsvp-event-title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'DM Serif Display', serif;
   font-size: 28px;
   font-weight: 700;
+  letter-spacing: 0.02em;
   color: #f0e8d8;
   line-height: 1.2;
   margin-bottom: 10px;
