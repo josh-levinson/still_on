@@ -102,7 +102,19 @@
       </div>
 
       <% unless current_user %>
-        <%= f.hidden_field :guest_phone, value: @prefilled_phone %>
+        <% if @prefilled_phone.present? %>
+          <%= f.hidden_field :guest_phone, value: @prefilled_phone %>
+        <% else %>
+          <div class="rsvp-field rsvp-phone-opt-in">
+            <label class="rsvp-label" for="rsvp_guest_phone">Phone number <span class="rsvp-optional">(optional)</span></label>
+            <%= f.telephone_field :guest_phone,
+                  placeholder: "(555) 000-0000",
+                  inputmode: "tel",
+                  autocomplete: "tel-national",
+                  class: "rsvp-input" %>
+            <p class="rsvp-sms-consent">By adding your number, you agree to receive SMS reminders for this and future hangouts from this group. Msg &amp; data rates may apply. Reply STOP to opt out.</p>
+          </div>
+        <% end %>
       <% end %>
 
       <%= f.submit(@existing_rsvp ? "Update RSVP" : "RSVP", class: "rsvp-submit-btn") %>

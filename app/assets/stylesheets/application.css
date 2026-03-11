@@ -1167,6 +1167,14 @@ tbody tr:hover {
   text-align: center;
 }
 
+.ob-sms-consent {
+  font-size: 11px;
+  color: #888;
+  text-align: center;
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
 .back-btn {
   background: none;
   border: none;
@@ -1857,6 +1865,23 @@ tbody tr:hover {
   justify-content: space-between;
 }
 
+.rsvp-optional {
+  font-weight: 400;
+  color: #888;
+  font-style: italic;
+}
+
+.rsvp-sms-consent {
+  font-size: 11px;
+  color: #888;
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+.rsvp-phone-opt-in {
+  margin-top: 4px;
+}
+
 .rsvp-stepper {
   display: flex;
   align-items: center;
@@ -2055,4 +2080,88 @@ tbody tr:hover {
   th, td {
     padding: var(--spacing-sm) var(--spacing-md);
   }
+}
+
+/* ── SMS Program Page ─────────────────────────────────────── */
+
+.sms-page {
+  max-width: 640px;
+  margin: 48px auto;
+  padding: 0 24px;
+}
+
+.sms-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.sms-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.sms-header p {
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.sms-section h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.sms-optin-block {
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.sms-optin-block h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.sms-optin-block p {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.sms-consent-example {
+  font-size: 0.85rem;
+  color: #333;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px 16px;
+  line-height: 1.5;
+}
+
+.sms-note {
+  margin-top: 10px !important;
+  font-style: italic;
+  color: #888 !important;
+}
+
+.sms-list {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sms-list li {
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.5;
 }

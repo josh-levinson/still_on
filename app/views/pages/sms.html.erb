@@ -1,0 +1,54 @@
+<% content_for :title, "SMS Program – StillOn" %>
+
+<div class="sms-page">
+  <div class="sms-shell">
+
+    <div class="sms-header">
+      <h1>StillOn SMS Program</h1>
+      <p>StillOn sends SMS reminders to help friend groups stay coordinated around recurring hangouts.</p>
+    </div>
+
+    <section class="sms-section">
+      <h2>How opt-in works</h2>
+      <p>There are two ways someone opts in to receive SMS messages from StillOn:</p>
+
+      <div class="sms-optin-block">
+        <h3>1. Organizer signup</h3>
+        <p>When an organizer creates their account, they enter their phone number to receive a verification code. The following consent language is shown before they submit:</p>
+        <div class="sms-consent-example">
+          By continuing, you agree to receive SMS messages from StillOn, including a verification code and event reminders. Msg &amp; data rates may apply. Reply STOP to opt out.
+        </div>
+      </div>
+
+      <div class="sms-optin-block">
+        <h3>2. Guest RSVP</h3>
+        <p>Guests receive an invite link shared by the organizer. When they open the RSVP page, they may optionally enter their phone number to receive future reminders. The following consent language is shown inline with the phone field:</p>
+        <div class="sms-consent-example">
+          By adding your number, you agree to receive SMS reminders for this and future hangouts from this group. Msg &amp; data rates may apply. Reply STOP to opt out.
+        </div>
+        <p class="sms-note">Phone number is always optional. Guests who do not provide a number are never sent SMS.</p>
+      </div>
+    </section>
+
+    <section class="sms-section">
+      <h2>Message types</h2>
+      <ul class="sms-list">
+        <li><strong>Verification code</strong> — sent once when an organizer enters their phone number during signup.</li>
+        <li><strong>RSVP reminder</strong> — sent 2 days before a scheduled hangout: <em>"Still on for [Event] on [Date]? RSVP here: [link]"</em></li>
+        <li><strong>Event reminder</strong> — sent the morning of a hangout to confirmed attendees who opted in at RSVP time.</li>
+        <li><strong>Cancellation notice</strong> — sent the morning of a hangout if it has been cancelled.</li>
+      </ul>
+    </section>
+
+    <section class="sms-section">
+      <h2>Opt-out &amp; support</h2>
+      <ul class="sms-list">
+        <li>Reply <strong>STOP</strong> at any time to unsubscribe from all StillOn SMS messages.</li>
+        <li>Reply <strong>HELP</strong> for support information.</li>
+        <li>Message and data rates may apply.</li>
+        <li>Message frequency varies based on your group's hangout schedule.</li>
+      </ul>
+    </section>
+
+  </div>
+</div>
