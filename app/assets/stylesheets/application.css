@@ -126,9 +126,6 @@ a {
   transition: color var(--transition-fast);
 }
 
-a:hover {
-  color: #f5e8cc;
-}
 
 /* ========================================
    LAYOUT CONTAINERS
@@ -219,7 +216,7 @@ a:hover {
   list-style: none;
 }
 
-.navbar-nav a {
+.navbar-nav a:not(.btn) {
   font-family: 'DM Sans', sans-serif;
   color: #888;
   font-size: 14px;
@@ -229,7 +226,7 @@ a:hover {
   transition: color var(--transition-fast);
 }
 
-.navbar-nav a:hover {
+.navbar-nav a:not(.btn):hover {
   color: #f0e8d8;
   background: transparent;
 }
@@ -1216,8 +1213,10 @@ tbody tr:hover {
   margin-top: var(--spacing-sm);
 }
 
+a.btn-onboarding-primary:hover,
 .btn-onboarding-primary:hover {
   background: #f5e8cc;
+  color: #0d0d0d;
   transform: translateY(-1px);
 }
 
