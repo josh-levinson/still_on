@@ -2103,7 +2103,7 @@ tbody tr:hover {
 }
 
 .sms-header p {
-  color: #555;
+  color: #888;
   font-size: 1rem;
   line-height: 1.6;
 }
@@ -2113,12 +2113,12 @@ tbody tr:hover {
   font-weight: 700;
   margin-bottom: 16px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #2a2a2a;
 }
 
 .sms-optin-block {
-  background: #fafafa;
-  border: 1px solid #eee;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
   border-radius: 10px;
   padding: 20px;
   margin-bottom: 16px;
@@ -2128,20 +2128,21 @@ tbody tr:hover {
   font-size: 0.95rem;
   font-weight: 600;
   margin-bottom: 8px;
+  color: #f0e8d8;
 }
 
 .sms-optin-block p {
   font-size: 0.9rem;
-  color: #555;
+  color: #888;
   margin-bottom: 12px;
   line-height: 1.5;
 }
 
 .sms-consent-example {
   font-size: 0.85rem;
-  color: #333;
-  background: #fff;
-  border: 1px solid #ddd;
+  color: #aaa;
+  background: #111;
+  border: 1px solid #2a2a2a;
   border-radius: 6px;
   padding: 12px 16px;
   line-height: 1.5;
@@ -2150,7 +2151,7 @@ tbody tr:hover {
 .sms-note {
   margin-top: 10px !important;
   font-style: italic;
-  color: #888 !important;
+  color: #666 !important;
 }
 
 .sms-list {
@@ -2162,6 +2163,6 @@ tbody tr:hover {
 
 .sms-list li {
   font-size: 0.9rem;
-  color: #444;
+  color: #888;
   line-height: 1.5;
 }
