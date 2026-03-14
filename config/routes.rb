@@ -54,6 +54,12 @@ Rails.application.routes.draw do
       get :discover
     end
     resource :membership, only: [ :create, :destroy ]
+    resources :group_memberships, only: [], param: :user_id do
+      member do
+        post :promote
+        post :demote
+      end
+    end
     resources :events do
       resources :event_occurrences do
         member do

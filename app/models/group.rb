@@ -21,6 +21,12 @@ class Group < ApplicationRecord
     members.include?(user)
   end
 
+  def organizer?(user)
+    return false unless user
+    return true if created_by == user
+    group_memberships.organizers.exists?(user_id: user.id)
+  end
+
   private
 
   def generate_slug

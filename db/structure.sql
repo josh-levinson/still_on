@@ -124,7 +124,8 @@ CREATE TABLE public.rsvps (
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
     guest_name character varying,
-    guest_phone character varying
+    guest_phone character varying,
+    email character varying
 );
 
 
@@ -596,7 +597,8 @@ CREATE TABLE public.users (
     avatar_url character varying,
     username character varying,
     phone_number character varying,
-    phone_verified_at timestamp(6) without time zone
+    phone_verified_at timestamp(6) without time zone,
+    email character varying
 );
 
 
@@ -1350,6 +1352,7 @@ ALTER TABLE ONLY public.group_memberships
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260314144445'),
 ('20260314120000'),
 ('20260310000001'),
 ('20260308010626'),

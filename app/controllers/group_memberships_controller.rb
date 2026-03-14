@@ -32,9 +32,33 @@ class GroupMembershipsController < ApplicationController
     end
   end
 
+  def promote
+    authorize_group_admin
+    membership = @group.group_memberships.find_by!(user_id: params[:user_id])
+    membership.update!(role: :organizer)
+    redirect_to group_path(@group), notice: "#{membership.user.first_name} is now a co-organizer."
+  end
+
+  def demote
+    authorize_group_admin
+    membership = @group.group_memberships.find_by!(user_id: params[:user_id])
+    if @group.created_by == membership.user
+      redirect_to group_path(@group), alert: "The group creator cannot be demoted."
+      return
+    end
+    membership.update!(role: :member)
+    redirect_to group_path(@group), notice: "#{membership.user.first_name} is now a member."
+  end
+
   private
 
   def set_group
     @group = Group.find_by!(slug: params[:group_slug])
+  end
+
+  def authorize_group_admin
+    unless @group.organizer?(current_user)
+      redirect_to group_path(@group), alert: "You are not authorized to perform this action."
+    end
   end
 end

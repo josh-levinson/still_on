@@ -75,7 +75,7 @@ class GroupsController < ApplicationController
   end
 
   def authorize_group_admin
-    unless @group.created_by == current_user
+    unless @group.organizer?(current_user)
       redirect_to @group, alert: "You are not authorized to perform this action."
     end
   end

@@ -16,8 +16,10 @@
       </div>
     </div>
     <div class="group-actions">
-      <% if @group.created_by == current_user %>
+      <% if @group.organizer?(current_user) %>
         <%= link_to "Edit Group", edit_group_path(@group.slug), class: "btn btn-secondary" %>
+      <% end %>
+      <% if @group.created_by == current_user %>
         <%= button_to "Delete Group", group_path(@group.slug), method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %>
       <% end %>
     </div>
@@ -52,7 +54,7 @@
   <div class="events-section">
     <div class="section-header">
       <h2>Events</h2>
-      <% if @group.created_by == current_user %>
+      <% if @group.organizer?(current_user) %>
         <%= link_to "Create Event", new_group_event_path(@group.slug), class: "btn btn-primary" %>
       <% end %>
     </div>
@@ -79,10 +81,41 @@
     <% else %>
       <div class="empty-state">
         <p>No events yet.</p>
-        <% if @group.created_by == current_user %>
+        <% if @group.organizer?(current_user) %>
           <%= link_to "Create the first event", new_group_event_path(@group.slug), class: "btn btn-primary" %>
         <% end %>
       </div>
     <% end %>
   </div>
+
+  <% if @group.organizer?(current_user) %>
+    <div class="members-section">
+      <div class="section-header">
+        <h2>Members</h2>
+      </div>
+      <div class="members-list">
+        <% @group.group_memberships.includes(:user).each do |membership| %>
+          <div class="member-row">
+            <span class="member-name">
+              <%= membership.user.first_name %> <%= membership.user.last_name %>
+              <% if @group.created_by == membership.user %>
+                <span class="badge">Owner</span>
+              <% elsif membership.organizer? %>
+                <span class="badge">Co-organizer</span>
+              <% end %>
+            </span>
+            <span class="member-actions">
+              <% unless @group.created_by == membership.user %>
+                <% if membership.organizer? %>
+                  <%= button_to "Remove co-organizer", demote_group_group_membership_path(@group.slug, membership.user_id), method: :post, class: "btn btn-secondary btn-sm" %>
+                <% else %>
+                  <%= button_to "Make co-organizer", promote_group_group_membership_path(@group.slug, membership.user_id), method: :post, class: "btn btn-secondary btn-sm" %>
+                <% end %>
+              <% end %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
 </div>

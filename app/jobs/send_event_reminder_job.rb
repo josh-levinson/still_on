@@ -13,6 +13,7 @@ class SendEventReminderJob < ApplicationJob
     time_str = occurrence.start_time.strftime("%-I:%M %p")
     location = occurrence.location.presence || event.location.presence
     message = build_message(event.title, time_str, location)
+    message += "\n\n#{occurrence.notes}" if occurrence.notes.present?
 
     confirmed_phones(occurrence).each do |phone|
       next if SmsOptOut.opted_out?(phone)

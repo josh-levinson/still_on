@@ -17,6 +17,7 @@ class SendRsvpReminderJob < ApplicationJob
 
       url = rsvp_url_for(occurrence, phone: user.phone_number)
       message = "Still on for #{event.title} on #{date_str}? RSVP here: #{url}"
+      message += "\n\n#{occurrence.notes}" if occurrence.notes.present?
       SmsService.send_message(to: user.phone_number, body: message)
     end
   end

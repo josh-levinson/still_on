@@ -95,7 +95,7 @@ class EventOccurrencesController < ApplicationController
   end
 
   def authorize_occurrence_admin
-    unless @event.created_by == current_user || @group.created_by == current_user
+    unless @group.organizer?(current_user)
       redirect_to [ @group, @event, @event_occurrence ], alert: "You are not authorized to perform this action."
     end
   end
