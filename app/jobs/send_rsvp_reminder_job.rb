@@ -11,10 +11,10 @@ class SendRsvpReminderJob < ApplicationJob
 
     event = occurrence.event
     date_str = occurrence.start_time.strftime("%A, %B %-d")
-    rsvp_url = rsvp_url_for(event, occurrence)
-    message = "Still on for #{event.title} on #{date_str}? RSVP here: #{rsvp_url}"
 
     unresvped_members(occurrence).each do |user|
+      url = rsvp_url_for(occurrence, phone: user.phone_number)
+      message = "Still on for #{event.title} on #{date_str}? RSVP here: #{url}"
       SmsService.send_message(to: user.phone_number, body: message)
     end
   end
@@ -30,11 +30,9 @@ class SendRsvpReminderJob < ApplicationJob
       .select { |u| u.phone_number.present? && !rsvped_user_ids.include?(u.id) }
   end
 
-  def rsvp_url_for(event, occurrence)
-    Rails.application.routes.url_helpers.event_occurrence_rsvps_url(
-      event_id: event.id,
-      event_occurrence_id: occurrence.id,
-      host: Rails.application.credentials.dig(:app, :host) || ENV["APP_HOST"] || "localhost:3000"
-    )
+  def rsvp_url_for(occurrence, phone: nil)
+    token = occurrence.invite_token(phone: phone)
+    host = Rails.application.credentials.dig(:app, :host) || ENV["APP_HOST"] || "localhost:3000"
+    Rails.application.routes.url_helpers.guest_rsvp_url(token, host: host)
   end
 end

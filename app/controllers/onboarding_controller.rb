@@ -60,6 +60,11 @@ class OnboardingController < ApplicationController
 
   def cadence
     @step = 3
+    if session[:ob_date].present?
+      date = Date.parse(session[:ob_date])
+      @day_name      = date.strftime("%A")
+      @monthly_label = "#{nth_weekday_n(date).ordinalize} #{@day_name}"
+    end
   end
 
   def submit_cadence
@@ -170,6 +175,10 @@ class OnboardingController < ApplicationController
 
   private
 
+  def nth_weekday_n(date)
+    ((date.day - 1) / 7) + 1
+  end
+
   def create_user_without_phone!
     first_name = session[:ob_first_name]
 
@@ -198,12 +207,22 @@ class OnboardingController < ApplicationController
     GroupMembership.create!(group: group, user: user)
 
     event = Event.create!(
-      title:          hangout_name,
-      group:          group,
-      created_by:     user,
+      title:           hangout_name,
+      group:           group,
+      created_by:      user,
       recurrence_type: cadence,
-      is_active:      true
+      is_active:       true
     )
+
+    if cadence != "none"
+      schedule_opts = if cadence == "monthly"
+        { nth_weekday: { day: date.strftime("%A").downcase.to_sym, n: nth_weekday_n(date) } }
+      else
+        {}
+      end
+      event.build_schedule(start_time, **schedule_opts)
+      event.save!
+    end
 
     occurrence = EventOccurrence.create!(
       event:      event,

@@ -42,6 +42,9 @@ Rails.application.routes.draw do
 
   # Nested resources for groups, events, occurrences, and RSVPs
   resources :groups, param: :slug do
+    collection do
+      get :discover
+    end
     resources :events do
       resources :event_occurrences do
         resources :rsvps, only: [ :create, :update, :destroy ]

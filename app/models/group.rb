@@ -8,10 +8,17 @@ class Group < ApplicationRecord
   validates :slug, presence: true, uniqueness: true
   validates :is_private, inclusion: { in: [ true, false ] }
 
+  scope :public_groups, -> { where(is_private: false) }
+
   before_validation :generate_slug, on: :create
 
   def to_param
     slug
+  end
+
+  def member?(user)
+    return false unless user
+    members.include?(user)
   end
 
   private

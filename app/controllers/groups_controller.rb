@@ -1,10 +1,16 @@
 class GroupsController < ApplicationController
-  before_action :authenticate_user!
+  before_action :authenticate_user!, except: [ :show, :discover ]
   before_action :set_group, only: [ :show, :edit, :update, :destroy ]
   before_action :authorize_group_admin, only: [ :edit, :update, :destroy ]
+  before_action :authorize_group_access, only: [ :show ]
 
   def index
     @groups = current_user.groups.order(name: :asc)
+  end
+
+  def discover
+    @groups = Group.public_groups.order(name: :asc)
+    @groups = @groups.where("name LIKE ?", "%#{params[:q]}%") if params[:q].present?
   end
 
   def show
@@ -48,6 +54,17 @@ class GroupsController < ApplicationController
 
   def set_group
     @group = Group.find_by!(slug: params[:id])
+  end
+
+  def authorize_group_access
+    return unless @group.is_private
+    return if @group.member?(current_user)
+
+    if user_signed_in?
+      redirect_to groups_path, alert: "This group is private."
+    else
+      redirect_to new_user_session_path, alert: "Please sign in to view this group."
+    end
   end
 
   def authorize_group_admin

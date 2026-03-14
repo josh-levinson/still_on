@@ -26,7 +26,9 @@
   <div class="events-section">
     <div class="section-header">
       <h2>Events</h2>
-      <%= link_to "Create Event", new_group_event_path(@group.slug), class: "btn btn-primary" %>
+      <% if @group.created_by == current_user %>
+        <%= link_to "Create Event", new_group_event_path(@group.slug), class: "btn btn-primary" %>
+      <% end %>
     </div>
 
     <% if @events.any? %>
@@ -51,7 +53,9 @@
     <% else %>
       <div class="empty-state">
         <p>No events yet.</p>
-        <%= link_to "Create the first event", new_group_event_path(@group.slug), class: "btn btn-primary" %>
+        <% if @group.created_by == current_user %>
+          <%= link_to "Create the first event", new_group_event_path(@group.slug), class: "btn btn-primary" %>
+        <% end %>
       </div>
     <% end %>
   </div>

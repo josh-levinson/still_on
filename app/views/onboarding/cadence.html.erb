@@ -21,7 +21,7 @@
               data-action="click->cadence#select">
         <div class="card-option-body">
           <span class="cadence-label">Weekly</span>
-          <span class="cadence-sub">Every 7 days</span>
+          <span class="cadence-sub">Every <%= @day_name || "week" %></span>
         </div>
       </button>
 
@@ -31,7 +31,7 @@
               data-action="click->cadence#select">
         <div class="card-option-body">
           <span class="cadence-label">Monthly</span>
-          <span class="cadence-sub">Once a month</span>
+          <span class="cadence-sub">Every <%= @monthly_label || "month" %></span>
         </div>
       </button>
 

@@ -1,0 +1,48 @@
+<div class="groups-index">
+  <div class="header">
+    <h1>Discover Groups</h1>
+    <% if user_signed_in? %>
+      <%= link_to "Create New Group", new_group_path, class: "btn btn-primary" %>
+    <% end %>
+  </div>
+
+  <%= form_with url: discover_groups_path, method: :get, local: true, class: "search-form" do |f| %>
+    <div class="search-input-wrapper">
+      <%= f.text_field :q, value: params[:q], placeholder: "Search groups…", class: "search-input" %>
+      <%= f.submit "Search", class: "btn btn-secondary" %>
+    </div>
+  <% end %>
+
+  <% if @groups.any? %>
+    <div class="groups-list">
+      <% @groups.each do |group| %>
+        <div class="group-card">
+          <%= link_to group_path(group.slug) do %>
+            <% if group.avatar_url.present? %>
+              <%= image_tag group.avatar_url, alt: group.name, class: "group-avatar" %>
+            <% end %>
+            <h2><%= group.name %></h2>
+            <% if group.description.present? %>
+              <p><%= truncate(group.description, length: 150) %></p>
+            <% end %>
+            <div class="group-meta">
+              <span><%= pluralize(group.members.count, 'member') %></span>
+              <span><%= pluralize(group.events.active.count, 'active event') %></span>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="empty-state">
+      <% if params[:q].present? %>
+        <p>No public groups match "<%= params[:q] %>".</p>
+      <% else %>
+        <p>No public groups yet.</p>
+      <% end %>
+      <% if user_signed_in? %>
+        <%= link_to "Create the first group", new_group_path, class: "btn btn-primary" %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
