@@ -74,7 +74,7 @@ The application is built around a hierarchical event management system:
 
 **Groups → Events → EventOccurrences → RSVPs**
 
-- **Users**: Authenticated via Devise with username, email, first_name, last_name, avatar_url. Only organizers have accounts.
+- **Users**: Authenticated via phone number + SMS OTP (Devise was removed). Fields: first_name, last_name, username, avatar_url, phone_number, phone_verified_at. Only organizers have accounts.
 - **Groups**: Collections of members (id: uuid, slug: unique, is_private flag, created_by references Users)
 - **Events**: Templates/series belonging to Groups. Can be recurring (recurrence_type: none/daily/weekly/monthly, recurrence_rule stores pattern)
 - **EventOccurrences**: Specific instances of Events (start_time, end_time, status: scheduled/cancelled/completed, max_attendees). Can override parent Event's location.
@@ -86,16 +86,28 @@ All core domain tables use UUID primary keys for scalability and security.
 ### Guest RSVP flow (no account required)
 Guests receive a signed token link. The token encodes the EventOccurrence and optionally a phone number. RSVPs from guests are stored with a lightweight guest record that can be claimed/merged if they later create an account. This is the primary interaction path for most people who use the app.
 
+### Organizer auth flow
+Organizers sign up (or sign in) via phone number + SMS OTP. The onboarding wizard collects first name, hangout name, date, and cadence — then creates the User, Group, Event, and first EventOccurrence in one step. Returning users sign in through the same phone/verify flow at `/onboarding/phone`.
+
+### Background jobs
+Two jobs run on a daily cron schedule (configured in `config/recurring.yml`):
+- `GenerateRecurringOccurrencesJob` — runs at 6am, generates EventOccurrence records for recurring events up to 30 days out
+- `ScheduleNotificationsJob` — runs at 8am, enqueues SMS reminders: RSVP prompts 2 days before each occurrence (to non-RSVPd members), and day-of confirmations to attending/maybe guests
+
+### Public vs. private groups
+Groups have an `is_private` flag. Public groups are browsable via `/groups/discover`. Private group show pages are restricted to members.
+
 ### Rails Stack
 
 - **Rails 8.1** with modern defaults
 - **Solid Cache**: Database-backed caching (instead of Redis)
 - **Solid Queue**: Database-backed job processing (instead of Sidekiq)
 - **Solid Cable**: Database-backed Action Cable (instead of Redis)
-- **SQLite3**: Database (2.1+)
+- **PostgreSQL**: Database
 - **Hotwire**: Turbo + Stimulus for frontend interactivity
 - **Propshaft**: Asset pipeline
-- **Devise**: Authentication
+- **IceCube**: Recurrence scheduling for recurring events
+- **Twilio**: SMS delivery for OTP auth and event reminders
 - **Kamal**: Deployment via Docker
 - **Thruster**: HTTP caching/compression for Puma
 
@@ -130,5 +142,5 @@ Follows **rubocop-rails-omakase** conventions. The `.rubocop.yml` inherits from 
 
 ## Known Issues
 
-### UUID type detection with SQLite3
-The schema currently has UUID type detection issues with SQLite3. Migrations use `type: :uuid` for foreign keys, but `db/schema.rb` shows "Unknown type 'uuid'" errors. This is a known SQLite UUID configuration issue that needs resolution for proper schema dumping.
+### UUID type detection with PostgreSQL
+Migrations use `type: :uuid` for foreign keys, but `db/schema.rb` shows "Unknown type 'uuid'" warnings. The tables and constraints are correct in the database — this is a schema dumper rendering issue only.

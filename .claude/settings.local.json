@@ -17,7 +17,11 @@
       "Bash(rsvg-convert:*)",
       "Bash(bin/rails db:migrate:status)",
       "Bash(bin/rails db:test:prepare)",
-      "Bash(xargs ls -la)"
+      "Bash(xargs ls -la)",
+      "Bash(bin/rails db:create db:migrate RAILS_ENV=test 2>&1)",
+      "Bash(cd:*)",
+      "Bash(git worktree:*)",
+      "Bash(git branch:*)"
     ]
   }
 }

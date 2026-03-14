@@ -1,0 +1,43 @@
+<div data-controller="otp" data-otp-length-value="6">
+  <%= link_to "\u2190 back", sign_in_path, class: "back-btn" %>
+
+  <div class="onboarding-card-header">
+    <h2>Check your texts</h2>
+    <p>Sent to <%= session[:signin_phone]&.then { |p| "(#{p[0..2]}) #{p[3..5]}-#{p[6..9]}" } %></p>
+  </div>
+
+  <% if flash[:error].present? %>
+    <div class="onboarding-error"><%= flash[:error] %></div>
+  <% end %>
+
+  <%= form_with url: sign_in_submit_verify_path, method: :post, class: "onboarding-form", data: { otp_target: "form" } do |f| %>
+    <%= f.hidden_field :code, value: "", data: { otp_target: "code" } %>
+
+    <div class="otp-inputs">
+      <% 6.times do |i| %>
+        <input
+          type="text"
+          inputmode="numeric"
+          maxlength="1"
+          pattern="[0-9]"
+          autocomplete="<%= i.zero? ? 'one-time-code' : 'off' %>"
+          class="otp-digit"
+          data-otp-target="digit"
+          data-action="input->otp#onInput keydown->otp#onKeydown paste->otp#onPaste"
+          <%= i.zero? ? "autofocus" : "" %>
+        />
+      <% end %>
+    </div>
+
+    <noscript>
+      <%= f.text_field :code, placeholder: "6-digit code", class: "onboarding-input", inputmode: "numeric", maxlength: 6 %>
+      <%= f.submit "Verify", class: "btn-onboarding-primary" %>
+    </noscript>
+  <% end %>
+
+  <div class="onboarding-secondary-action">
+    <%= link_to "Resend code", sign_in_resend_otp_path, data: { turbo_method: :post } %>
+    &nbsp;&middot;&nbsp;
+    <%= link_to "Wrong number?", sign_in_path %>
+  </div>
+</div>

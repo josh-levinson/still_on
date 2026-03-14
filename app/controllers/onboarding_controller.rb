@@ -4,7 +4,7 @@ class OnboardingController < ApplicationController
   CADENCES = %w[none weekly monthly].freeze
 
   def splash
-    redirect_to groups_path if user_signed_in?
+    redirect_to dashboard_path if user_signed_in?
   end
 
   def name
@@ -90,7 +90,7 @@ class OnboardingController < ApplicationController
   end
 
   def phone
-    redirect_to groups_path if current_user&.phone_verified_at.present?
+    redirect_to dashboard_path if current_user&.phone_verified_at.present?
     redirect_to onboarding_splash_path unless session[:ob_occurrence_id]
     @step = 4
   end

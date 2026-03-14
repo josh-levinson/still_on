@@ -10,13 +10,6 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: public; Type: SCHEMA; Schema: -; Owner: -
---
-
--- *not* creating schema, since initdb creates it
-
-
---
 -- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
 --
 
@@ -141,6 +134,18 @@ CREATE TABLE public.rsvps (
 
 CREATE TABLE public.schema_migrations (
     version character varying NOT NULL
+);
+
+
+--
+-- Name: sms_opt_outs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sms_opt_outs (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    phone_number character varying NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
 );
 
 
@@ -743,6 +748,14 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
+-- Name: sms_opt_outs sms_opt_outs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sms_opt_outs
+    ADD CONSTRAINT sms_opt_outs_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: solid_cable_messages solid_cable_messages_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -971,6 +984,13 @@ CREATE INDEX index_rsvps_on_status ON public.rsvps USING btree (status);
 --
 
 CREATE INDEX index_rsvps_on_user_id ON public.rsvps USING btree (user_id);
+
+
+--
+-- Name: index_sms_opt_outs_on_phone_number; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_sms_opt_outs_on_phone_number ON public.sms_opt_outs USING btree (phone_number);
 
 
 --
@@ -1330,6 +1350,7 @@ ALTER TABLE ONLY public.group_memberships
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260314120000'),
 ('20260310000001'),
 ('20260308010626'),
 ('20260307234840'),

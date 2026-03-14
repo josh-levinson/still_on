@@ -36,6 +36,13 @@
     <div class="occurrence-actions">
       <% if @event.created_by == current_user || @group.created_by == current_user %>
         <%= link_to "Edit Occurrence", edit_group_event_event_occurrence_path(@group.slug, @event, @event_occurrence), class: "btn btn-secondary" %>
+        <% if @event_occurrence.status == "scheduled" %>
+          <%= button_to "Cancel Occurrence",
+              cancel_group_event_event_occurrence_path(@group.slug, @event, @event_occurrence),
+              method: :patch,
+              data: { confirm: "Cancel this occurrence and notify attendees?" },
+              class: "btn btn-warning" %>
+        <% end %>
         <%= button_to "Delete Occurrence",
             group_event_event_occurrence_path(@group.slug, @event, @event_occurrence),
             method: :delete,

@@ -1,5 +1,10 @@
 Rails.application.routes.draw do
-  delete "sign_out", to: "sessions#destroy", as: :sign_out
+  delete "sign_out",        to: "sessions#destroy",       as: :sign_out
+  get    "sign_in",         to: "sessions#phone",         as: :sign_in
+  post   "sign_in",         to: "sessions#submit_phone",  as: :sign_in_submit_phone
+  get    "sign_in/verify",  to: "sessions#verify",        as: :sign_in_verify
+  post   "sign_in/verify",  to: "sessions#submit_verify", as: :sign_in_submit_verify
+  post   "sign_in/resend",  to: "sessions#resend_otp",    as: :sign_in_resend_otp
 
   # Test-only sign-in backdoor (never available in production)
   if Rails.env.test?
@@ -22,8 +27,9 @@ Rails.application.routes.draw do
   get  "onboarding/invite",   to: "onboarding#invite",         as: :onboarding_invite
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
-  get "sms",     to: "pages#sms",     as: :sms_info
-  get "privacy", to: "pages#privacy", as: :privacy
+  get  "sms",     to: "pages#sms",     as: :sms_info
+  get  "privacy", to: "pages#privacy", as: :privacy
+  post "twilio/sms", to: "twilio_webhooks#sms", as: :twilio_sms_webhook
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
@@ -32,6 +38,8 @@ Rails.application.routes.draw do
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+
+  get "dashboard", to: "posts#index", as: :dashboard
 
   # Defines the root path route ("/")
   root "onboarding#splash"
@@ -45,8 +53,12 @@ Rails.application.routes.draw do
     collection do
       get :discover
     end
+    resource :membership, only: [ :create, :destroy ]
     resources :events do
       resources :event_occurrences do
+        member do
+          patch :cancel
+        end
         resources :rsvps, only: [ :create, :update, :destroy ]
       end
     end

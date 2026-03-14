@@ -13,6 +13,8 @@ class SendRsvpReminderJob < ApplicationJob
     date_str = occurrence.start_time.strftime("%A, %B %-d")
 
     unresvped_members(occurrence).each do |user|
+      next if SmsOptOut.opted_out?(user.phone_number)
+
       url = rsvp_url_for(occurrence, phone: user.phone_number)
       message = "Still on for #{event.title} on #{date_str}? RSVP here: #{url}"
       SmsService.send_message(to: user.phone_number, body: message)

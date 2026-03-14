@@ -23,6 +23,32 @@
     </div>
   </div>
 
+  <% if (@group.created_by == current_user || @group.member?(current_user)) && @upcoming_occurrences.any? %>
+    <div class="rsvp-summary-section">
+      <div class="section-header">
+        <h2>Upcoming</h2>
+      </div>
+      <div class="rsvp-summary-list">
+        <% member_count = @group.group_memberships.count %>
+        <% @upcoming_occurrences.each do |occurrence| %>
+          <%= link_to group_event_event_occurrence_path(@group.slug, occurrence.event, occurrence), class: "rsvp-summary-row" do %>
+            <div class="rsvp-summary-event">
+              <span class="rsvp-summary-title"><%= occurrence.event.title %></span>
+              <span class="rsvp-summary-date"><%= occurrence.start_time.strftime("%a %b %-d") %></span>
+            </div>
+            <div class="rsvp-summary-counts">
+              <span class="rsvp-count attending"><%= occurrence.attending_count %> in</span>
+              <span class="rsvp-count-sep">·</span>
+              <span class="rsvp-count maybe"><%= occurrence.maybe_count %> maybe</span>
+              <span class="rsvp-count-sep">·</span>
+              <span class="rsvp-count no-response"><%= occurrence.no_response_count(member_count) %> no response</span>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
   <div class="events-section">
     <div class="section-header">
       <h2>Events</h2>

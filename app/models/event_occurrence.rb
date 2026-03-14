@@ -15,6 +15,22 @@ class EventOccurrence < ApplicationRecord
     rsvps.where(status: "attending").sum("1 + guest_count")
   end
 
+  def maybe_count
+    rsvps.where(status: "maybe").count
+  end
+
+  def declined_count
+    rsvps.where(status: "declined").count
+  end
+
+  def responded_count
+    rsvps.count
+  end
+
+  def no_response_count(member_count)
+    [ member_count - responded_count, 0 ].max
+  end
+
   def full?
     max_attendees.present? && attending_count >= max_attendees
   end

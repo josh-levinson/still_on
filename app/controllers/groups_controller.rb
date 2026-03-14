@@ -15,6 +15,13 @@ class GroupsController < ApplicationController
 
   def show
     @events = @group.events.active.order(created_at: :desc)
+    @upcoming_occurrences = EventOccurrence
+      .joins(event: :group)
+      .where(events: { group_id: @group.id }, status: "scheduled")
+      .where("start_time > ?", Time.current)
+      .order(:start_time)
+      .limit(10)
+      .includes(:rsvps, :event)
   end
 
   def new

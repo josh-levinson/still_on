@@ -1,4 +1,6 @@
 class PostsController < ApplicationController
+  before_action :authenticate_user!
+
   def index
     if user_signed_in?
       @groups = current_user.groups.order(name: :asc)

@@ -3,10 +3,12 @@ class ScheduleNotificationsJob < ApplicationJob
 
   RSVP_REMINDER_DAYS_BEFORE = 2
   EVENT_REMINDER_MIN_HOURS_AHEAD = 3
+  QUORUM_ALERT_HOURS_BEFORE = 24
 
   def perform
     schedule_rsvp_reminders
     schedule_event_reminders
+    schedule_quorum_alerts
   end
 
   private
@@ -22,6 +24,15 @@ class ScheduleNotificationsJob < ApplicationJob
     window = EVENT_REMINDER_MIN_HOURS_AHEAD.hours.from_now..Time.current.end_of_day
     EventOccurrence.scheduled.where(start_time: window).each do |occurrence|
       SendEventReminderJob.perform_later(occurrence.id)
+    end
+  end
+
+  def schedule_quorum_alerts
+    window = QUORUM_ALERT_HOURS_BEFORE.hours.from_now..(QUORUM_ALERT_HOURS_BEFORE + 2).hours.from_now
+    EventOccurrence.scheduled.includes(:event).where(start_time: window).each do |occurrence|
+      next if occurrence.event.quorum.blank?
+
+      SendQuorumAlertJob.perform_later(occurrence.id)
     end
   end
 

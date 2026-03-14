@@ -339,6 +339,17 @@ a {
   color: #ccc;
 }
 
+.btn-warning {
+  background-color: transparent;
+  color: #f5c842;
+  border-color: #3d3010;
+}
+
+.btn-warning:hover:not(:disabled) {
+  background-color: #3d3010;
+  color: #f5c842;
+}
+
 .btn-danger {
   background-color: transparent;
   color: #fca5a5;
@@ -716,6 +727,78 @@ tbody tr:hover {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
+}
+
+/* ========================================
+   RSVP SUMMARY (GROUP SHOW PAGE)
+   ======================================== */
+
+.rsvp-summary-section {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.rsvp-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.rsvp-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: #141414;
+  border: 1px solid #252525;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: inherit;
+  transition: all var(--transition-base);
+}
+
+.rsvp-summary-row:hover {
+  border-color: #e8d5b0;
+}
+
+.rsvp-summary-event {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rsvp-summary-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #f0e8d8;
+}
+
+.rsvp-summary-date {
+  font-size: 0.8125rem;
+  color: #555;
+}
+
+.rsvp-summary-counts {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 0.8125rem;
+  flex-shrink: 0;
+}
+
+.rsvp-count.attending {
+  color: #7cbb7c;
+}
+
+.rsvp-count.maybe {
+  color: #c9a84c;
+}
+
+.rsvp-count.no-response {
+  color: #555;
+}
+
+.rsvp-count-sep {
+  color: #333;
 }
 
 /* ========================================
@@ -2006,6 +2089,47 @@ a.btn-onboarding-primary:hover,
 
 .rsvp-signup-nudge a:hover {
   color: #ccc;
+}
+
+.rsvp-claim-nudge {
+  margin-top: 32px;
+  padding: 20px;
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.rsvp-claim-nudge-heading {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e8d5b0;
+  margin: 0 0 8px;
+}
+
+.rsvp-claim-nudge-copy {
+  font-size: 13px;
+  color: #888;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+.rsvp-claim-nudge-btn {
+  display: inline-block;
+  padding: 10px 24px;
+  background: transparent;
+  border: 1px solid #e8d5b0;
+  border-radius: 8px;
+  color: #e8d5b0;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.rsvp-claim-nudge-btn:hover {
+  background: #e8d5b0;
+  color: #0d0d0d;
 }
 
 @media (max-width: 440px) {

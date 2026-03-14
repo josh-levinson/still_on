@@ -132,11 +132,12 @@
       </p>
     <% end %>
 
-    <%# ── Soft sign-up prompt ── %>
-    <% unless current_user %>
-      <div class="rsvp-signup-nudge">
-        Want reminders for future hangouts?
-        <%= link_to "Create an account \u2192", onboarding_name_path %>
+    <%# ── Account claim nudge (shown after RSVP, guests only) ── %>
+    <% if @existing_rsvp && !current_user %>
+      <div class="rsvp-claim-nudge">
+        <h2 class="rsvp-claim-nudge-heading">Want to keep track of your RSVPs?</h2>
+        <p class="rsvp-claim-nudge-copy">Create a free account with your phone number and we'll save your RSVPs in one place.</p>
+        <%= link_to "Create a free account", onboarding_phone_path, class: "rsvp-claim-nudge-btn" %>
       </div>
     <% end %>
 

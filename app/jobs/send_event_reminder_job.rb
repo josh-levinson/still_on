@@ -15,6 +15,8 @@ class SendEventReminderJob < ApplicationJob
     message = build_message(event.title, time_str, location)
 
     confirmed_phones(occurrence).each do |phone|
+      next if SmsOptOut.opted_out?(phone)
+
       SmsService.send_message(to: phone, body: message)
     end
   end

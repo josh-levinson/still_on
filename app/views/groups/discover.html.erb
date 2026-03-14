@@ -30,6 +30,9 @@
               <span><%= pluralize(group.events.active.count, 'active event') %></span>
             </div>
           <% end %>
+          <% if user_signed_in? && !group.member?(current_user) %>
+            <%= button_to "Join", group_membership_path(group.slug), method: :post, class: "btn btn-primary btn-sm" %>
+          <% end %>
         </div>
       <% end %>
     </div>

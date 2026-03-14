@@ -28,10 +28,10 @@
         <% end %>
         <ul class="navbar-nav">
           <% if user_signed_in? %>
-            <li><%= link_to "My Groups", groups_path %></li>
+            <li><%= link_to "Dashboard", dashboard_path %></li>
             <li><%= button_to "Sign Out", sign_out_path, method: :delete, class: "btn btn-sm btn-outline" %></li>
           <% else %>
-            <li><%= link_to "Get Started", onboarding_phone_path, class: "btn btn-sm btn-primary" %></li>
+            <li><%= link_to "Get Started", onboarding_name_path, class: "btn btn-sm btn-primary" %></li>
           <% end %>
         </ul>
       </div>
