@@ -62,6 +62,8 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+  # Minitest 6 removed minitest/mock; pin to 5.x for stub support
+  gem "minitest", "~> 5.1"
 end
 
 gem "twilio-ruby", "~> 7.0"

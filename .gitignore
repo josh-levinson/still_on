@@ -30,6 +30,9 @@
 
 /public/assets
 
+# Claude Code worktrees (temporary agent workspaces)
+/.claude/worktrees/
+
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 

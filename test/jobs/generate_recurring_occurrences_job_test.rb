@@ -12,7 +12,8 @@ class GenerateRecurringOccurrencesJobTest < ActiveSupport::TestCase
     event.build_schedule(start_time)
     event.save!
 
-    assert_difference "EventOccurrence.count", -> { event.next_occurrences(10).count { |t| t <= 30.days.from_now } } do
+    expected_count = event.next_occurrences(10).count { |t| t <= 30.days.from_now }
+    assert_difference "EventOccurrence.count", expected_count do
       GenerateRecurringOccurrencesJob.perform_now
     end
   end
