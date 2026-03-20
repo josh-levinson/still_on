@@ -18,10 +18,12 @@ class ScheduleNotificationsJobTest < ActiveSupport::TestCase
   end
 
   test "enqueues event reminders for occurrences happening today after the min hours threshold" do
-    occurrence = create_occurrence(@event, start_time: 4.hours.from_now, end_time: 6.hours.from_now)
+    travel_to Time.current.noon do
+      occurrence = create_occurrence(@event, start_time: 4.hours.from_now, end_time: 6.hours.from_now)
 
-    assert_enqueued_with(job: SendEventReminderJob, args: [ occurrence.id ]) do
-      ScheduleNotificationsJob.perform_now
+      assert_enqueued_with(job: SendEventReminderJob, args: [ occurrence.id ]) do
+        ScheduleNotificationsJob.perform_now
+      end
     end
   end
 

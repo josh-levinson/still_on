@@ -1,0 +1,2250 @@
+--- !ruby/object:ActiveRecord::ConnectionAdapters::SchemaCache
+columns:
+  ar_internal_metadata:
+  - &5 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: created_at
+    cast_type: &1 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::OID::Timestamp
+      precision: 6
+      scale:
+      limit:
+      timezone:
+    sql_type_metadata: &2 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::TypeMetadata
+      delegate_dc_obj: !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+        sql_type: timestamp(6) without time zone
+        type: :datetime
+        limit:
+        precision: 6
+        scale:
+      oid: 1114
+      fmod: 6
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - &31 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: key
+    cast_type: &3 !ruby/object:ActiveModel::Type::String
+      true: t
+      false: f
+      precision:
+      scale:
+      limit:
+    sql_type_metadata: &4 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::TypeMetadata
+      delegate_dc_obj: !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+        sql_type: character varying
+        type: :string
+        limit:
+        precision:
+        scale:
+      oid: 1043
+      fmod: -1
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - &8 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: updated_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: value
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  event_occurrences:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: end_time
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: event_id
+    cast_type: &6 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::OID::Uuid
+      precision:
+      scale:
+      limit:
+    sql_type_metadata: &7 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::TypeMetadata
+      delegate_dc_obj: !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+        sql_type: uuid
+        type: :uuid
+        limit:
+        precision:
+        scale:
+      oid: 2950
+      fmod: -1
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - &13 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: id
+    cast_type: *6
+    sql_type_metadata: *7
+    'null': false
+    default:
+    default_function: gen_random_uuid()
+    collation:
+    comment:
+  - &14 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: location
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: max_attendees
+    cast_type: &9 !ruby/object:ActiveModel::Type::Integer
+      precision:
+      scale:
+      limit: 4
+      max: 2147483648
+      min: -2147483648
+    sql_type_metadata: &10 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::TypeMetadata
+      delegate_dc_obj: !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+        sql_type: integer
+        type: :integer
+        limit: 4
+        precision:
+        scale:
+      oid: 23
+      fmod: -1
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - &20 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: notes
+    cast_type: &11 !ruby/object:ActiveRecord::Type::Text
+      true: t
+      false: f
+      precision:
+      scale:
+      limit:
+    sql_type_metadata: &12 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::TypeMetadata
+      delegate_dc_obj: !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+        sql_type: text
+        type: :text
+        limit:
+        precision:
+        scale:
+      oid: 25
+      fmod: -1
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: start_time
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: status
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default: scheduled
+    default_function:
+    collation:
+    comment:
+  - *8
+  events:
+  - *5
+  - &16 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: created_by_id
+    cast_type: *6
+    sql_type_metadata: *7
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: default_duration_minutes
+    cast_type: *9
+    sql_type_metadata: *10
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - &17 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: description
+    cast_type: *11
+    sql_type_metadata: *12
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - &15 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: group_id
+    cast_type: *6
+    sql_type_metadata: *7
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - *13
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: is_active
+    cast_type: &18 !ruby/object:ActiveModel::Type::Boolean
+      precision:
+      scale:
+      limit:
+    sql_type_metadata: &19 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::TypeMetadata
+      delegate_dc_obj: !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+        sql_type: boolean
+        type: :boolean
+        limit:
+        precision:
+        scale:
+      oid: 16
+      fmod: -1
+    'null': false
+    default: true
+    default_function:
+    collation:
+    comment:
+  - *14
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: quorum
+    cast_type: *9
+    sql_type_metadata: *10
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: recurrence_rule
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: recurrence_type
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default: none
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: title
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - *8
+  group_memberships:
+  - *5
+  - *15
+  - *13
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: joined_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': false
+    default:
+    default_function: CURRENT_TIMESTAMP
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: role
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default: member
+    default_function:
+    collation:
+    comment:
+  - *8
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: user_id
+    cast_type: *6
+    sql_type_metadata: *7
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  groups:
+  - &33 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: avatar_url
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *5
+  - *16
+  - *17
+  - *13
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: is_private
+    cast_type: *18
+    sql_type_metadata: *19
+    'null': false
+    default: false
+    default_function:
+    collation:
+    comment:
+  - &29 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: name
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: slug
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - *8
+  guest_group_subscriptions:
+  - *5
+  - *15
+  - *13
+  - &21 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: phone_number
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - *8
+  rsvps:
+  - *5
+  - &34 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: email
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: event_occurrence_id
+    cast_type: *6
+    sql_type_metadata: *7
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: guest_count
+    cast_type: *9
+    sql_type_metadata: *10
+    'null': false
+    default: 0
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: guest_name
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: guest_phone
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *13
+  - *20
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: status
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - *8
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: user_id
+    cast_type: *6
+    sql_type_metadata: *7
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  schema_migrations:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: version
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  sms_opt_outs:
+  - *5
+  - *13
+  - *21
+  - *8
+  solid_cable_messages:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: channel
+    cast_type: &24 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::OID::Bytea
+      precision:
+      scale:
+      limit:
+    sql_type_metadata: &25 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::TypeMetadata
+      delegate_dc_obj: !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+        sql_type: bytea
+        type: :binary
+        limit:
+        precision:
+        scale:
+      oid: 17
+      fmod: -1
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: channel_hash
+    cast_type: &22 !ruby/object:ActiveModel::Type::Integer
+      precision:
+      scale:
+      limit: 8
+      max: 9223372036854775808
+      min: -9223372036854775808
+    sql_type_metadata: &23 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::TypeMetadata
+      delegate_dc_obj: !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+        sql_type: bigint
+        type: :integer
+        limit: 8
+        precision:
+        scale:
+      oid: 20
+      fmod: -1
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial: true
+    identity:
+    generated: ''
+    name: id
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': false
+    default:
+    default_function: nextval('solid_cable_messages_id_seq'::regclass)
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: payload
+    cast_type: *24
+    sql_type_metadata: *25
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  solid_cache_entries:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: byte_size
+    cast_type: *9
+    sql_type_metadata: *10
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial: true
+    identity:
+    generated: ''
+    name: id
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': false
+    default:
+    default_function: nextval('solid_cache_entries_id_seq'::regclass)
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: key
+    cast_type: *24
+    sql_type_metadata: *25
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: key_hash
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: value
+    cast_type: *24
+    sql_type_metadata: *25
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  solid_queue_blocked_executions:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: concurrency_key
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - *5
+  - &32 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: expires_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial: true
+    identity:
+    generated: ''
+    name: id
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': false
+    default:
+    default_function: nextval('solid_queue_blocked_executions_id_seq'::regclass)
+    collation:
+    comment:
+  - &26 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: job_id
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - &27 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: priority
+    cast_type: *9
+    sql_type_metadata: *10
+    'null': false
+    default: 0
+    default_function:
+    collation:
+    comment:
+  - &28 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: queue_name
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  solid_queue_claimed_executions:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial: true
+    identity:
+    generated: ''
+    name: id
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': false
+    default:
+    default_function: nextval('solid_queue_claimed_executions_id_seq'::regclass)
+    collation:
+    comment:
+  - *26
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: process_id
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  solid_queue_failed_executions:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: error
+    cast_type: *11
+    sql_type_metadata: *12
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial: true
+    identity:
+    generated: ''
+    name: id
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': false
+    default:
+    default_function: nextval('solid_queue_failed_executions_id_seq'::regclass)
+    collation:
+    comment:
+  - *26
+  solid_queue_jobs:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: active_job_id
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - &30 !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: arguments
+    cast_type: *11
+    sql_type_metadata: *12
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: class_name
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: concurrency_key
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: finished_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial: true
+    identity:
+    generated: ''
+    name: id
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': false
+    default:
+    default_function: nextval('solid_queue_jobs_id_seq'::regclass)
+    collation:
+    comment:
+  - *27
+  - *28
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: scheduled_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *8
+  solid_queue_pauses:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial: true
+    identity:
+    generated: ''
+    name: id
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': false
+    default:
+    default_function: nextval('solid_queue_pauses_id_seq'::regclass)
+    collation:
+    comment:
+  - *28
+  solid_queue_processes:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: hostname
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial: true
+    identity:
+    generated: ''
+    name: id
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': false
+    default:
+    default_function: nextval('solid_queue_processes_id_seq'::regclass)
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: kind
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: last_heartbeat_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: metadata
+    cast_type: *11
+    sql_type_metadata: *12
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *29
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: pid
+    cast_type: *9
+    sql_type_metadata: *10
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: supervisor_id
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  solid_queue_ready_executions:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial: true
+    identity:
+    generated: ''
+    name: id
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': false
+    default:
+    default_function: nextval('solid_queue_ready_executions_id_seq'::regclass)
+    collation:
+    comment:
+  - *26
+  - *27
+  - *28
+  solid_queue_recurring_executions:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial: true
+    identity:
+    generated: ''
+    name: id
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': false
+    default:
+    default_function: nextval('solid_queue_recurring_executions_id_seq'::regclass)
+    collation:
+    comment:
+  - *26
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: run_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: task_key
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  solid_queue_recurring_tasks:
+  - *30
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: class_name
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: command
+    cast_type: !ruby/object:ActiveModel::Type::String
+      true: t
+      false: f
+      precision:
+      scale:
+      limit: 2048
+    sql_type_metadata: !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::TypeMetadata
+      delegate_dc_obj: !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+        sql_type: character varying(2048)
+        type: :string
+        limit: 2048
+        precision:
+        scale:
+      oid: 1043
+      fmod: 2052
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *5
+  - *17
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial: true
+    identity:
+    generated: ''
+    name: id
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': false
+    default:
+    default_function: nextval('solid_queue_recurring_tasks_id_seq'::regclass)
+    collation:
+    comment:
+  - *31
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: priority
+    cast_type: *9
+    sql_type_metadata: *10
+    'null': true
+    default: 0
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: queue_name
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: schedule
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: static
+    cast_type: *18
+    sql_type_metadata: *19
+    'null': false
+    default: true
+    default_function:
+    collation:
+    comment:
+  - *8
+  solid_queue_scheduled_executions:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial: true
+    identity:
+    generated: ''
+    name: id
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': false
+    default:
+    default_function: nextval('solid_queue_scheduled_executions_id_seq'::regclass)
+    collation:
+    comment:
+  - *26
+  - *27
+  - *28
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: scheduled_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  solid_queue_semaphores:
+  - *5
+  - *32
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial: true
+    identity:
+    generated: ''
+    name: id
+    cast_type: *22
+    sql_type_metadata: *23
+    'null': false
+    default:
+    default_function: nextval('solid_queue_semaphores_id_seq'::regclass)
+    collation:
+    comment:
+  - *31
+  - *8
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: value
+    cast_type: *9
+    sql_type_metadata: *10
+    'null': false
+    default: 1
+    default_function:
+    collation:
+    comment:
+  users:
+  - *33
+  - *5
+  - *34
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: first_name
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *13
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: last_name
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: phone_number
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: phone_verified_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *8
+  - !ruby/object:ActiveRecord::ConnectionAdapters::PostgreSQL::Column
+    serial:
+    identity:
+    generated: ''
+    name: username
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+primary_keys:
+  ar_internal_metadata: key
+  event_occurrences: id
+  events: id
+  group_memberships: id
+  groups: id
+  guest_group_subscriptions: id
+  rsvps: id
+  schema_migrations: version
+  sms_opt_outs: id
+  solid_cable_messages: id
+  solid_cache_entries: id
+  solid_queue_blocked_executions: id
+  solid_queue_claimed_executions: id
+  solid_queue_failed_executions: id
+  solid_queue_jobs: id
+  solid_queue_pauses: id
+  solid_queue_processes: id
+  solid_queue_ready_executions: id
+  solid_queue_recurring_executions: id
+  solid_queue_recurring_tasks: id
+  solid_queue_scheduled_executions: id
+  solid_queue_semaphores: id
+  users: id
+data_sources:
+  ar_internal_metadata: true
+  event_occurrences: true
+  events: true
+  group_memberships: true
+  groups: true
+  guest_group_subscriptions: true
+  rsvps: true
+  schema_migrations: true
+  sms_opt_outs: true
+  solid_cable_messages: true
+  solid_cache_entries: true
+  solid_queue_blocked_executions: true
+  solid_queue_claimed_executions: true
+  solid_queue_failed_executions: true
+  solid_queue_jobs: true
+  solid_queue_pauses: true
+  solid_queue_processes: true
+  solid_queue_ready_executions: true
+  solid_queue_recurring_executions: true
+  solid_queue_recurring_tasks: true
+  solid_queue_scheduled_executions: true
+  solid_queue_semaphores: true
+  users: true
+indexes:
+  ar_internal_metadata: []
+  event_occurrences:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: event_occurrences
+    name: index_event_occurrences_on_event_id
+    unique: false
+    columns:
+    - event_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: event_occurrences
+    name: index_event_occurrences_on_event_id_and_start_time
+    unique: false
+    columns:
+    - event_id
+    - start_time
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: event_occurrences
+    name: index_event_occurrences_on_start_time
+    unique: false
+    columns:
+    - start_time
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: event_occurrences
+    name: index_event_occurrences_on_status
+    unique: false
+    columns:
+    - status
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  events:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: events
+    name: index_events_on_created_by_id
+    unique: false
+    columns:
+    - created_by_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: events
+    name: index_events_on_group_id
+    unique: false
+    columns:
+    - group_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: events
+    name: index_events_on_recurrence_type
+    unique: false
+    columns:
+    - recurrence_type
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  group_memberships:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: group_memberships
+    name: index_group_memberships_on_group_id
+    unique: false
+    columns:
+    - group_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: group_memberships
+    name: index_group_memberships_on_group_id_and_user_id
+    unique: true
+    columns:
+    - group_id
+    - user_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: group_memberships
+    name: index_group_memberships_on_user_id
+    unique: false
+    columns:
+    - user_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  groups:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: groups
+    name: index_groups_on_created_by_id
+    unique: false
+    columns:
+    - created_by_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: groups
+    name: index_groups_on_slug
+    unique: true
+    columns:
+    - slug
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  guest_group_subscriptions:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: guest_group_subscriptions
+    name: index_guest_group_subscriptions_on_group_id
+    unique: false
+    columns:
+    - group_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: guest_group_subscriptions
+    name: index_guest_group_subscriptions_on_group_id_and_phone_number
+    unique: true
+    columns:
+    - group_id
+    - phone_number
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  rsvps:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: rsvps
+    name: index_rsvps_on_event_occurrence_id
+    unique: false
+    columns:
+    - event_occurrence_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: rsvps
+    name: index_rsvps_on_occurrence_and_guest_phone
+    unique: true
+    columns:
+    - event_occurrence_id
+    - guest_phone
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where: "(guest_phone IS NOT NULL)"
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: rsvps
+    name: index_rsvps_on_occurrence_and_user
+    unique: true
+    columns:
+    - event_occurrence_id
+    - user_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where: "(user_id IS NOT NULL)"
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: rsvps
+    name: index_rsvps_on_status
+    unique: false
+    columns:
+    - status
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: rsvps
+    name: index_rsvps_on_user_id
+    unique: false
+    columns:
+    - user_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  schema_migrations: []
+  sms_opt_outs:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: sms_opt_outs
+    name: index_sms_opt_outs_on_phone_number
+    unique: true
+    columns:
+    - phone_number
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  solid_cable_messages:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_cable_messages
+    name: index_solid_cable_messages_on_channel
+    unique: false
+    columns:
+    - channel
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_cable_messages
+    name: index_solid_cable_messages_on_channel_hash
+    unique: false
+    columns:
+    - channel_hash
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_cable_messages
+    name: index_solid_cable_messages_on_created_at
+    unique: false
+    columns:
+    - created_at
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  solid_cache_entries:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_cache_entries
+    name: index_solid_cache_entries_on_byte_size
+    unique: false
+    columns:
+    - byte_size
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_cache_entries
+    name: index_solid_cache_entries_on_key_hash
+    unique: true
+    columns:
+    - key_hash
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_cache_entries
+    name: index_solid_cache_entries_on_key_hash_and_byte_size
+    unique: false
+    columns:
+    - key_hash
+    - byte_size
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  solid_queue_blocked_executions:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_blocked_executions
+    name: index_solid_queue_blocked_executions_for_maintenance
+    unique: false
+    columns:
+    - expires_at
+    - concurrency_key
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_blocked_executions
+    name: index_solid_queue_blocked_executions_for_release
+    unique: false
+    columns:
+    - concurrency_key
+    - priority
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_blocked_executions
+    name: index_solid_queue_blocked_executions_on_job_id
+    unique: true
+    columns:
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  solid_queue_claimed_executions:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_claimed_executions
+    name: index_solid_queue_claimed_executions_on_job_id
+    unique: true
+    columns:
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_claimed_executions
+    name: index_solid_queue_claimed_executions_on_process_id_and_job_id
+    unique: false
+    columns:
+    - process_id
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  solid_queue_failed_executions:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_failed_executions
+    name: index_solid_queue_failed_executions_on_job_id
+    unique: true
+    columns:
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  solid_queue_jobs:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_jobs
+    name: index_solid_queue_jobs_for_alerting
+    unique: false
+    columns:
+    - scheduled_at
+    - finished_at
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_jobs
+    name: index_solid_queue_jobs_for_filtering
+    unique: false
+    columns:
+    - queue_name
+    - finished_at
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_jobs
+    name: index_solid_queue_jobs_on_active_job_id
+    unique: false
+    columns:
+    - active_job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_jobs
+    name: index_solid_queue_jobs_on_class_name
+    unique: false
+    columns:
+    - class_name
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_jobs
+    name: index_solid_queue_jobs_on_finished_at
+    unique: false
+    columns:
+    - finished_at
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  solid_queue_pauses:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_pauses
+    name: index_solid_queue_pauses_on_queue_name
+    unique: true
+    columns:
+    - queue_name
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  solid_queue_processes:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_processes
+    name: index_solid_queue_processes_on_last_heartbeat_at
+    unique: false
+    columns:
+    - last_heartbeat_at
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_processes
+    name: index_solid_queue_processes_on_name_and_supervisor_id
+    unique: true
+    columns:
+    - name
+    - supervisor_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_processes
+    name: index_solid_queue_processes_on_supervisor_id
+    unique: false
+    columns:
+    - supervisor_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  solid_queue_ready_executions:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_ready_executions
+    name: index_solid_queue_poll_all
+    unique: false
+    columns:
+    - priority
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_ready_executions
+    name: index_solid_queue_poll_by_queue
+    unique: false
+    columns:
+    - queue_name
+    - priority
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_ready_executions
+    name: index_solid_queue_ready_executions_on_job_id
+    unique: true
+    columns:
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  solid_queue_recurring_executions:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_recurring_executions
+    name: index_solid_queue_recurring_executions_on_job_id
+    unique: true
+    columns:
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_recurring_executions
+    name: index_solid_queue_recurring_executions_on_task_key_and_run_at
+    unique: true
+    columns:
+    - task_key
+    - run_at
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  solid_queue_recurring_tasks:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_recurring_tasks
+    name: index_solid_queue_recurring_tasks_on_key
+    unique: true
+    columns:
+    - key
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_recurring_tasks
+    name: index_solid_queue_recurring_tasks_on_static
+    unique: false
+    columns:
+    - static
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  solid_queue_scheduled_executions:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_scheduled_executions
+    name: index_solid_queue_dispatch_all
+    unique: false
+    columns:
+    - scheduled_at
+    - priority
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_scheduled_executions
+    name: index_solid_queue_scheduled_executions_on_job_id
+    unique: true
+    columns:
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  solid_queue_semaphores:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_semaphores
+    name: index_solid_queue_semaphores_on_expires_at
+    unique: false
+    columns:
+    - expires_at
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_semaphores
+    name: index_solid_queue_semaphores_on_key
+    unique: true
+    columns:
+    - key
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_semaphores
+    name: index_solid_queue_semaphores_on_key_and_value
+    unique: false
+    columns:
+    - key
+    - value
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+  users:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: users
+    name: index_users_on_username
+    unique: true
+    columns:
+    - username
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using: :btree
+    include:
+    nulls_not_distinct: false
+    comment:
+    valid: true
+version: 20260319000001
