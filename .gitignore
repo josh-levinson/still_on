@@ -29,6 +29,7 @@
 !/tmp/storage/.keep
 
 /public/assets
+/coverage
 
 # Claude Code worktrees (temporary agent workspaces)
 /.claude/worktrees/

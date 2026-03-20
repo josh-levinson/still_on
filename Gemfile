@@ -64,6 +64,7 @@ group :test do
   gem "selenium-webdriver"
   # Minitest 6 removed minitest/mock; pin to 5.x for stub support
   gem "minitest", "~> 5.1"
+  gem "simplecov", require: false
 end
 
 gem "twilio-ruby", "~> 7.0"
