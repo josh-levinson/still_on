@@ -1,6 +1,7 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -8,6 +9,13 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+
+--
+-- Name: public; Type: SCHEMA; Schema: -; Owner: -
+--
+
+-- *not* creating schema, since initdb creates it
+
 
 --
 -- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
@@ -105,6 +113,19 @@ CREATE TABLE public.groups (
     avatar_url character varying,
     is_private boolean DEFAULT false NOT NULL,
     created_by_id uuid NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: guest_group_subscriptions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.guest_group_subscriptions (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    group_id uuid NOT NULL,
+    phone_number character varying NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL
 );
@@ -734,6 +755,14 @@ ALTER TABLE ONLY public.groups
 
 
 --
+-- Name: guest_group_subscriptions guest_group_subscriptions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.guest_group_subscriptions
+    ADD CONSTRAINT guest_group_subscriptions_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: rsvps rsvps_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -951,6 +980,20 @@ CREATE INDEX index_groups_on_created_by_id ON public.groups USING btree (created
 --
 
 CREATE UNIQUE INDEX index_groups_on_slug ON public.groups USING btree (slug);
+
+
+--
+-- Name: index_guest_group_subscriptions_on_group_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_guest_group_subscriptions_on_group_id ON public.guest_group_subscriptions USING btree (group_id);
+
+
+--
+-- Name: index_guest_group_subscriptions_on_group_id_and_phone_number; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_guest_group_subscriptions_on_group_id_and_phone_number ON public.guest_group_subscriptions USING btree (group_id, phone_number);
 
 
 --
@@ -1330,6 +1373,14 @@ ALTER TABLE ONLY public.event_occurrences
 
 
 --
+-- Name: guest_group_subscriptions fk_rails_bae4b92246; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.guest_group_subscriptions
+    ADD CONSTRAINT fk_rails_bae4b92246 FOREIGN KEY (group_id) REFERENCES public.groups(id);
+
+
+--
 -- Name: solid_queue_scheduled_executions fk_rails_c4316f352d; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1352,6 +1403,7 @@ ALTER TABLE ONLY public.group_memberships
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260319000001'),
 ('20260314144445'),
 ('20260314120000'),
 ('20260310000001'),

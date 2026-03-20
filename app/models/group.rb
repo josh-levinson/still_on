@@ -3,6 +3,7 @@ class Group < ApplicationRecord
   has_many :group_memberships, dependent: :destroy
   has_many :members, through: :group_memberships, source: :user
   has_many :events, dependent: :destroy
+  has_many :guest_group_subscriptions, dependent: :destroy
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true

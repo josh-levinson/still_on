@@ -13,6 +13,7 @@ class GuestRsvpsController < ApplicationController
     if @existing_rsvp
       if @existing_rsvp.update(rsvp_params)
         save_phone_cookie(@existing_rsvp.guest_phone)
+        update_future_reminder_subscription(@existing_rsvp.guest_phone)
         redirect_to guest_rsvp_path(@token), notice: "RSVP updated!"
       else
         @rsvp = @existing_rsvp
@@ -30,6 +31,7 @@ class GuestRsvpsController < ApplicationController
 
     if @rsvp.save
       save_phone_cookie(@rsvp.guest_phone)
+      update_future_reminder_subscription(@rsvp.guest_phone)
       redirect_to guest_rsvp_path(@token), notice: rsvp_confirmation_message(@rsvp)
     else
       @cookie_phone = cookies[:guest_phone]
@@ -72,6 +74,17 @@ class GuestRsvpsController < ApplicationController
     permitted = params.require(:rsvp).permit(:status, :guest_count, :notes, :guest_name, :guest_phone)
     # Authenticated users don't need/use guest identity fields
     current_user ? permitted.except(:guest_name, :guest_phone) : permitted
+  end
+
+  def update_future_reminder_subscription(phone)
+    return if current_user
+    return if phone.blank?
+
+    if params[:send_future_reminders] == "1"
+      GuestGroupSubscription.subscribe(group: @group, phone_number: phone)
+    else
+      GuestGroupSubscription.unsubscribe(group: @group, phone_number: phone)
+    end
   end
 
   def rsvp_confirmation_message(rsvp)

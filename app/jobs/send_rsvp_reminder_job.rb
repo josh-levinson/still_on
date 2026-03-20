@@ -3,7 +3,7 @@ class SendRsvpReminderJob < ApplicationJob
 
   def perform(event_occurrence_id)
     occurrence = EventOccurrence
-      .includes(event: { group: { group_memberships: :user } }, rsvps: [])
+      .includes(event: { group: { group_memberships: :user, guest_group_subscriptions: [] } }, rsvps: [])
       .find(event_occurrence_id)
 
     return unless occurrence.status == "scheduled"
@@ -20,6 +20,15 @@ class SendRsvpReminderJob < ApplicationJob
       message += "\n\n#{occurrence.notes}" if occurrence.notes.present?
       SmsService.send_message(to: user.phone_number, body: message)
     end
+
+    unresvped_subscribers(occurrence).each do |phone|
+      next if SmsOptOut.opted_out?(phone)
+
+      url = rsvp_url_for(occurrence, phone: phone)
+      message = "Still on for #{event.title} on #{date_str}? RSVP here: #{url}"
+      message += "\n\n#{occurrence.notes}" if occurrence.notes.present?
+      SmsService.send_message(to: phone, body: message)
+    end
   end
 
   private
@@ -31,6 +40,14 @@ class SendRsvpReminderJob < ApplicationJob
       .includes(:user)
       .map(&:user)
       .select { |u| u.phone_number.present? && !rsvped_user_ids.include?(u.id) }
+  end
+
+  def unresvped_subscribers(occurrence)
+    rsvped_phones = occurrence.rsvps.pluck(:guest_phone).to_set
+
+    occurrence.event.group.guest_group_subscriptions
+      .pluck(:phone_number)
+      .reject { |phone| rsvped_phones.include?(phone) }
   end
 
   def rsvp_url_for(occurrence, phone: nil)

@@ -104,6 +104,15 @@
       <% unless current_user %>
         <% if @prefilled_phone.present? %>
           <%= f.hidden_field :guest_phone, value: @prefilled_phone %>
+          <div class="rsvp-field rsvp-future-reminders">
+            <label class="rsvp-checkbox-label">
+              <%= check_box_tag :send_future_reminders, "1",
+                    GuestGroupSubscription.exists?(group: @group, phone_number: @prefilled_phone),
+                    class: "rsvp-checkbox" %>
+              Text me a reminder to RSVP for future <%= @group.name %> events
+            </label>
+            <p class="rsvp-sms-consent">Msg &amp; data rates may apply. Reply STOP to opt out. <%= link_to "Privacy policy", privacy_path %>.</p>
+          </div>
         <% else %>
           <div class="rsvp-field rsvp-phone-opt-in">
             <label class="rsvp-label" for="rsvp_guest_phone">
@@ -117,6 +126,15 @@
                   autocomplete: "tel-national",
                   class: "rsvp-input" %>
             <p class="rsvp-sms-consent">We'll send you one SMS the morning of the event. Msg &amp; data rates may apply. Reply STOP to opt out. <%= link_to "Privacy policy", privacy_path %>.</p>
+          </div>
+          <% existing_phone = @rsvp.guest_phone || @cookie_phone %>
+          <div class="rsvp-field rsvp-future-reminders">
+            <label class="rsvp-checkbox-label">
+              <%= check_box_tag :send_future_reminders, "1",
+                    existing_phone.present? && GuestGroupSubscription.exists?(group: @group, phone_number: existing_phone),
+                    class: "rsvp-checkbox" %>
+              Text me a reminder to RSVP for future <%= @group.name %> events
+            </label>
           </div>
         <% end %>
       <% end %>
