@@ -53,7 +53,7 @@ Rails.application.routes.draw do
     collection do
       get :discover
     end
-    resource :membership, only: [ :create, :destroy ]
+    resource :membership, only: [ :create, :destroy ], controller: "group_memberships"
     resources :group_memberships, only: [], param: :user_id do
       member do
         post :promote

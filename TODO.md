@@ -28,10 +28,10 @@
 ### Controllers (high priority)
 - [x] `OnboardingController` — multi-step wizard: phone → OTP → hangout details → invite. Critical path, 0 tests.
 - [x] `SessionsController` — phone OTP sign-in/sign-out flow
-- [ ] `EventsController` — CRUD, authorization checks
+- [x] `EventsController` — CRUD, authorization checks
 - [x] `GroupsController` — CRUD, public/private authorization, discover page
-- [ ] `EventOccurrencesController` — CRUD, status changes
-- [ ] `GroupMembershipsController` — join/leave
+- [x] `EventOccurrencesController` — CRUD, status changes
+- [x] `GroupMembershipsController` — join/leave
 - [ ] `RsvpsController` — organizer-facing RSVP management
 - [ ] `TwilioWebhooksController` — SMS opt-out and status callbacks
 - [ ] `PagesController` / `PostsController` — dashboard and static pages
