@@ -2,7 +2,7 @@ require "test_helper"
 
 class ApplicationMailerTest < ActionMailer::TestCase
   test "has correct default from address" do
-    assert_equal "from@example.com", ApplicationMailer.default[:from]
+    assert_equal "StillOn <noreply@stillonapp.com>", ApplicationMailer.default[:from]
   end
 
   test "uses mailer layout" do

@@ -9,23 +9,28 @@ class SendCancellationNotificationJob < ApplicationJob
     event = occurrence.event
     date_str = occurrence.start_time.strftime("%A, %b %-d at %-I:%M %p")
     message = "#{event.title} on #{date_str} has been cancelled. Sorry for the inconvenience!"
+    subject = "#{event.title} has been cancelled"
 
-    attending_phones(occurrence).each do |phone|
-      next if SmsOptOut.opted_out?(phone)
-
-      SmsService.send_message(to: phone, body: message)
+    attending_recipients(occurrence).each do |recipient|
+      notify(phone: recipient[:phone], email: recipient[:email], subject: subject, body: message)
     end
   end
 
   private
 
-  def attending_phones(occurrence)
+  def attending_recipients(occurrence)
     occurrence.rsvps.where(status: %w[attending maybe]).includes(:user).filter_map do |rsvp|
-      phone = rsvp.user&.phone_number.presence || rsvp.guest_phone.presence
-      next unless phone.present?
-      next unless rsvp.user.nil? || rsvp.user.phone_verified_at.present?
+      if rsvp.user.present?
+        phone = rsvp.user.phone_verified_at.present? ? rsvp.user.phone_number.presence : nil
+        email = rsvp.user.email.presence
+      else
+        phone = rsvp.guest_phone.presence
+        email = rsvp.email.presence
+      end
 
-      phone
+      next if phone.blank? && email.blank?
+
+      { phone: phone, email: email }
     end
   end
 end

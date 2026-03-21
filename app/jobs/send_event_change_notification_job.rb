@@ -12,24 +12,36 @@ class SendEventChangeNotificationJob < ApplicationJob
     old_start_time = Time.parse(old_start_time_iso)
 
     message = build_message(event, occurrence, changed_fields, old_start_time, old_location)
+    subject = "#{event.title} has been updated"
 
-    attending_phones(occurrence).each do |phone|
-      next if SmsOptOut.opted_out?(phone)
-
-      rsvp_link = rsvp_url_for(occurrence, phone: phone)
-      SmsService.send_message(to: phone, body: "#{message} RSVP: #{rsvp_link}")
+    attending_recipients(occurrence).each do |recipient|
+      rsvp_link = rsvp_url_for(occurrence, phone: recipient[:phone])
+      notify(
+        phone: recipient[:phone],
+        email: recipient[:email],
+        subject: subject,
+        body: "#{message} RSVP: #{rsvp_link}"
+      )
     end
   end
 
   private
 
-  def attending_phones(occurrence)
+  def attending_recipients(occurrence)
     occurrence.rsvps.where(status: %w[attending maybe]).includes(:user).filter_map do |rsvp|
-      phone = rsvp.user&.phone_number.presence || rsvp.guest_phone.presence
-      next unless phone.present?
-      next unless rsvp.user.nil? || rsvp.user.phone_verified_at.present?
+      if rsvp.user.present?
+        next if rsvp.user.phone_verified_at.blank? && rsvp.user.email.blank?
 
-      phone
+        phone = rsvp.user.phone_verified_at.present? ? rsvp.user.phone_number.presence : nil
+        email = rsvp.user.email.presence
+      else
+        phone = rsvp.guest_phone.presence
+        email = rsvp.email.presence
+      end
+
+      next if phone.blank? && email.blank?
+
+      { phone: phone, email: email }
     end
   end
 

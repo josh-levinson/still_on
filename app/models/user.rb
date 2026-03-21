@@ -7,6 +7,8 @@ class User < ApplicationRecord
 
   validates :phone_number, uniqueness: true, allow_blank: true
   validates :username, uniqueness: true, allow_nil: true
+  validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true,
+                    uniqueness: { case_sensitive: false, allow_blank: true }
 
   after_update :claim_guest_rsvps, if: -> { saved_change_to_phone_number? && phone_number.present? }
 

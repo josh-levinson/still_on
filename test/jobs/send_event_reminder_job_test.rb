@@ -116,6 +116,18 @@ class SendEventReminderJobTest < ActiveSupport::TestCase
     assert_match "Bring a chair!", messages.first[:body]
   end
 
+  test "skips user RSVPs with no phone and no email" do
+    no_contact = create_user(phone_number: nil)
+    create_rsvp(@occurrence, user: no_contact, status: "attending")
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendEventReminderJob.perform_now(@occurrence.id)
+    end
+
+    assert_empty messages
+  end
+
   test "skips opted-out phone numbers" do
     create_rsvp(@occurrence, user: @user, status: "attending")
 

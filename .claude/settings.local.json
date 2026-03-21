@@ -35,7 +35,8 @@
       "Bash(for f:*)",
       "Bash(do echo:*)",
       "Read(//home/josh/code/still_on/**)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(ruby:*)"
     ]
   }
 }

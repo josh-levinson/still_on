@@ -71,9 +71,9 @@ class GuestRsvpsController < ApplicationController
   end
 
   def rsvp_params
-    permitted = params.require(:rsvp).permit(:status, :guest_count, :notes, :guest_name, :guest_phone)
+    permitted = params.require(:rsvp).permit(:status, :guest_count, :notes, :guest_name, :guest_phone, :email)
     # Authenticated users don't need/use guest identity fields
-    current_user ? permitted.except(:guest_name, :guest_phone) : permitted
+    current_user ? permitted.except(:guest_name, :guest_phone, :email) : permitted
   end
 
   def update_future_reminder_subscription(phone)

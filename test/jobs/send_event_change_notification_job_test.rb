@@ -184,6 +184,24 @@ class SendEventChangeNotificationJobTest < ActiveSupport::TestCase
     assert_match /location has changed/i, messages.first[:body]
   end
 
+  test "sends email to user with unverified phone but valid email" do
+    unverified = create_user(phone_number: "+15550003099", phone_verified_at: nil, email: "unverified@example.com")
+    create_rsvp(@occurrence, user: unverified, status: "attending")
+
+    sms_recipients = []
+    SmsService.stub(:send_message, ->(to:, body:) { sms_recipients << to }) do
+      SendEventChangeNotificationJob.perform_now(
+        @occurrence.id, [ "start_time" ], @old_start_time.iso8601, @old_location
+      )
+    end
+
+    assert_not_includes sms_recipients, "+15550003099"
+    email = ActionMailer::Base.deliveries.find { |m| m.to.include?("unverified@example.com") }
+    assert_not_nil email
+  ensure
+    ActionMailer::Base.deliveries.clear
+  end
+
   test "skips attending RSVPs with no phone at all" do
     create_rsvp(@occurrence, status: "attending")  # no user, no guest_phone
 

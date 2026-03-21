@@ -139,6 +139,22 @@
         <% end %>
       <% end %>
 
+      <%# Email — optional, for notification fallback when SMS is unavailable %>
+      <% unless current_user %>
+        <div class="rsvp-field rsvp-email-opt-in">
+          <label class="rsvp-label" for="rsvp_email">
+            Email for updates
+            <span class="rsvp-optional">(optional)</span>
+          </label>
+          <%= f.email_field :email,
+                value: @rsvp.email,
+                placeholder: "you@example.com",
+                autocomplete: "email",
+                class: "rsvp-input" %>
+          <p class="rsvp-sms-consent">Only used if we can't reach you by text.</p>
+        </div>
+      <% end %>
+
       <%= f.submit(@existing_rsvp ? "Update RSVP" : "RSVP", class: "rsvp-submit-btn") %>
     <% end %>
 
