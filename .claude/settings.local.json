@@ -25,7 +25,11 @@
       "Bash(ls:*)",
       "Bash(bundle exec:*)",
       "Bash(gem list:*)",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(RAILS_ENV=test bin/rails db:schema:load 2>&1 | tail -5)",
+      "Bash(RAILS_ENV=test bin/rails db:migrate:status 2>&1 | tail -10)"
     ]
   }
 }

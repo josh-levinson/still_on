@@ -60,7 +60,7 @@ class GroupsController < ApplicationController
   private
 
   def set_group
-    @group = Group.find_by!(slug: params[:id])
+    @group = Group.find_by!(slug: params[:slug])
   end
 
   def authorize_group_access
@@ -70,7 +70,7 @@ class GroupsController < ApplicationController
     if user_signed_in?
       redirect_to groups_path, alert: "This group is private."
     else
-      redirect_to new_user_session_path, alert: "Please sign in to view this group."
+      redirect_to sign_in_path, alert: "Please sign in to view this group."
     end
   end
 

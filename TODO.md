@@ -20,3 +20,31 @@
 - [ ] Co-organizer support — no way to add other organizers or transfer group ownership
 - [ ] Email fallback — if SMS fails to deliver there's no backup contact method
 - [ ] Occurrence notes in SMS reminders — `notes` field on EventOccurrence isn't included in reminder messages
+
+---
+
+## Test coverage
+
+### Controllers (high priority)
+- [x] `OnboardingController` — multi-step wizard: phone → OTP → hangout details → invite. Critical path, 0 tests.
+- [x] `SessionsController` — phone OTP sign-in/sign-out flow
+- [ ] `EventsController` — CRUD, authorization checks
+- [x] `GroupsController` — CRUD, public/private authorization, discover page
+- [ ] `EventOccurrencesController` — CRUD, status changes
+- [ ] `GroupMembershipsController` — join/leave
+- [ ] `RsvpsController` — organizer-facing RSVP management
+- [ ] `TwilioWebhooksController` — SMS opt-out and status callbacks
+- [ ] `PagesController` / `PostsController` — dashboard and static pages
+
+### Jobs (medium priority)
+- [ ] `SendCancellationNotificationJob`
+- [ ] `SendQuorumAlertJob`
+- [ ] `SendEventChangeNotificationJob`
+
+### Models (lower priority)
+- [ ] `GroupMembership`
+- [ ] `GuestGroupSubscription`
+- [ ] `SmsOptOut`
+
+### Services (lower priority)
+- [ ] `SmsService` — unit test directly instead of always stubbing

@@ -35,7 +35,7 @@ module ActiveSupport
 
     def create_group(user, attrs = {})
       Group.create!({
-        name: "Test Group",
+        name: "Test Group #{SecureRandom.hex(4)}",
         created_by: user,
         is_private: false
       }.merge(attrs))
@@ -66,6 +66,20 @@ module ActiveSupport
         guest_name: "Guest Person",
         guest_count: 0
       }.merge(attrs))
+    end
+  end
+end
+
+module ActiveSupport
+  class TestCase
+    # Swap in a memory cache store for the duration of the block, then restore.
+    # Useful for controller tests that exercise OTP flows (the test env uses null_store).
+    def with_memory_cache
+      original = Rails.cache
+      Rails.cache = ActiveSupport::Cache::MemoryStore.new
+      yield
+    ensure
+      Rails.cache = original
     end
   end
 end

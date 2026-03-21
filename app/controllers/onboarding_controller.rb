@@ -90,8 +90,8 @@ class OnboardingController < ApplicationController
   end
 
   def phone
-    redirect_to dashboard_path if current_user&.phone_verified_at.present?
-    redirect_to onboarding_splash_path unless session[:ob_occurrence_id]
+    return redirect_to dashboard_path if current_user&.phone_verified_at.present?
+    return redirect_to onboarding_splash_path unless session[:ob_occurrence_id]
     @step = 4
   end
 
