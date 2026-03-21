@@ -4,7 +4,7 @@
 
 - [ ] **Timezone support** — `start_time`/`end_time` stored in server timezone with no per-group or per-user timezone. Ambiguous times will confuse real users immediately. Store a timezone on Group (or Event), display and accept times in that zone, and include timezone in SMS/email notifications.
 - [ ] **Manual "Still on?" trigger** — Organizers can't manually send a reminder outside the automated 2-day-before schedule. Add a "Send reminder" button on the occurrence show page that fires `SendRsvpReminderJob` on demand.
-- [ ] **Guest RSVP re-access** — If a guest loses the SMS link and wants to change their response, they have no way to retrieve it. Add a "resend my link" flow (enter phone → receive new SMS with token) or a "look up RSVP by phone" page.
+- [x] **Guest RSVP re-access** — If a guest loses the SMS link and wants to change their response, they have no way to retrieve it. Add a "resend my link" flow (enter phone → receive new SMS with token) or a "look up RSVP by phone" page.
 - [ ] **Max attendees enforcement** — `EventOccurrence#full?` exists but the RSVP controllers don't check it. A 10-person cap currently does nothing.
 
 - [x] **Returning user sign-in** — `/sign_in` flow in `SessionsController`: phone → OTP → `find_by(phone_number:)` → groups dashboard. Splash and navbar links updated.

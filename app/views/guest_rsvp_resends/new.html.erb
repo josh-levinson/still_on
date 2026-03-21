@@ -1,0 +1,35 @@
+<% content_for :title, "Get your RSVP link" %>
+
+<div class="rsvp-page">
+  <div class="rsvp-shell">
+
+    <div class="rsvp-event-header">
+      <div class="rsvp-fire"></div>
+      <h1 class="rsvp-event-title">Get your RSVP link</h1>
+      <p class="rsvp-group-name">Enter the phone number you used to RSVP and we'll text you your links.</p>
+    </div>
+
+    <% if notice.present? %>
+      <div class="rsvp-notice"><%= notice %></div>
+    <% end %>
+
+    <%= form_with url: guest_rsvp_resend_path, method: :post, local: true,
+          class: "rsvp-form", data: { controller: "phone-input" } do |f| %>
+      <div class="rsvp-field">
+        <label class="rsvp-label" for="phone">Your phone number</label>
+        <%= telephone_field_tag :phone,
+              nil,
+              placeholder: "(555) 000-0000",
+              inputmode: "tel",
+              autocomplete: "tel-national",
+              class: "rsvp-input",
+              required: true,
+              autofocus: true,
+              data: { action: "input->phone-input#format", phone_input_target: "display" } %>
+      </div>
+
+      <%= submit_tag "Text me my links \u2192", class: "rsvp-submit-btn" %>
+    <% end %>
+
+  </div>
+</div>

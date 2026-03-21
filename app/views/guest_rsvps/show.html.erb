@@ -176,5 +176,10 @@
       </div>
     <% end %>
 
+    <%# ── Resend link ── %>
+    <p class="rsvp-resend-prompt">
+      Lost your link? <%= link_to "Get it texted to you again \u2192", new_guest_rsvp_resend_path, class: "rsvp-resend-link" %>
+    </p>
+
   </div>
 </div>
