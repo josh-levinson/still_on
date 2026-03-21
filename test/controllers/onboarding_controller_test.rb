@@ -127,7 +127,7 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
   # ---- POST /onboarding/cadence ----
 
   test "submit_cadence creates user, group, event, and occurrence" do
-    assert_difference ["User.count", "Group.count", "Event.count", "EventOccurrence.count"], 1 do
+    assert_difference [ "User.count", "Group.count", "Event.count", "EventOccurrence.count" ], 1 do
       complete_cadence_step
     end
   end
