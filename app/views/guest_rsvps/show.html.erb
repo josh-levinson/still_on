@@ -14,6 +14,7 @@
         <span class="rsvp-time">
           <%= @event_occurrence.start_time.strftime("%-l:%M %p") %> &ndash;
           <%= @event_occurrence.end_time.strftime("%-l:%M %p") %>
+          <%= @event_occurrence.start_time.zone %>
         </span>
       </div>
       <% if @event_occurrence.location.present? %>

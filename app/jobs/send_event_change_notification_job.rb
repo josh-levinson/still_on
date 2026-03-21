@@ -3,7 +3,7 @@ class SendEventChangeNotificationJob < ApplicationJob
 
   def perform(event_occurrence_id, changed_fields, old_start_time_iso, old_location)
     occurrence = EventOccurrence
-      .includes(event: [], rsvps: :user)
+      .includes(event: :group, rsvps: :user)
       .find(event_occurrence_id)
 
     return unless occurrence.status == "scheduled"
@@ -47,10 +47,13 @@ class SendEventChangeNotificationJob < ApplicationJob
 
   def build_message(event, occurrence, changed_fields, old_start_time, old_location)
     parts = []
+    tz = occurrence.event.group.time_zone
 
     if changed_fields.include?("start_time")
-      old_date_str = old_start_time.strftime("%A, %b %-d at %-I:%M %p")
-      new_date_str = occurrence.start_time.strftime("%A, %b %-d at %-I:%M %p")
+      old_local = old_start_time.in_time_zone(tz)
+      new_local = occurrence.start_time.in_time_zone(tz)
+      old_date_str = "#{old_local.strftime("%A, %b %-d at %-I:%M %p")} #{old_local.zone}"
+      new_date_str = "#{new_local.strftime("%A, %b %-d at %-I:%M %p")} #{new_local.zone}"
       parts << "#{event.title} on #{old_date_str} has moved to #{new_date_str}."
     end
 

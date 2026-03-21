@@ -2,6 +2,11 @@
 
 ## High priority
 
+- [ ] **Timezone support** — `start_time`/`end_time` stored in server timezone with no per-group or per-user timezone. Ambiguous times will confuse real users immediately. Store a timezone on Group (or Event), display and accept times in that zone, and include timezone in SMS/email notifications.
+- [ ] **Manual "Still on?" trigger** — Organizers can't manually send a reminder outside the automated 2-day-before schedule. Add a "Send reminder" button on the occurrence show page that fires `SendRsvpReminderJob` on demand.
+- [ ] **Guest RSVP re-access** — If a guest loses the SMS link and wants to change their response, they have no way to retrieve it. Add a "resend my link" flow (enter phone → receive new SMS with token) or a "look up RSVP by phone" page.
+- [ ] **Max attendees enforcement** — `EventOccurrence#full?` exists but the RSVP controllers don't check it. A 10-person cap currently does nothing.
+
 - [x] **Returning user sign-in** — `/sign_in` flow in `SessionsController`: phone → OTP → `find_by(phone_number:)` → groups dashboard. Splash and navbar links updated.
 - [x] **Dashboard route** — `PostsController#index` has a working query for upcoming activity across groups but no route. Wire up `/dashboard` or `/` (for signed-in users) to this view.
 - [x] **Group membership** — No join/leave actions for non-organizer users. Need a way for people to become members of a group (separate from RSVPing to a specific event).
@@ -16,6 +21,8 @@
 - [x] **Event change notifications** — If an organizer edits the time or location of an occurrence, attending/maybe guests should receive an SMS update.
 
 ## Lower priority
+
+- [ ] **Avatar/photo upload** — `avatar_url` fields exist on User and Group but there's no upload mechanism. Currently the field is unused.
 
 - [x] Co-organizer support — promote/demote members to co-organizer via group members section
 - [x] Email fallback — if SMS fails to deliver there's no backup contact method

@@ -10,7 +10,8 @@ class SendRsvpReminderJob < ApplicationJob
     return if occurrence.start_time <= Time.current
 
     event = occurrence.event
-    date_str = occurrence.start_time.strftime("%A, %B %-d")
+    group = event.group
+    date_str = occurrence.start_time.in_time_zone(group.time_zone).strftime("%A, %B %-d")
 
     unresvped_members(occurrence).each do |user|
       url = rsvp_url_for(occurrence, phone: user.phone_number)

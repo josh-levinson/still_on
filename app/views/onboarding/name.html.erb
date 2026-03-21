@@ -10,6 +10,15 @@
   <% end %>
 
   <%= form_with url: onboarding_submit_name_path, method: :post, class: "onboarding-form" do |f| %>
+    <input type="hidden" name="time_zone" id="ob_time_zone" value="UTC">
+    <script>
+      (function() {
+        try {
+          document.getElementById("ob_time_zone").value =
+            Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+        } catch(e) {}
+      })();
+    </script>
     <div class="form-group">
       <%= f.label :first_name, "Your first name" %>
       <%= f.text_field :first_name,

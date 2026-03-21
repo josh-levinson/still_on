@@ -3,7 +3,7 @@ class SendQuorumAlertJob < ApplicationJob
 
   def perform(event_occurrence_id)
     occurrence = EventOccurrence
-      .includes(event: :created_by, rsvps: :user)
+      .includes(event: [ :created_by, :group ], rsvps: :user)
       .find(event_occurrence_id)
 
     event = occurrence.event
@@ -12,7 +12,8 @@ class SendQuorumAlertJob < ApplicationJob
     return unless occurrence.status == "scheduled"
     return if occurrence.attending_count >= event.quorum
 
-    date_str = occurrence.start_time.strftime("%A, %b %-d at %-I:%M %p")
+    local_time = occurrence.start_time.in_time_zone(event.group.time_zone)
+    date_str = "#{local_time.strftime("%A, %b %-d at %-I:%M %p")} #{local_time.zone}"
     count = occurrence.attending_count
 
     send_organizer_alert(event, date_str, count)

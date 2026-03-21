@@ -3,14 +3,15 @@ class SendEventReminderJob < ApplicationJob
 
   def perform(event_occurrence_id)
     occurrence = EventOccurrence
-      .includes(event: [], rsvps: :user)
+      .includes(event: :group, rsvps: :user)
       .find(event_occurrence_id)
 
     return unless occurrence.status == "scheduled"
     return if occurrence.start_time <= Time.current
 
     event = occurrence.event
-    time_str = occurrence.start_time.strftime("%-I:%M %p")
+    local_time = occurrence.start_time.in_time_zone(event.group.time_zone)
+    time_str = "#{local_time.strftime("%-I:%M %p")} #{local_time.zone}"
     location = occurrence.location.presence || event.location.presence
     message = build_message(event.title, time_str, location)
     message += "\n\n#{occurrence.notes}" if occurrence.notes.present?

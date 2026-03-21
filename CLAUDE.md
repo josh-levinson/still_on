@@ -116,6 +116,7 @@ Groups have an `is_private` flag. Public groups are browsable via `/groups/disco
 - Uses standard Rails minitest
 - Tests run in parallel (`:number_of_processors`)
 - System tests available via Capybara + Selenium
+- To find uncovered lines/branches after a test run, read `coverage/.resultset.json` — do not try to parse `coverage/index.html`
 
 ---
 

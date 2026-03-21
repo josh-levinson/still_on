@@ -24,6 +24,7 @@ class OnboardingController < ApplicationController
 
     session[:ob_first_name]   = first_name
     session[:ob_hangout_name] = hangout_name
+    session[:ob_time_zone]    = rails_zone_from_iana(params[:time_zone])
     redirect_to onboarding_date_path
   end
 
@@ -175,6 +176,11 @@ class OnboardingController < ApplicationController
 
   private
 
+  def rails_zone_from_iana(iana_name)
+    return "UTC" if iana_name.blank?
+    ActiveSupport::TimeZone::MAPPING.key(iana_name) || "UTC"
+  end
+
   def nth_weekday_n(date)
     ((date.day - 1) / 7) + 1
   end
@@ -189,7 +195,8 @@ class OnboardingController < ApplicationController
     hangout_name = session[:ob_hangout_name]
     date         = Date.parse(session[:ob_date])
     cadence      = session[:ob_cadence]
-    start_time   = date.to_time.change(hour: 19)
+    time_zone    = session[:ob_time_zone].presence || "UTC"
+    start_time   = Time.use_zone(time_zone) { Time.zone.local(date.year, date.month, date.day, 19, 0, 0) }
     end_time     = start_time + 2.hours
 
     slug = hangout_name.parameterize.presence || "hangout"
@@ -201,7 +208,8 @@ class OnboardingController < ApplicationController
       name:       hangout_name,
       slug:       slug,
       is_private: false,
-      created_by: user
+      created_by: user,
+      time_zone:  time_zone
     )
 
     GroupMembership.create!(group: group, user: user)

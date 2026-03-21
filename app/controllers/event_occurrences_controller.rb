@@ -1,6 +1,7 @@
 class EventOccurrencesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_group
+  around_action :use_group_timezone
   before_action :set_event
   before_action :set_event_occurrence, only: [ :show, :edit, :update, :destroy, :cancel ]
   before_action :authorize_occurrence_admin, only: [ :edit, :update, :destroy, :cancel ]
@@ -104,5 +105,9 @@ class EventOccurrencesController < ApplicationController
     params.require(:event_occurrence).permit(
       :start_time, :end_time, :location, :status, :max_attendees, :notes
     )
+  end
+
+  def use_group_timezone
+    Time.use_zone(@group.time_zone) { yield }
   end
 end

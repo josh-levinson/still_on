@@ -64,6 +64,18 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
     assert_match /fill in both/i, flash[:error]
   end
 
+  test "submit_name with known IANA timezone stores matching Rails zone in session" do
+    post onboarding_submit_name_path, params: { first_name: "Alex", hangout_name: "Drinks", time_zone: "America/New_York" }
+    assert_redirected_to onboarding_date_path
+    assert_equal "Eastern Time (US & Canada)", session[:ob_time_zone]
+  end
+
+  test "submit_name with unknown IANA timezone falls back to UTC" do
+    post onboarding_submit_name_path, params: { first_name: "Alex", hangout_name: "Drinks", time_zone: "Unknown/Zone" }
+    assert_redirected_to onboarding_date_path
+    assert_equal "UTC", session[:ob_time_zone]
+  end
+
   # ---- GET /onboarding/date ----
 
   test "date_step renders step 2" do

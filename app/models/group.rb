@@ -8,6 +8,7 @@ class Group < ApplicationRecord
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
   validates :is_private, inclusion: { in: [ true, false ] }
+  validates :time_zone, inclusion: { in: ActiveSupport::TimeZone.all.map(&:name) }
 
   scope :public_groups, -> { where(is_private: false) }
 

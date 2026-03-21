@@ -3,11 +3,12 @@ class SendCancellationNotificationJob < ApplicationJob
 
   def perform(event_occurrence_id)
     occurrence = EventOccurrence
-      .includes(event: [], rsvps: :user)
+      .includes(event: :group, rsvps: :user)
       .find(event_occurrence_id)
 
     event = occurrence.event
-    date_str = occurrence.start_time.strftime("%A, %b %-d at %-I:%M %p")
+    local_time = occurrence.start_time.in_time_zone(event.group.time_zone)
+    date_str = "#{local_time.strftime("%A, %b %-d at %-I:%M %p")} #{local_time.zone}"
     message = "#{event.title} on #{date_str} has been cancelled. Sorry for the inconvenience!"
     subject = "#{event.title} has been cancelled"
 

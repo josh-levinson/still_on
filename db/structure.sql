@@ -106,7 +106,8 @@ CREATE TABLE public.groups (
     is_private boolean DEFAULT false NOT NULL,
     created_by_id uuid NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    time_zone character varying DEFAULT 'UTC'::character varying NOT NULL
 );
 
 
@@ -1395,6 +1396,7 @@ ALTER TABLE ONLY public.group_memberships
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260321153745'),
 ('20260319000001'),
 ('20260314144445'),
 ('20260314120000'),

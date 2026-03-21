@@ -1,5 +1,6 @@
 class GuestRsvpsController < ApplicationController
   before_action :load_occurrence_from_token
+  around_action :use_group_timezone
 
   def show
     @existing_rsvp = find_existing_rsvp
@@ -85,6 +86,10 @@ class GuestRsvpsController < ApplicationController
     else
       GuestGroupSubscription.unsubscribe(group: @group, phone_number: phone)
     end
+  end
+
+  def use_group_timezone
+    Time.use_zone(@group.time_zone) { yield }
   end
 
   def rsvp_confirmation_message(rsvp)

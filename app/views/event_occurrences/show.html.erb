@@ -10,7 +10,7 @@
     <h1><%= @event.title %></h1>
     <div class="occurrence-time">
       <h2><%= @event_occurrence.start_time.strftime("%A, %B %d, %Y") %></h2>
-      <p><%= @event_occurrence.start_time.strftime("%l:%M %p") %> - <%= @event_occurrence.end_time.strftime("%l:%M %p") %></p>
+      <p><%= @event_occurrence.start_time.strftime("%l:%M %p") %> - <%= @event_occurrence.end_time.strftime("%l:%M %p") %> <%= @event_occurrence.start_time.zone %></p>
     </div>
     <% if @event_occurrence.location.present? %>
       <div class="occurrence-location">
