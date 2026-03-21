@@ -29,7 +29,8 @@
       "Bash(find:*)",
       "Bash(wc:*)",
       "Bash(RAILS_ENV=test bin/rails db:schema:load 2>&1 | tail -5)",
-      "Bash(RAILS_ENV=test bin/rails db:migrate:status 2>&1 | tail -10)"
+      "Bash(RAILS_ENV=test bin/rails db:migrate:status 2>&1 | tail -10)",
+      "Bash(grep:*)"
     ]
   }
 }

@@ -32,7 +32,7 @@
 - [x] `GroupsController` — CRUD, public/private authorization, discover page
 - [x] `EventOccurrencesController` — CRUD, status changes
 - [x] `GroupMembershipsController` — join/leave
-- [ ] `RsvpsController` — organizer-facing RSVP management
+- [x] `RsvpsController` — organizer-facing RSVP management
 - [ ] `TwilioWebhooksController` — SMS opt-out and status callbacks
 - [ ] `PagesController` / `PostsController` — dashboard and static pages
 
