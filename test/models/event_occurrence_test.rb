@@ -104,6 +104,37 @@ class EventOccurrenceTest < ActiveSupport::TestCase
     assert_equal 0, @occurrence.attending_count
   end
 
+  # --- maybe_count / declined_count / responded_count / no_response_count ---
+
+  test "maybe_count returns count of maybe RSVPs" do
+    create_rsvp(@occurrence, guest_name: "A", status: "maybe")
+    create_rsvp(@occurrence, guest_name: "B", status: "maybe")
+    create_rsvp(@occurrence, guest_name: "C", status: "attending")
+    assert_equal 2, @occurrence.maybe_count
+  end
+
+  test "declined_count returns count of declined RSVPs" do
+    create_rsvp(@occurrence, guest_name: "A", status: "declined")
+    create_rsvp(@occurrence, guest_name: "B", status: "attending")
+    assert_equal 1, @occurrence.declined_count
+  end
+
+  test "responded_count returns total RSVP count" do
+    create_rsvp(@occurrence, guest_name: "A", status: "attending")
+    create_rsvp(@occurrence, guest_name: "B", status: "declined")
+    assert_equal 2, @occurrence.responded_count
+  end
+
+  test "no_response_count returns member_count minus responded" do
+    create_rsvp(@occurrence, guest_name: "A", status: "attending")
+    assert_equal 4, @occurrence.no_response_count(5)
+  end
+
+  test "no_response_count returns 0 when responded exceeds member_count" do
+    3.times { |i| create_rsvp(@occurrence, guest_name: "Person #{i}", status: "attending") }
+    assert_equal 0, @occurrence.no_response_count(2)
+  end
+
   # --- full? ---
 
   test "full? returns false when no max_attendees set" do

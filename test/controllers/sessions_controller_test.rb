@@ -103,6 +103,20 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_match /didn't match/i, flash[:error]
   end
 
+  test "submit_verify with correct code but user deleted between steps renders verify with error" do
+    otp = "123456"
+    with_memory_cache do
+      SmsService.stub(:send_message, true) do
+        post sign_in_submit_phone_path, params: { phone: @phone }
+      end
+      Rails.cache.write("otp:#{@phone}", otp, expires_in: 10.minutes)
+      @user.destroy
+      post sign_in_submit_verify_path, params: { code: otp }
+    end
+    assert_response :unprocessable_entity
+    assert_match /no account found/i, flash[:error]
+  end
+
   test "submit_verify with expired OTP re-renders verify" do
     with_memory_cache do
       SmsService.stub(:send_message, true) do

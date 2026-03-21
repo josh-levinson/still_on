@@ -74,6 +74,68 @@ class SendRsvpReminderJobTest < ActiveSupport::TestCase
     assert_empty messages
   end
 
+  test "skips opted-out members" do
+    SmsOptOut.opt_out!(@user.phone_number)
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendRsvpReminderJob.perform_now(@occurrence.id)
+    end
+
+    assert_empty messages
+  end
+
+  test "appends occurrence notes to SMS body for members" do
+    @occurrence.update!(notes: "Bring a coat")
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendRsvpReminderJob.perform_now(@occurrence.id)
+    end
+
+    assert_match "Bring a coat", messages.first[:body]
+  end
+
+  test "sends to unresvped guest subscribers" do
+    GuestGroupSubscription.create!(group: @group, phone_number: "+15550099001")
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendRsvpReminderJob.perform_now(@occurrence.id)
+    end
+
+    phones = messages.map { |m| m[:to] }
+    assert_includes phones, "+15550099001"
+  end
+
+  test "skips opted-out subscribers" do
+    GuestGroupSubscription.create!(group: @group, phone_number: "+15550099002")
+    SmsOptOut.opt_out!("+15550099002")
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendRsvpReminderJob.perform_now(@occurrence.id)
+    end
+
+    phones = messages.map { |m| m[:to] }
+    assert_not_includes phones, "+15550099002"
+  end
+
+  test "appends occurrence notes to SMS body for subscribers" do
+    @occurrence.update!(notes: "Bring snacks")
+    GuestGroupSubscription.create!(group: @group, phone_number: "+15550099003")
+    SmsOptOut.opt_out!(@user.phone_number)  # silence member so only subscriber message remains
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendRsvpReminderJob.perform_now(@occurrence.id)
+    end
+
+    subscriber_msg = messages.find { |m| m[:to] == "+15550099003" }
+    assert_not_nil subscriber_msg
+    assert_match "Bring snacks", subscriber_msg[:body]
+  end
+
   test "sends to multiple unresponded members" do
     second_user = create_user(phone_number: "+15550000002", phone_verified_at: Time.current)
     GroupMembership.create!(group: @group, user: second_user)

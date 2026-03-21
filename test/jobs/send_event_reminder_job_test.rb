@@ -103,4 +103,29 @@ class SendEventReminderJobTest < ActiveSupport::TestCase
 
     assert_empty messages
   end
+
+  test "appends notes to message when occurrence has notes" do
+    @occurrence.update!(notes: "Bring a chair!")
+    create_rsvp(@occurrence, user: @user, status: "attending")
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendEventReminderJob.perform_now(@occurrence.id)
+    end
+
+    assert_match "Bring a chair!", messages.first[:body]
+  end
+
+  test "skips opted-out phone numbers" do
+    create_rsvp(@occurrence, user: @user, status: "attending")
+
+    messages = []
+    SmsOptOut.stub(:opted_out?, ->(_phone) { true }) do
+      SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+        SendEventReminderJob.perform_now(@occurrence.id)
+      end
+    end
+
+    assert_empty messages
+  end
 end

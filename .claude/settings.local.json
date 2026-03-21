@@ -30,7 +30,12 @@
       "Bash(wc:*)",
       "Bash(RAILS_ENV=test bin/rails db:schema:load 2>&1 | tail -5)",
       "Bash(RAILS_ENV=test bin/rails db:migrate:status 2>&1 | tail -10)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(python3:*)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Read(//home/josh/code/still_on/**)",
+      "Bash(done)"
     ]
   }
 }

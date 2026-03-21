@@ -26,6 +26,7 @@
 ## Test coverage
 
 ### Controllers (high priority)
+
 - [x] `OnboardingController` — multi-step wizard: phone → OTP → hangout details → invite. Critical path, 0 tests.
 - [x] `SessionsController` — phone OTP sign-in/sign-out flow
 - [x] `EventsController` — CRUD, authorization checks
@@ -33,18 +34,21 @@
 - [x] `EventOccurrencesController` — CRUD, status changes
 - [x] `GroupMembershipsController` — join/leave
 - [x] `RsvpsController` — organizer-facing RSVP management
-- [ ] `TwilioWebhooksController` — SMS opt-out and status callbacks
-- [ ] `PagesController` / `PostsController` — dashboard and static pages
+- [x] `TwilioWebhooksController` — SMS opt-out and status callbacks
+- [x] `PagesController` / `PostsController` — dashboard and static pages
 
 ### Jobs (medium priority)
-- [ ] `SendCancellationNotificationJob`
-- [ ] `SendQuorumAlertJob`
-- [ ] `SendEventChangeNotificationJob`
+
+- [x] `SendCancellationNotificationJob`
+- [x] `SendQuorumAlertJob`
+- [x] `SendEventChangeNotificationJob`
 
 ### Models (lower priority)
-- [ ] `GroupMembership`
-- [ ] `GuestGroupSubscription`
-- [ ] `SmsOptOut`
+
+- [x] `GroupMembership`
+- [x] `GuestGroupSubscription`
+- [x] `SmsOptOut`
 
 ### Services (lower priority)
+
 - [ ] `SmsService` — unit test directly instead of always stubbing

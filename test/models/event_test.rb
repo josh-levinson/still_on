@@ -77,6 +77,66 @@ class EventTest < ActiveSupport::TestCase
 
   # --- associations ---
 
+  # --- build_schedule / schedule= / next_occurrences ---
+
+  test "build_schedule with daily recurrence sets a daily rule" do
+    event = create_event(@group, @user, recurrence_type: "daily")
+    event.build_schedule(1.week.from_now)
+    event.save!
+    assert_not_nil event.schedule
+    assert event.schedule.recurrence_rules.any?
+  end
+
+  test "build_schedule with monthly and day_of_month option" do
+    event = create_event(@group, @user, recurrence_type: "monthly")
+    event.build_schedule(1.week.from_now, day_of_month: 15)
+    event.save!
+    assert_not_nil event.schedule
+    assert event.schedule.recurrence_rules.any?
+  end
+
+  test "next_occurrences returns upcoming times" do
+    event = create_event(@group, @user, recurrence_type: "weekly")
+    event.build_schedule(1.week.from_now)
+    event.save!
+    occurrences = event.next_occurrences(3)
+    assert_equal 3, occurrences.length
+  end
+
+  test "schedule= setter serializes the IceCube schedule to recurrence_rule" do
+    event = create_event(@group, @user, recurrence_type: "weekly")
+    s = IceCube::Schedule.new(1.week.from_now)
+    s.add_recurrence_rule(IceCube::Rule.weekly)
+    event.schedule = s
+    assert_not_nil event.recurrence_rule
+    assert JSON.parse(event.recurrence_rule).present?
+  end
+
+  test "schedule= with nil clears recurrence_rule" do
+    event = create_event(@group, @user, recurrence_type: "weekly")
+    event.schedule = nil
+    assert_nil event.recurrence_rule
+  end
+
+  test "next_occurrences returns empty array when event has no schedule" do
+    event = create_event(@group, @user, recurrence_type: "none")
+    assert_equal [], event.next_occurrences(3)
+  end
+
+  test "build_schedule with monthly and nth_weekday option" do
+    event = create_event(@group, @user, recurrence_type: "monthly")
+    event.build_schedule(1.week.from_now, nth_weekday: { day: :thursday, n: 3 })
+    event.save!
+    assert_not_nil event.schedule
+    assert event.schedule.recurrence_rules.any?
+  end
+
+  test "build_schedule with none recurrence_type does not add a rule" do
+    event = create_event(@group, @user, recurrence_type: "none")
+    s = event.build_schedule(1.week.from_now)
+    assert_empty s.recurrence_rules
+  end
+
   test "destroying event destroys its occurrences" do
     event = create_event(@group, @user)
     create_occurrence(event)

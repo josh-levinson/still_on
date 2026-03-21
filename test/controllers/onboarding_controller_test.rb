@@ -96,11 +96,30 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
     assert_match /valid future date/i, flash[:error]
   end
 
+  test "date_step on a Friday assigns the following Friday as this_friday" do
+    travel_to Time.zone.local(2026, 3, 20, 12, 0, 0) do  # 2026-03-20 is a Friday
+      get onboarding_date_path
+      assert_response :success
+    end
+  end
+
+  test "submit_date on a Friday still re-renders with error for past date" do
+    travel_to Time.zone.local(2026, 3, 20, 12, 0, 0) do  # 2026-03-20 is a Friday
+      post onboarding_submit_date_path, params: { date: "2020-01-01" }
+      assert_response :unprocessable_entity
+    end
+  end
+
   # ---- GET /onboarding/cadence ----
 
   test "cadence renders step 3" do
     post onboarding_submit_name_path, params: { first_name: "Alex", hangout_name: "Friday Night" }
     post onboarding_submit_date_path, params: { date: 1.week.from_now.to_date.to_s }
+    get onboarding_cadence_path
+    assert_response :success
+  end
+
+  test "cadence renders even when ob_date not in session" do
     get onboarding_cadence_path
     assert_response :success
   end
@@ -130,6 +149,17 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
     assert_difference "EventOccurrence.count", 1 do
       complete_cadence_step(cadence: "none")
     end
+  end
+
+  test "submit_cadence generates unique slug when hangout name collides with existing group" do
+    Group.create!(name: "Existing", slug: "friday-night", created_by: create_user, is_private: false)
+
+    assert_difference [ "User.count", "Group.count" ], 1 do
+      complete_cadence_step
+    end
+
+    new_group = Group.order(:created_at).last
+    assert_match(/\Afriday-night-.+\z/, new_group.slug)
   end
 
   test "submit_cadence with monthly cadence creates occurrence" do
@@ -289,5 +319,18 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
   test "invite redirects to splash when no occurrence_id in session" do
     get onboarding_invite_path
     assert_redirected_to onboarding_splash_path
+  end
+
+  # ---- submit_verify when no current_user (false branch of if current_user) ----
+
+  test "submit_verify redirects to invite when no current user and OTP is correct" do
+    with_memory_cache do
+      SmsService.stub(:send_message, true) do
+        post onboarding_submit_phone_path, params: { phone: "5559876543" }
+      end
+      Rails.cache.write("otp:5559876543", "111222", expires_in: 10.minutes)
+      post onboarding_submit_verify_path, params: { code: "111222" }
+    end
+    assert_redirected_to onboarding_invite_path
   end
 end

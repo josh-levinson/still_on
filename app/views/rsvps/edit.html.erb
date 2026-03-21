@@ -1,0 +1,16 @@
+<div class="rsvp-edit">
+  <h2>Edit RSVP</h2>
+  <%= form_with model: [@event_occurrence, @rsvp], url: event_occurrence_rsvp_path(@event_occurrence, @rsvp), method: :patch do |f| %>
+    <% if @rsvp.errors.any? %>
+      <div class="errors">
+        <% @rsvp.errors.full_messages.each do |msg| %>
+          <p><%= msg %></p>
+        <% end %>
+      </div>
+    <% end %>
+    <div>
+      <%= f.select :status, %w[attending maybe declined] %>
+    </div>
+    <%= f.submit "Update RSVP" %>
+  <% end %>
+</div>

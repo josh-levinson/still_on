@@ -50,6 +50,18 @@ class GenerateRecurringOccurrencesJobTest < ActiveSupport::TestCase
     end
   end
 
+  test "skips events with no occurrences in the lookahead window" do
+    # Schedule starts 60 days out — beyond the 30-day lookahead
+    event = create_event(@group, @user, recurrence_type: "weekly")
+    start_time = 60.days.from_now.change(hour: 19, min: 0, sec: 0)
+    event.build_schedule(start_time)
+    event.save!
+
+    assert_no_difference "EventOccurrence.count" do
+      GenerateRecurringOccurrencesJob.perform_now
+    end
+  end
+
   test "skips events without a recurrence_rule" do
     event = create_event(@group, @user, recurrence_type: "weekly")
     # no build_schedule call — recurrence_rule is blank

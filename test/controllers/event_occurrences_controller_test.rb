@@ -166,6 +166,25 @@ class EventOccurrencesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "update enqueues change notification job when start_time changes" do
+    sign_in(@organizer)
+    new_start = 3.weeks.from_now
+    assert_enqueued_with(job: SendEventChangeNotificationJob) do
+      patch group_event_event_occurrence_path(@group, @event, @occurrence),
+        params: { event_occurrence: { start_time: new_start.iso8601, end_time: (new_start + 2.hours).iso8601 } }
+    end
+  end
+
+  test "update does not enqueue any notification when occurrence was already cancelled" do
+    @occurrence.update!(status: "cancelled")
+    sign_in(@organizer)
+    assert_no_enqueued_jobs only: [ SendCancellationNotificationJob, SendEventChangeNotificationJob ] do
+      patch group_event_event_occurrence_path(@group, @event, @occurrence),
+        params: { event_occurrence: { notes: "Updated note" } }
+    end
+    assert_redirected_to group_event_event_occurrence_path(@group, @event, @occurrence)
+  end
+
   # ---- PATCH /groups/:group_slug/events/:event_id/event_occurrences/:id/cancel ----
 
   test "cancel requires sign-in" do

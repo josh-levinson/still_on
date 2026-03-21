@@ -64,6 +64,12 @@ class RsvpsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "maybe", @rsvp.reload.status
   end
 
+  test "update re-renders edit with unprocessable_entity on invalid params" do
+    sign_in(@organizer)
+    patch event_occurrence_rsvp_path(@occurrence, @rsvp), params: { rsvp: { status: "bad_status" } }
+    assert_response :unprocessable_entity
+  end
+
   test "update is forbidden for a non-owner" do
     sign_in(@other)
     patch event_occurrence_rsvp_path(@occurrence, @rsvp), params: { rsvp: { status: "maybe" } }

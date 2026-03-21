@@ -153,6 +153,40 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "attending", existing.reload.status
   end
 
+  # --- send_future_reminders subscription ---
+
+  test "create with send_future_reminders subscribes the guest to future reminders" do
+    assert_difference "GuestGroupSubscription.count", 1 do
+      post guest_rsvp_path(@phone_token), params: {
+        rsvp: { status: "attending", guest_name: "Sub Guest", guest_phone: "+15550001234", guest_count: 0 },
+        send_future_reminders: "1"
+      }
+    end
+  end
+
+  # --- cookie fallback in find_existing_rsvp ---
+
+  test "show uses cookie phone to find existing RSVP when token has no phone" do
+    # Create RSVP with the phone that will end up in cookie
+    Rsvp.create!(event_occurrence: @occurrence, guest_name: "Cookie Person",
+                 guest_phone: "+15550001234", status: "attending", guest_count: 0)
+    # POST with phone_token sets the guest_phone cookie
+    post guest_rsvp_path(@phone_token), params: {
+      rsvp: { status: "attending", guest_name: "Cookie Person", guest_count: 0 }
+    }
+    # GET with base token (no phone) — finds RSVP via cookie fallback
+    get guest_rsvp_path(@token)
+    assert_response :success
+  end
+
+  # --- rsvp_confirmation_message: implicit else branch ---
+
+  test "rsvp_confirmation_message returns nil for unrecognized status" do
+    ctrl = GuestRsvpsController.new
+    rsvp = Struct.new(:status).new("unknown")
+    assert_nil ctrl.send(:rsvp_confirmation_message, rsvp)
+  end
+
   # --- authenticated user: guest fields are stripped ---
 
   test "authenticated user cannot set guest_name or guest_phone" do
