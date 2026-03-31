@@ -25,7 +25,7 @@ class GroupsController < ApplicationController
   end
 
   def new
-    @group = Group.new
+    @group = Group.new(time_zone: current_user.time_zone.presence || "Eastern Time (US & Canada)")
   end
 
   def create
@@ -33,6 +33,7 @@ class GroupsController < ApplicationController
     @group.created_by = current_user
 
     if @group.save
+      current_user.update_column(:time_zone, @group.time_zone) if @group.time_zone.present?
       # Auto-add creator as a member
       @group.group_memberships.create!(user: current_user)
       redirect_to @group, notice: "Group was successfully created."
@@ -46,6 +47,7 @@ class GroupsController < ApplicationController
 
   def update
     if @group.update(group_params)
+      current_user.update_column(:time_zone, @group.time_zone) if @group.time_zone.present?
       redirect_to @group, notice: "Group was successfully updated."
     else
       render :edit, status: :unprocessable_entity

@@ -34,7 +34,26 @@
 
         <div class="form-group">
           <%= f.label :time_zone, "Timezone" %>
-          <%= f.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { default: "Eastern Time (US & Canada)" } %>
+          <%= f.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones %>
+          <% unless current_user.time_zone.present? %>
+            <script>
+              (function() {
+                try {
+                  var ianaZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                  var mapping = <%= ActiveSupport::TimeZone::MAPPING.to_json.html_safe %>;
+                  var select = document.getElementById("group_time_zone");
+                  if (select && ianaZone) {
+                    for (var railsName in mapping) {
+                      if (mapping[railsName] === ianaZone) {
+                        select.value = railsName;
+                        break;
+                      }
+                    }
+                  }
+                } catch(e) {}
+              })();
+            </script>
+          <% end %>
         </div>
 
         <div class="form-group checkbox-group">
