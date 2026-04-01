@@ -118,6 +118,12 @@ class GroupsControllerTest < ActionDispatch::IntegrationTest
     assert group.member?(@organizer)
   end
 
+  test "create updates organizer time_zone when time_zone is provided" do
+    sign_in(@organizer)
+    post groups_path, params: { group: { name: "TZ Group", is_private: false, time_zone: "Pacific Time (US & Canada)" } }
+    assert_equal "Pacific Time (US & Canada)", @organizer.reload.time_zone
+  end
+
   test "create re-renders new on invalid params" do
     sign_in(@organizer)
     assert_no_difference "Group.count" do
@@ -159,6 +165,13 @@ class GroupsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to group_path(@group)
     assert_match /successfully updated/i, flash[:notice]
     assert_equal "Renamed Group", @group.reload.name
+  end
+
+  test "update updates organizer time_zone when time_zone is provided" do
+    sign_in(@organizer)
+    patch group_path(@group), params: { group: { name: @group.name, time_zone: "Mountain Time (US & Canada)" } }
+    assert_redirected_to group_path(@group)
+    assert_equal "Mountain Time (US & Canada)", @organizer.reload.time_zone
   end
 
   test "update re-renders edit on invalid params" do
