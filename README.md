@@ -1,38 +1,32 @@
-# Still On
+# StillOn
 
-A Rails 8.1 application for managing recurring group events with RSVP functionality. Built with modern Rails conventions and the Hotwire stack.
+A social coordination app that keeps recurring friend group hangouts alive. StillOn automates "Still on?" reminders, tracks RSVPs, and reduces the friction on whoever's organizing.
 
-## Features
+## How it works
 
-- **Group Management**: Create private or public groups with unique slugs
-- **Recurring Events**: Support for daily, weekly, monthly, and one-time events
-- **Event Occurrences**: Individual instances of recurring events with independent management
-- **RSVP System**: Per-occurrence attendance tracking with guest counts
-- **User Authentication**: Powered by Devise with username and profile support
+1. An organizer creates a hangout (name, date, cadence)
+2. They share an invite link with their friend group
+3. StillOn sends an SMS reminder 2 days before each occurrence
+4. Friends RSVP via the link — no account required
+5. The organizer sees who's in
 
 ## Tech Stack
 
-- **Ruby 3.4.2**
-- **Rails 8.1.2**
-- **SQLite3** (2.1+)
+- **Ruby 3.4.2** / **Rails 8.1**
+- **PostgreSQL**
 - **Hotwire** (Turbo + Stimulus)
-- **Solid Cache** - Database-backed caching
-- **Solid Queue** - Database-backed job processing
-- **Solid Cable** - Database-backed Action Cable
-- **Devise** - User authentication
-- **Propshaft** - Asset pipeline
-- **Kamal** - Docker-based deployment
-- **Thruster** - HTTP caching/compression for Puma
+- **Solid Cache / Queue / Cable** — database-backed caching, jobs, and WebSockets (no Redis)
+- **Twilio** — SMS for auth OTP and event reminders
+- **IceCube** — recurrence scheduling
+- **Propshaft** — asset pipeline
+- **Thruster** — HTTP caching/compression for Puma
 
 ## Prerequisites
 
 - Ruby 3.4.2+
-- SQLite3 2.1+
-- Node.js (for JavaScript bundling)
+- PostgreSQL
 
 ## Getting Started
-
-### Initial Setup
 
 ```bash
 # Clone the repository
@@ -43,47 +37,37 @@ cd still_on
 bin/setup
 ```
 
-The setup script will:
-- Install dependencies
-- Create and migrate the database
-- Seed initial data
-
-### Running the Application
-
-```bash
-# Start the development server with all services
-bin/dev
-
-# Or start just the Rails server
-bin/rails server
-```
-
-Visit http://localhost:3000 to see the application.
+Then visit http://localhost:3000.
 
 ## Development
 
-### Database Commands
+### Running the app
+
+```bash
+bin/dev              # Start server with all services
+bin/rails server     # Rails only
+```
+
+### Database
 
 ```bash
 bin/rails db:migrate         # Run pending migrations
 bin/rails db:rollback        # Rollback last migration
-bin/rails db:seed            # Seed database with sample data
+bin/rails db:seed            # Seed database
 bin/rails db:seed:replant    # Drop, create, migrate, and seed
 ```
 
-### Running Tests
+### Tests
 
 ```bash
 bin/rails test                              # Run all tests
-bin/rails test test/models/user_test.rb     # Run specific test file
-bin/ci                                      # Run full CI suite locally
+bin/rails test test/models/user_test.rb     # Run specific file
+bin/ci                                      # Full CI suite
 ```
 
-Tests run in parallel using all available processors.
+Tests run in parallel using all available processors. To find uncovered lines after a run, read `coverage/.resultset.json`.
 
 ### Code Quality
-
-The project follows **rubocop-rails-omakase** conventions.
 
 ```bash
 bin/rubocop           # Run RuboCop linter
@@ -95,74 +79,47 @@ bin/importmap audit   # Check JavaScript dependencies
 
 ### CI Pipeline
 
-The `bin/ci` command runs the complete CI pipeline:
-1. Setup (without starting server)
-2. RuboCop style checks
-3. Bundler audit (gem security)
-4. Importmap audit (JavaScript security)
-5. Brakeman (static security analysis)
+`bin/ci` runs:
+1. Setup (without server)
+2. RuboCop
+3. Bundler audit
+4. Importmap audit
+5. Brakeman
 6. Rails test suite
-7. Database seed replanting test
+7. Seed replanting test
 
 ## Architecture
 
 ### Data Model
 
-The application uses a hierarchical event management system:
+**Groups → Events → EventOccurrences → RSVPs**
 
-**Groups → Events → Event Occurrences → RSVPs**
+- **Users** — organizers only; authenticated via phone number + SMS OTP (no password). Fields: first_name, last_name, username, avatar_url, phone_number, phone_verified_at
+- **Groups** — collections of members (UUID pk, unique slug, is_private flag)
+- **Events** — templates/series belonging to groups; store recurrence pattern (none/daily/weekly/monthly)
+- **EventOccurrences** — specific instances of events (start_time, end_time, status: scheduled/cancelled/completed, max_attendees)
+- **RSVPs** — scoped to occurrences, not events (status: attending/declined/maybe, guest_count)
+- **GroupMemberships** — join table connecting users to groups
 
-#### Core Models
+All core domain tables use UUID primary keys.
 
-- **Users**: Authenticated users with username, email, name, and avatar
-- **Groups**: Collections of members with unique slugs and privacy settings
-- **Events**: Belong to groups, can be recurring (none/daily/weekly/monthly)
-- **EventOccurrences**: Specific instances of events with start/end times, status tracking, and capacity limits
-- **RSVPs**: User responses to specific event occurrences (attending/declined/maybe) with guest counts
-- **GroupMemberships**: Join table connecting users to groups
+### Auth
 
-All core domain tables use UUID primary keys for improved scalability and security.
+Organizers sign up and sign in via phone number + SMS OTP — no password. Onboarding collects name, hangout name, date, and cadence, then creates the User, Group, Event, and first EventOccurrence in one step.
 
-#### Key Features
+### Guest RSVP flow
 
-- **Recurring Events**: Events store recurrence patterns allowing automatic generation of future occurrences
-- **Location Overrides**: Individual event occurrences can override the parent event's location
-- **Per-Occurrence RSVPs**: Users RSVP to specific occurrences, not events, enabling granular attendance tracking
-- **Guest Support**: RSVPs support guest counts for "+1" functionality
-- **Capacity Management**: Event occurrences can set maximum attendee limits
+Guests receive a signed token link encoding the EventOccurrence and optionally their phone number. They RSVP without an account. Guest records can be claimed/merged if they later create an account. This is the primary interaction path for most people.
 
-### Rails Omakase Stack
+### Background Jobs
 
-This application uses Rails 8's modern, batteries-included approach:
-
-- **No Redis Required**: Solid Cache, Solid Queue, and Solid Cable provide database-backed alternatives
-- **SQLite in Production**: Leverages SQLite3 2.1+ for simplified deployment
-- **Hotwire**: Turbo and Stimulus provide SPA-like interactivity without complex JavaScript frameworks
-- **Importmap**: Manage JavaScript dependencies without Node.js build tools
-
-## Deployment
-
-The application is configured for deployment using Kamal (Docker-based) with Thruster for HTTP caching and compression.
-
-```bash
-kamal setup    # Initial deployment setup
-kamal deploy   # Deploy to production
-```
-
-See `config/deploy.yml` for deployment configuration.
+Two jobs run on a daily cron schedule (`config/recurring.yml`):
+- `GenerateRecurringOccurrencesJob` — 6am, generates occurrences up to 30 days out
+- `ScheduleNotificationsJob` — 8am, enqueues RSVP prompts 2 days before each occurrence and day-of confirmations to attending/maybe guests
 
 ## Known Issues
 
-- **UUID Schema Dumping**: The schema currently has UUID type detection issues with SQLite3. Migrations use `type: :uuid` for foreign keys, but `db/schema.rb` shows "Unknown type 'uuid'" errors. This is a known SQLite UUID configuration issue that needs resolution.
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Run tests and code quality checks (`bin/ci`)
-4. Commit your changes
-5. Push to the branch
-6. Open a Pull Request
+- **UUID schema dumping**: `db/schema.rb` shows "Unknown type 'uuid'" warnings for UUID foreign keys. The tables and constraints are correct in the database — this is a schema dumper rendering issue only.
 
 ## License
 
