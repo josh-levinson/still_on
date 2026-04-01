@@ -36,7 +36,8 @@
       "Bash(do echo:*)",
       "Read(//home/josh/code/still_on/**)",
       "Bash(done)",
-      "Bash(ruby:*)"
+      "Bash(ruby:*)",
+      "Bash(gem contents:*)"
     ]
   }
 }
