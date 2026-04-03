@@ -13,9 +13,15 @@ export default class extends Controller {
   onInput(event) {
     const input = event.target
     const index = this.digitTargets.indexOf(input)
+    const filtered = input.value.replace(/\D/g, "")
 
-    // Only allow digits
-    const digit = input.value.replace(/\D/g, "").slice(-1)
+    // Handle autofill (e.g. iOS/Android SMS autofill) dropping the full code into one field
+    if (filtered.length > 1) {
+      this.distributeDigits(filtered)
+      return
+    }
+
+    const digit = filtered.slice(-1)
     input.value = digit
 
     if (digit && index < this.digitTargets.length - 1) {
@@ -37,6 +43,10 @@ export default class extends Controller {
   onPaste(event) {
     event.preventDefault()
     const text = (event.clipboardData || window.clipboardData).getData("text")
+    this.distributeDigits(text)
+  }
+
+  distributeDigits(text) {
     const digits = text.replace(/\D/g, "").slice(0, 6)
 
     digits.split("").forEach((digit, i) => {
