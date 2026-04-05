@@ -63,7 +63,7 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
   # Minitest 6 removed minitest/mock; pin to 5.x for stub support
-  gem "minitest", "~> 5.0"
+  gem "minitest", "~> 6.0"
   gem "simplecov", require: false
 end
 
