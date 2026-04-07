@@ -41,7 +41,8 @@
       "Skill(update-config)",
       "Read(//private/tmp/claude-502/-Users-jlevinson-code-still_on/351e4410-db0c-4396-a7c8-4185d3315de3/tasks/**)",
       "Read(//private/tmp/claude-502/-Users-jlevinson-code-still-on/**)",
-      "Bash(DISABLE_SIMPLECOV=1 bundle exec rails test)"
+      "Bash(DISABLE_SIMPLECOV=1 bundle exec rails test)",
+      "Bash(node:*)"
     ]
   }
 }

@@ -27,6 +27,15 @@ Rails.application.routes.draw do
   get  "onboarding/invite",   to: "onboarding#invite",         as: :onboarding_invite
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
+  # New hangout wizard (for authenticated users creating additional hangouts)
+  get  "hangouts/new",          to: "new_hangout#name",           as: :new_hangout
+  post "hangouts/new/name",     to: "new_hangout#submit_name",    as: :new_hangout_submit_name
+  get  "hangouts/new/date",     to: "new_hangout#date_step",      as: :new_hangout_date
+  post "hangouts/new/date",     to: "new_hangout#submit_date",    as: :new_hangout_submit_date
+  get  "hangouts/new/cadence",  to: "new_hangout#cadence",        as: :new_hangout_cadence
+  post "hangouts/new/cadence",  to: "new_hangout#submit_cadence", as: :new_hangout_submit_cadence
+  get  "hangouts/new/invite",   to: "new_hangout#invite",         as: :new_hangout_invite
+
   get  "sms",     to: "pages#sms",     as: :sms_info
   get  "privacy", to: "pages#privacy", as: :privacy
   post "twilio/sms", to: "twilio_webhooks#sms", as: :twilio_sms_webhook

@@ -25,9 +25,10 @@
 
       <% if local_assigns[:step].present? || @step.present? %>
         <% current_step = local_assigns[:step] || @step %>
+        <% total_steps = @total_steps || 6 %>
         <div class="onboarding-progress">
           <div class="progress-bar-track">
-            <div class="progress-bar-fill" style="width: <%= (current_step.to_f / 4 * 100).round %>%"></div>
+            <div class="progress-bar-fill" style="width: <%= (current_step.to_f / total_steps * 100).round %>%"></div>
           </div>
         </div>
       <% end %>

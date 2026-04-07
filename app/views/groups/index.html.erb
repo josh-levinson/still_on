@@ -1,7 +1,7 @@
 <div class="groups-index">
   <div class="header">
     <h1>My Groups</h1>
-    <%= link_to "Create New Group", new_group_path, class: "btn btn-primary" %>
+    <%= link_to "Create New Group", new_hangout_path, class: "btn btn-primary" %>
   </div>
 
   <% if @groups.any? %>
@@ -27,7 +27,7 @@
   <% else %>
     <div class="empty-state">
       <p>You're not part of any groups yet.</p>
-      <%= link_to "Create your first group", new_group_path, class: "btn btn-primary" %>
+      <%= link_to "Create your first group", new_hangout_path, class: "btn btn-primary" %>
     </div>
   <% end %>
 </div>

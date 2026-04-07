@@ -1,0 +1,49 @@
+<div data-controller="cadence">
+  <%= link_to "\u2190 back", new_hangout_date_path, class: "back-btn" %>
+
+  <p class="ob-label">Step <%= @step %> of <%= @total_steps %> &middot; Cadence</p>
+  <div class="onboarding-card-header">
+    <h2>How often?</h2>
+    <p>StillOn will ping everyone before each one.</p>
+  </div>
+
+  <% if flash[:error].present? %>
+    <div class="onboarding-error"><%= flash[:error] %></div>
+  <% end %>
+
+  <%= form_with url: new_hangout_submit_cadence_path, method: :post, class: "onboarding-form", data: { cadence_target: "form" } do |f| %>
+    <%= f.hidden_field :cadence, data: { cadence_target: "input" } %>
+
+    <div class="card-options">
+      <button type="button"
+              class="cadence-btn"
+              data-cadence-value="weekly"
+              data-action="click->cadence#select">
+        <div class="card-option-body">
+          <span class="cadence-label">Weekly</span>
+          <span class="cadence-sub">Every <%= @day_name || "week" %></span>
+        </div>
+      </button>
+
+      <button type="button"
+              class="cadence-btn"
+              data-cadence-value="monthly"
+              data-action="click->cadence#select">
+        <div class="card-option-body">
+          <span class="cadence-label">Monthly</span>
+          <span class="cadence-sub">Every <%= @monthly_label || "month" %></span>
+        </div>
+      </button>
+
+      <button type="button"
+              class="cadence-btn"
+              data-cadence-value="none"
+              data-action="click->cadence#select">
+        <div class="card-option-body">
+          <span class="cadence-label">Just once</span>
+          <span class="cadence-sub">One-time event</span>
+        </div>
+      </button>
+    </div>
+  <% end %>
+</div>
