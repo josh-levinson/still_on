@@ -1,2 +1,2 @@
-[variables]
-SECRET_KEY_BASE_DUMMY = "1"
+[phases.build]
+cmds = ["bundle install"]
