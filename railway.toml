@@ -2,5 +2,5 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "bundle exec rails assets:precompile && bundle exec rails db:prepare && bundle exec rails db:migrate && bundle exec thrust rails server -b 0.0.0.0"
+startCommand = "bundle exec rails db:prepare && bundle exec rails db:migrate && bundle exec thrust rails server -b 0.0.0.0"
 healthcheckPath = "/up"
