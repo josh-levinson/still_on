@@ -1,5 +1,0 @@
-[phases.setup]
-aptPkgs = ["postgresql-client", "libyaml-dev"]
-
-[phases.deploy]
-aptPkgs = ["postgresql-client"]

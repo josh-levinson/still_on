@@ -1,8 +1,13 @@
 {
   "$schema": "https://schema.railpack.com",
+  "buildAptPackages": ["postgresql-client", "libyaml-dev"],
+  "deployAptPackages": ["postgresql-client"],
   "steps": {
     "install": {
-      "commands": ["bundle config set without 'development:test' && bundle install"]
+      "commands": [
+        "bundle config set without 'development:test'",
+        "bundle install"
+      ]
     }
   }
 }
