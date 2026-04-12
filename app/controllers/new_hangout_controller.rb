@@ -63,11 +63,9 @@ class NewHangoutController < ApplicationController
     return redirect_to new_hangout_path unless session[:nh_date].present?
     @step = 3
     @total_steps = 3
-    if session[:nh_date].present?
-      date = Date.parse(session[:nh_date])
-      @day_name      = date.strftime("%A")
-      @monthly_label = "#{nth_weekday_n(date).ordinalize} #{@day_name}"
-    end
+    date = Date.parse(session[:nh_date])
+    @day_name      = date.strftime("%A")
+    @monthly_label = "#{nth_weekday_n(date).ordinalize} #{@day_name}"
   end
 
   def submit_cadence
