@@ -45,7 +45,9 @@
       "Bash(node:*)",
       "WebSearch",
       "WebFetch(domain:railpack.io)",
-      "WebFetch(domain:railpack.com)"
+      "WebFetch(domain:railpack.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:schema.railpack.com)"
     ]
   }
 }

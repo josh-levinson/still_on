@@ -4,8 +4,8 @@ aptPkgs = ["postgresql-client"]
 [phases.deploy]
 aptPkgs = ["postgresql-client"]
 
-[phases.install]
-cmds = [
+[steps.install]
+commands = [
   "bundle config set without 'development test'",
   "bundle install",
 ]
