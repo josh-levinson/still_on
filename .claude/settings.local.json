@@ -47,7 +47,8 @@
       "WebFetch(domain:railpack.io)",
       "WebFetch(domain:railpack.com)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:schema.railpack.com)"
+      "WebFetch(domain:schema.railpack.com)",
+      "WebFetch(domain:station.railway.com)"
     ]
   }
 }

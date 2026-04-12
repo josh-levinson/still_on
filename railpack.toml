@@ -3,9 +3,3 @@ aptPkgs = ["postgresql-client"]
 
 [phases.deploy]
 aptPkgs = ["postgresql-client"]
-
-[steps.install]
-commands = [
-  "bundle config set without 'development test'",
-  "bundle install",
-]
