@@ -30,6 +30,7 @@
 
 /public/assets
 /coverage
+/db/schema_cache.yml
 
 # Claude Code worktrees (temporary agent workspaces)
 /.claude/worktrees/
