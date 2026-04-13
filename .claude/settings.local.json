@@ -49,7 +49,11 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:schema.railpack.com)",
       "WebFetch(domain:station.railway.com)",
-      "WebFetch(domain:docs.railway.com)"
+      "WebFetch(domain:docs.railway.com)",
+      "Bash(RAILS_ENV=test bin/rails db:migrate:status)",
+      "Bash(RAILS_ENV=test bin/rails runner:*)",
+      "Bash(bin/rails db:migrate:reset:*)",
+      "Bash(RAILS_ENV=test bin/rails test test/jobs/generate_recurring_occurrences_job_test.rb)"
     ]
   }
 }
