@@ -1,6 +1,0 @@
-[build]
-builder = "railpack"
-
-[deploy]
-startCommand = "bundle exec rails db:prepare && bundle exec thrust rails server -b 0.0.0.0"
-healthcheckPath = "/up"
