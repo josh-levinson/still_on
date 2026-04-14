@@ -30,7 +30,13 @@
 
     <div class="form-group">
       <%= f.label :location, "Default Location" %>
-      <%= f.text_field :location, class: "form-control" %>
+      <div data-controller="location-autocomplete"
+           data-location-autocomplete-access-token-value="<%= ENV['MAPBOX_ACCESS_TOKEN'] %>"
+           class="location-autocomplete-wrapper">
+        <%= f.text_field :location, class: "form-control",
+            data: { location_autocomplete_target: "input" } %>
+        <div data-location-autocomplete-target="suggestions" class="location-suggestions hidden"></div>
+      </div>
     </div>
 
     <div class="form-group">
