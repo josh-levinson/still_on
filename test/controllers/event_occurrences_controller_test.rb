@@ -55,6 +55,25 @@ class EventOccurrencesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "show includes share RSVP link for organizer on scheduled occurrence" do
+    sign_in(@organizer)
+    get group_event_event_occurrence_path(@group, @event, @occurrence)
+    assert_select ".invite-share-section"
+  end
+
+  test "show does not include share RSVP link for non-organizer" do
+    sign_in(@other)
+    get group_event_event_occurrence_path(@group, @event, @occurrence)
+    assert_select ".invite-share-section", count: 0
+  end
+
+  test "show does not include share RSVP link for cancelled occurrence" do
+    @occurrence.update!(status: "cancelled")
+    sign_in(@organizer)
+    get group_event_event_occurrence_path(@group, @event, @occurrence)
+    assert_select ".invite-share-section", count: 0
+  end
+
   # ---- GET /groups/:group_slug/events/:event_id/event_occurrences/new ----
 
   test "new requires sign-in" do
