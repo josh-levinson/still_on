@@ -3,9 +3,9 @@ require "test_helper"
 class SmsServiceTest < ActiveSupport::TestCase
   setup do
     @received = []
-    @messages_mock = Object.new
-    @messages_mock.define_singleton_method(:create) { |**kwargs| @received << kwargs }
     received = @received
+
+    @messages_mock = Object.new
     @messages_mock.define_singleton_method(:create) { |**kwargs| received << kwargs }
 
     @client_mock = Object.new
@@ -16,9 +16,7 @@ class SmsServiceTest < ActiveSupport::TestCase
   test "send_message instance method calls Twilio client with correct args" do
     ENV["TWILIO_FROM_NUMBER"] = "+15550001111"
 
-    Twilio::REST::Client.stub(:new, @client_mock) do
-      SmsService.new.send_message(to: "+15559999999", body: "Hello test")
-    end
+    SmsService.new(client: @client_mock).send_message(to: "+15559999999", body: "Hello test")
 
     assert_equal 1, @received.length
     assert_equal "+15559999999", @received.first[:to]
@@ -27,6 +25,7 @@ class SmsServiceTest < ActiveSupport::TestCase
   end
 
   test "self.send_message class method delegates to instance" do
+    ENV["TWILIO_FROM_NUMBER"] = "+15550001111"
     Twilio::REST::Client.stub(:new, @client_mock) do
       SmsService.send_message(to: "+15559999998", body: "Class method test")
     end
@@ -44,10 +43,8 @@ class SmsServiceTest < ActiveSupport::TestCase
     bad_client = Object.new
     bad_client.define_singleton_method(:messages) { bad_messages }
 
-    Twilio::REST::Client.stub(:new, bad_client) do
-      assert_raises Twilio::REST::RestError do
-        SmsService.new.send_message(to: "+15559999997", body: "Will fail")
-      end
+    assert_raises Twilio::REST::RestError do
+      SmsService.new(client: bad_client).send_message(to: "+15559999997", body: "Will fail")
     end
   end
 end

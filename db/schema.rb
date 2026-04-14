@@ -251,13 +251,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_31_192853) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
-  create_table "users", force: :cascade do |t|
+  create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "avatar_url"
     t.datetime "created_at", null: false
     t.string "email"
     t.string "first_name"
     t.string "last_name"
     t.string "phone_number"
+    t.datetime "phone_verified_at"
+    t.string "time_zone"
     t.datetime "updated_at", null: false
     t.string "username"
     t.index ["username"], name: "index_users_on_username", unique: true
@@ -265,13 +267,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_31_192853) do
 
   add_foreign_key "event_occurrences", "events"
   add_foreign_key "events", "groups"
-  add_foreign_key "events", "users", column: "created_by_id"
   add_foreign_key "group_memberships", "groups"
-  add_foreign_key "group_memberships", "users"
-  add_foreign_key "groups", "users", column: "created_by_id"
   add_foreign_key "guest_group_subscriptions", "groups"
   add_foreign_key "rsvps", "event_occurrences"
-  add_foreign_key "rsvps", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

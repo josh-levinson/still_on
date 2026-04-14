@@ -53,7 +53,8 @@
       "Bash(RAILS_ENV=test bin/rails db:migrate:status)",
       "Bash(RAILS_ENV=test bin/rails runner:*)",
       "Bash(bin/rails db:migrate:reset:*)",
-      "Bash(RAILS_ENV=test bin/rails test test/jobs/generate_recurring_occurrences_job_test.rb)"
+      "Bash(RAILS_ENV=test bin/rails test test/jobs/generate_recurring_occurrences_job_test.rb)",
+      "Bash(xargs cat:*)"
     ]
   }
 }

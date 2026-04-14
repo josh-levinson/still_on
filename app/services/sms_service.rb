@@ -3,6 +3,10 @@ class SmsService
     new.send_message(to:, body:)
   end
 
+  def initialize(client: nil)
+    @client = client
+  end
+
   def send_message(to:, body:)
     client.messages.create(
       from: from_number,
@@ -21,6 +25,6 @@ class SmsService
   end
 
   def client
-    Twilio::REST::Client.new
+    @client ||= Twilio::REST::Client.new
   end
 end

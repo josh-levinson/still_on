@@ -97,14 +97,17 @@ class TwilioWebhooksControllerTest < ActionDispatch::IntegrationTest
     )
     controller.instance_variable_set(:@_request, mock_request)
 
-    mock_validator = Minitest::Mock.new
-    mock_validator.expect(:validate, true, [ "https://example.com/twilio/sms", {}, "abc123" ])
+    validate_calls = []
+    validator = Object.new
+    validator.define_singleton_method(:validate) { |*args| validate_calls << args; true }
 
     Rails.env.stub(:test?, false) do
-      Twilio::Security::RequestValidator.stub(:new, mock_validator) do
+      Twilio::Security::RequestValidator.stub(:new, validator) do
         assert controller.send(:valid_twilio_request?)
       end
     end
-    mock_validator.verify
+
+    assert_equal 1, validate_calls.length
+    assert_equal [ "https://example.com/twilio/sms", {}, "abc123" ], validate_calls.first
   end
 end
