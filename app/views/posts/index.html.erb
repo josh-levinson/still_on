@@ -25,8 +25,11 @@
                 </div>
                 <h3><%= occurrence.event.title %></h3>
                 <div class="occurrence-time">
-                  <span class="date"><%= occurrence.start_time.strftime("%B %d, %Y") %></span>
-                  <span class="time"><%= occurrence.start_time.strftime("%l:%M %p") %> - <%= occurrence.end_time.strftime("%l:%M %p") %></span>
+                  <% tz = occurrence.event.group.time_zone %>
+                  <% local_start = occurrence.start_time.in_time_zone(tz) %>
+                  <% local_end = occurrence.end_time.in_time_zone(tz) %>
+                  <span class="date"><%= local_start.strftime("%B %d, %Y") %></span>
+                  <span class="time"><%= local_start.strftime("%l:%M %p") %> &ndash; <%= local_end.strftime("%l:%M %p") %> <%= local_start.zone %></span>
                 </div>
                 <% if occurrence.location.present? %>
                   <div class="occurrence-location"><%= occurrence.location %></div>

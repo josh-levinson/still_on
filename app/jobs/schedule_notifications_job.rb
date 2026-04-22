@@ -1,7 +1,6 @@
 class ScheduleNotificationsJob < ApplicationJob
   queue_as :default
 
-  RSVP_REMINDER_DAYS_BEFORE = 2
   EVENT_REMINDER_MIN_HOURS_AHEAD = 3
   QUORUM_ALERT_HOURS_BEFORE = 24
 
@@ -14,9 +13,12 @@ class ScheduleNotificationsJob < ApplicationJob
   private
 
   def schedule_rsvp_reminders
-    window = days_from_now_window(RSVP_REMINDER_DAYS_BEFORE)
-    EventOccurrence.scheduled.where(start_time: window).each do |occurrence|
-      SendRsvpReminderJob.perform_later(occurrence.id)
+    Group.distinct.pluck(:reminder_days_before).each do |days|
+      window = days_from_now_window(days)
+      EventOccurrence.scheduled
+        .joins(event: :group)
+        .where(groups: { reminder_days_before: days }, start_time: window)
+        .each { |occurrence| SendRsvpReminderJob.perform_later(occurrence.id) }
     end
   end
 

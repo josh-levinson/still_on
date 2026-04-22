@@ -27,6 +27,15 @@ class ScheduleNotificationsJobTest < ActiveSupport::TestCase
     end
   end
 
+  test "enqueues RSVP reminders using group's custom reminder_days_before" do
+    @group.update!(reminder_days_before: 5)
+    occurrence = create_occurrence(@event, start_time: 5.days.from_now.change(hour: 19), end_time: 5.days.from_now.change(hour: 21))
+
+    assert_enqueued_with(job: SendRsvpReminderJob, args: [ occurrence.id ]) do
+      ScheduleNotificationsJob.perform_now
+    end
+  end
+
   test "does not enqueue RSVP reminder for occurrences too far out" do
     create_occurrence(@event, start_time: 5.days.from_now, end_time: 5.days.from_now + 2.hours)
 

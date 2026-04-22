@@ -8,6 +8,7 @@ class PostsController < ApplicationController
       .where(group_memberships: { user_id: current_user.id })
       .upcoming
       .scheduled
+      .includes(event: :group)
       .limit(10)
   end
 end

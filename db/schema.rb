@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_31_192853) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_15_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -68,6 +68,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_31_192853) do
     t.text "description"
     t.boolean "is_private", default: false, null: false
     t.string "name", null: false
+    t.integer "reminder_days_before", default: 2, null: false
     t.string "slug", null: false
     t.string "time_zone", default: "UTC", null: false
     t.datetime "updated_at", null: false
@@ -267,9 +268,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_31_192853) do
 
   add_foreign_key "event_occurrences", "events"
   add_foreign_key "events", "groups"
+  add_foreign_key "events", "users", column: "created_by_id"
   add_foreign_key "group_memberships", "groups"
+  add_foreign_key "group_memberships", "users"
+  add_foreign_key "groups", "users", column: "created_by_id"
   add_foreign_key "guest_group_subscriptions", "groups"
   add_foreign_key "rsvps", "event_occurrences"
+  add_foreign_key "rsvps", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

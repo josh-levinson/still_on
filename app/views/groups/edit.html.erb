@@ -34,6 +34,13 @@
     </div>
 
     <div class="form-group">
+      <%= f.label :reminder_days_before, "Send RSVP reminder" %>
+      <%= f.select :reminder_days_before,
+            (1..7).map { |d| ["#{d} #{d == 1 ? 'day' : 'days'} before", d] },
+            {}, class: "form-control" %>
+    </div>
+
+    <div class="form-group">
       <%= f.label :is_private, "Make this group private" %>
       <%= f.check_box :is_private %>
     </div>
