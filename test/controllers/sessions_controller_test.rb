@@ -45,14 +45,12 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_match /no account found/i, flash[:error]
   end
 
-  test "submit_phone writes OTP to cache even if SMS raises" do
-    with_memory_cache do
-      SmsService.stub(:send_message, ->(to:, body:) { raise "Twilio down" }) do
-        post sign_in_submit_phone_path, params: { phone: @phone }
-      end
-      assert_redirected_to sign_in_verify_path
-      assert Rails.cache.read("otp:#{@phone}").present?
+  test "submit_phone writes OTP to session even if SMS raises" do
+    SmsService.stub(:send_message, ->(to:, body:) { raise "Twilio down" }) do
+      post sign_in_submit_phone_path, params: { phone: @phone }
     end
+    assert_redirected_to sign_in_verify_path
+    assert session[:signin_otp].present?
   end
 
   # --- GET /sign_in/verify ---
@@ -79,51 +77,41 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   # --- POST /sign_in/verify ---
 
   test "submit_verify with correct code signs in user and redirects to dashboard" do
-    otp = "123456"
-    with_memory_cache do
-      SmsService.stub(:send_message, true) do
-        post sign_in_submit_phone_path, params: { phone: @phone }
-      end
-      Rails.cache.write("otp:#{@phone}", otp, expires_in: 10.minutes)
-      post sign_in_submit_verify_path, params: { code: otp }
+    SmsService.stub(:send_message, true) do
+      post sign_in_submit_phone_path, params: { phone: @phone }
     end
+    post sign_in_submit_verify_path, params: { code: session[:signin_otp] }
     assert_redirected_to dashboard_path
     assert_match /welcome back/i, flash[:notice]
   end
 
   test "submit_verify with wrong code re-renders verify" do
-    with_memory_cache do
-      SmsService.stub(:send_message, true) do
-        post sign_in_submit_phone_path, params: { phone: @phone }
-      end
-      Rails.cache.write("otp:#{@phone}", "999999", expires_in: 10.minutes)
-      post sign_in_submit_verify_path, params: { code: "000000" }
+    SmsService.stub(:send_message, true) do
+      post sign_in_submit_phone_path, params: { phone: @phone }
     end
+    post sign_in_submit_verify_path, params: { code: "000000" }
     assert_response :unprocessable_entity
     assert_match /didn't match/i, flash[:error]
   end
 
   test "submit_verify with correct code but user deleted between steps renders verify with error" do
-    otp = "123456"
-    with_memory_cache do
-      SmsService.stub(:send_message, true) do
-        post sign_in_submit_phone_path, params: { phone: @phone }
-      end
-      Rails.cache.write("otp:#{@phone}", otp, expires_in: 10.minutes)
-      @user.destroy
-      post sign_in_submit_verify_path, params: { code: otp }
+    SmsService.stub(:send_message, true) do
+      post sign_in_submit_phone_path, params: { phone: @phone }
     end
+    otp = session[:signin_otp]
+    @user.destroy
+    post sign_in_submit_verify_path, params: { code: otp }
     assert_response :unprocessable_entity
     assert_match /no account found/i, flash[:error]
   end
 
   test "submit_verify with expired OTP re-renders verify" do
-    with_memory_cache do
-      SmsService.stub(:send_message, true) do
-        post sign_in_submit_phone_path, params: { phone: @phone }
-      end
-      # Don't write OTP — simulates expiry
-      post sign_in_submit_verify_path, params: { code: "123456" }
+    SmsService.stub(:send_message, true) do
+      post sign_in_submit_phone_path, params: { phone: @phone }
+    end
+    otp = session[:signin_otp]
+    travel_to 11.minutes.from_now do
+      post sign_in_submit_verify_path, params: { code: otp }
     end
     assert_response :unprocessable_entity
     assert_match /didn't match/i, flash[:error]

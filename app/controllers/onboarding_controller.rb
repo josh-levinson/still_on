@@ -107,7 +107,6 @@ class OnboardingController < ApplicationController
     end
 
     otp = rand(100_000..999_999).to_s
-    Rails.cache.write("otp:#{phone}", otp, expires_in: 10.minutes)
 
     begin
       SmsService.send_message(to: "+1#{phone}", body: "Your StillOn code is #{otp}. It expires in 10 minutes.")
@@ -116,6 +115,8 @@ class OnboardingController < ApplicationController
     end
 
     session[:ob_phone] = phone
+    session[:ob_otp] = otp
+    session[:ob_otp_expires_at] = 10.minutes.from_now.to_i
     redirect_to onboarding_verify_path
   end
 
@@ -125,12 +126,14 @@ class OnboardingController < ApplicationController
   end
 
   def submit_verify
-    phone = session[:ob_phone]
-    code  = params[:code].to_s.strip
-    stored = Rails.cache.read("otp:#{phone}")
+    phone      = session[:ob_phone]
+    code       = params[:code].to_s.strip
+    stored     = session[:ob_otp]
+    expires_at = session[:ob_otp_expires_at].to_i
 
-    if stored && code == stored
-      Rails.cache.delete("otp:#{phone}")
+    if stored && code == stored && Time.current.to_i < expires_at
+      session.delete(:ob_otp)
+      session.delete(:ob_otp_expires_at)
 
       # Update the user's phone number and mark as verified
       if current_user
@@ -150,7 +153,6 @@ class OnboardingController < ApplicationController
     redirect_to onboarding_phone_path and return unless phone
 
     otp = rand(100_000..999_999).to_s
-    Rails.cache.write("otp:#{phone}", otp, expires_in: 10.minutes)
 
     begin
       SmsService.send_message(to: "+1#{phone}", body: "Your StillOn code is #{otp}. It expires in 10 minutes.")
@@ -158,6 +160,8 @@ class OnboardingController < ApplicationController
       Rails.logger.error("[Onboarding] OTP resend failed: #{e.message}")
     end
 
+    session[:ob_otp] = otp
+    session[:ob_otp_expires_at] = 10.minutes.from_now.to_i
     redirect_to onboarding_verify_path, notice: "Code resent!"
   end
 

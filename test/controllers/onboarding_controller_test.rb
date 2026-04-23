@@ -217,15 +217,13 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
     assert_match /valid 10-digit/i, flash[:error]
   end
 
-  test "submit_phone writes OTP to cache even if SMS raises" do
+  test "submit_phone writes OTP to session even if SMS raises" do
     complete_cadence_step
-    with_memory_cache do
-      SmsService.stub(:send_message, ->(to:, body:) { raise "Twilio down" }) do
-        post onboarding_submit_phone_path, params: { phone: "5559876543" }
-      end
-      assert_redirected_to onboarding_verify_path
-      assert Rails.cache.read("otp:5559876543").present?
+    SmsService.stub(:send_message, ->(to:, body:) { raise "Twilio down" }) do
+      post onboarding_submit_phone_path, params: { phone: "5559876543" }
     end
+    assert_redirected_to onboarding_verify_path
+    assert session[:ob_otp].present?
   end
 
   # ---- GET /onboarding/verify ----
@@ -248,38 +246,32 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
 
   test "submit_verify with correct code updates user phone and redirects to invite" do
     complete_cadence_step
-    with_memory_cache do
-      SmsService.stub(:send_message, true) do
-        post onboarding_submit_phone_path, params: { phone: "5559876543" }
-      end
-      Rails.cache.write("otp:5559876543", "111222", expires_in: 10.minutes)
-      post onboarding_submit_verify_path, params: { code: "111222" }
+    SmsService.stub(:send_message, true) do
+      post onboarding_submit_phone_path, params: { phone: "5559876543" }
     end
+    post onboarding_submit_verify_path, params: { code: session[:ob_otp] }
     assert_redirected_to onboarding_invite_path
     assert User.find_by(phone_number: "5559876543")&.phone_verified_at.present?
   end
 
   test "submit_verify with wrong code re-renders with error" do
     complete_cadence_step
-    with_memory_cache do
-      SmsService.stub(:send_message, true) do
-        post onboarding_submit_phone_path, params: { phone: "5559876543" }
-      end
-      Rails.cache.write("otp:5559876543", "999999", expires_in: 10.minutes)
-      post onboarding_submit_verify_path, params: { code: "000000" }
+    SmsService.stub(:send_message, true) do
+      post onboarding_submit_phone_path, params: { phone: "5559876543" }
     end
+    post onboarding_submit_verify_path, params: { code: "000000" }
     assert_response :unprocessable_entity
     assert_match /didn't match/i, flash[:error]
   end
 
   test "submit_verify with expired OTP re-renders with error" do
     complete_cadence_step
-    with_memory_cache do
-      SmsService.stub(:send_message, true) do
-        post onboarding_submit_phone_path, params: { phone: "5559876543" }
-      end
-      Rails.cache.delete("otp:5559876543")
-      post onboarding_submit_verify_path, params: { code: "123456" }
+    SmsService.stub(:send_message, true) do
+      post onboarding_submit_phone_path, params: { phone: "5559876543" }
+    end
+    otp = session[:ob_otp]
+    travel_to 11.minutes.from_now do
+      post onboarding_submit_verify_path, params: { code: otp }
     end
     assert_response :unprocessable_entity
     assert_match /didn't match/i, flash[:error]
@@ -317,13 +309,10 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
 
   test "invite renders with hangout details when session is complete" do
     complete_cadence_step
-    with_memory_cache do
-      SmsService.stub(:send_message, true) do
-        post onboarding_submit_phone_path, params: { phone: "5559876543" }
-      end
-      Rails.cache.write("otp:5559876543", "111222", expires_in: 10.minutes)
-      post onboarding_submit_verify_path, params: { code: "111222" }
+    SmsService.stub(:send_message, true) do
+      post onboarding_submit_phone_path, params: { phone: "5559876543" }
     end
+    post onboarding_submit_verify_path, params: { code: session[:ob_otp] }
     get onboarding_invite_path
     assert_response :success
   end
@@ -336,13 +325,10 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
   # ---- submit_verify when no current_user (false branch of if current_user) ----
 
   test "submit_verify redirects to invite when no current user and OTP is correct" do
-    with_memory_cache do
-      SmsService.stub(:send_message, true) do
-        post onboarding_submit_phone_path, params: { phone: "5559876543" }
-      end
-      Rails.cache.write("otp:5559876543", "111222", expires_in: 10.minutes)
-      post onboarding_submit_verify_path, params: { code: "111222" }
+    SmsService.stub(:send_message, true) do
+      post onboarding_submit_phone_path, params: { phone: "5559876543" }
     end
+    post onboarding_submit_verify_path, params: { code: session[:ob_otp] }
     assert_redirected_to onboarding_invite_path
   end
 end
