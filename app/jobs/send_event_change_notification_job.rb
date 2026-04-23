@@ -31,6 +31,7 @@ class SendEventChangeNotificationJob < ApplicationJob
     occurrence.rsvps.where(status: %w[attending maybe]).includes(:user).filter_map do |rsvp|
       if rsvp.user.present?
         next if rsvp.user.phone_verified_at.blank? && rsvp.user.email.blank?
+        next unless NotificationPreference.allows?(rsvp.user, :event_change_notifications)
 
         phone = rsvp.user.phone_verified_at.present? ? rsvp.user.phone_number.presence : nil
         email = rsvp.user.email.presence

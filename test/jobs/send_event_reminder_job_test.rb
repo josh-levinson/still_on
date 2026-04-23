@@ -140,4 +140,40 @@ class SendEventReminderJobTest < ActiveSupport::TestCase
 
     assert_empty messages
   end
+
+  test "skips users who have disabled event_day_reminders" do
+    NotificationPreference.create!(user: @user, event_day_reminders: false)
+    create_rsvp(@occurrence, user: @user, status: "attending")
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendEventReminderJob.perform_now(@occurrence.id)
+    end
+
+    assert_empty messages
+  end
+
+  test "still sends to users who have enabled event_day_reminders" do
+    NotificationPreference.create!(user: @user, event_day_reminders: true)
+    create_rsvp(@occurrence, user: @user, status: "attending")
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendEventReminderJob.perform_now(@occurrence.id)
+    end
+
+    assert_equal 1, messages.length
+  end
+
+  test "still sends day-of reminder to guests regardless of notification preferences" do
+    create_rsvp(@occurrence, status: "attending", guest_name: "Guest", guest_phone: "+15550000099")
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendEventReminderJob.perform_now(@occurrence.id)
+    end
+
+    assert_equal 1, messages.length
+    assert_equal "+15550000099", messages.first[:to]
+  end
 end

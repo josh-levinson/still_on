@@ -27,6 +27,7 @@ class SendEventReminderJob < ApplicationJob
   def confirmed_recipients(occurrence)
     occurrence.rsvps.where(status: %w[attending maybe]).includes(:user).filter_map do |rsvp|
       if rsvp.user.present?
+        next unless NotificationPreference.allows?(rsvp.user, :event_day_reminders)
         phone = rsvp.user.phone_number.presence
         email = rsvp.user.email.presence
       else

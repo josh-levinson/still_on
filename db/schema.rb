@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_15_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_23_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -83,6 +83,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_15_000001) do
     t.datetime "updated_at", null: false
     t.index ["group_id", "phone_number"], name: "index_guest_group_subscriptions_on_group_id_and_phone_number", unique: true
     t.index ["group_id"], name: "index_guest_group_subscriptions_on_group_id"
+  end
+
+  create_table "notification_preferences", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "cancellation_notifications", default: true, null: false
+    t.datetime "created_at", null: false
+    t.boolean "event_change_notifications", default: true, null: false
+    t.boolean "event_day_reminders", default: true, null: false
+    t.boolean "quorum_alerts", default: true, null: false
+    t.boolean "rsvp_reminders", default: true, null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["user_id"], name: "index_notification_preferences_on_user_id"
   end
 
   create_table "rsvps", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -273,6 +285,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_15_000001) do
   add_foreign_key "group_memberships", "users"
   add_foreign_key "groups", "users", column: "created_by_id"
   add_foreign_key "guest_group_subscriptions", "groups"
+  add_foreign_key "notification_preferences", "users"
   add_foreign_key "rsvps", "event_occurrences"
   add_foreign_key "rsvps", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

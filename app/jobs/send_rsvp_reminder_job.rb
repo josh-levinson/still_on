@@ -44,7 +44,11 @@ class SendRsvpReminderJob < ApplicationJob
     occurrence.event.group.group_memberships
       .includes(:user)
       .map(&:user)
-      .select { |u| (u.phone_number.present? || u.email.present?) && !rsvped_user_ids.include?(u.id) }
+      .select do |u|
+        (u.phone_number.present? || u.email.present?) &&
+          !rsvped_user_ids.include?(u.id) &&
+          NotificationPreference.allows?(u, :rsvp_reminders)
+      end
   end
 
   def unresvped_subscribers(occurrence)

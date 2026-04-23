@@ -50,6 +50,8 @@ Rails.application.routes.draw do
 
   get "dashboard", to: "posts#index", as: :dashboard
 
+  resource :notification_preference, only: [ :edit, :update ]
+
   # Defines the root path route ("/")
   root "onboarding#splash"
 
