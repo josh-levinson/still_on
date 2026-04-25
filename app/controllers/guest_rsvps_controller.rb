@@ -24,6 +24,11 @@ class GuestRsvpsController < ApplicationController
       return
     end
 
+    if @event_occurrence.full? && params.dig(:rsvp, :status) == "attending"
+      redirect_to guest_rsvp_path(@token), alert: "Sorry, this event is full."
+      return
+    end
+
     @rsvp = @event_occurrence.rsvps.new(rsvp_params)
 
     if current_user

@@ -49,6 +49,32 @@ class RsvpsControllerTest < ActionDispatch::IntegrationTest
     assert flash[:alert].present?
   end
 
+  test "create blocks attending RSVP when event is full" do
+    full_occurrence = create_occurrence(@event, max_attendees: 1)
+    create_rsvp(full_occurrence, user: @organizer, guest_count: 0)
+    sign_in(@other)
+
+    assert_no_difference "Rsvp.count" do
+      post event_occurrence_rsvps_path(full_occurrence), params: { rsvp: { status: "attending", guest_count: 0 } }
+    end
+
+    assert_redirected_to occurrence_path_for(full_occurrence)
+    assert_match /full/i, flash[:alert]
+  end
+
+  test "create allows maybe RSVP when event is full" do
+    full_occurrence = create_occurrence(@event, max_attendees: 1)
+    create_rsvp(full_occurrence, user: @organizer, guest_count: 0)
+    sign_in(@other)
+
+    assert_difference "Rsvp.count", 1 do
+      post event_occurrence_rsvps_path(full_occurrence), params: { rsvp: { status: "maybe", guest_count: 0 } }
+    end
+
+    assert_redirected_to occurrence_path_for(full_occurrence)
+    assert flash[:alert].blank?
+  end
+
   # ---- PATCH /event_occurrences/:event_occurrence_id/rsvps/:id (update) ----
 
   test "update requires sign-in" do

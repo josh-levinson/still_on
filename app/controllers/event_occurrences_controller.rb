@@ -3,8 +3,8 @@ class EventOccurrencesController < ApplicationController
   before_action :set_group
   around_action :use_group_timezone
   before_action :set_event
-  before_action :set_event_occurrence, only: [ :show, :edit, :update, :destroy, :cancel ]
-  before_action :authorize_occurrence_admin, only: [ :edit, :update, :destroy, :cancel ]
+  before_action :set_event_occurrence, only: [ :show, :edit, :update, :destroy, :cancel, :send_reminder ]
+  before_action :authorize_occurrence_admin, only: [ :edit, :update, :destroy, :cancel, :send_reminder ]
 
   def index
     @upcoming_occurrences = @event.event_occurrences.upcoming
@@ -73,6 +73,15 @@ class EventOccurrencesController < ApplicationController
       redirect_to [ @group, @event, @event_occurrence ], notice: "Occurrence cancelled and attendees will be notified."
     else
       redirect_to [ @group, @event, @event_occurrence ], alert: "This occurrence is not scheduled."
+    end
+  end
+
+  def send_reminder
+    if @event_occurrence.status == "scheduled" && @event_occurrence.start_time > Time.current
+      SendRsvpReminderJob.perform_later(@event_occurrence.id)
+      redirect_to [ @group, @event, @event_occurrence ], notice: "Reminder will be sent shortly."
+    else
+      redirect_to [ @group, @event, @event_occurrence ], alert: "Reminders can only be sent for upcoming scheduled occurrences."
     end
   end
 

@@ -1,6 +1,7 @@
 class GroupsController < ApplicationController
   before_action :authenticate_user!, except: [ :show, :discover ]
   before_action :set_group, only: [ :show, :edit, :update, :destroy ]
+  around_action :use_group_timezone, only: [ :show, :edit, :update, :destroy ]
   before_action :authorize_group_admin, only: [ :edit, :update, :destroy ]
   before_action :authorize_group_access, only: [ :show ]
 
@@ -84,5 +85,9 @@ class GroupsController < ApplicationController
 
   def group_params
     params.require(:group).permit(:name, :description, :avatar_url, :is_private, :time_zone, :reminder_days_before)
+  end
+
+  def use_group_timezone
+    Time.use_zone(@group.time_zone) { yield }
   end
 end

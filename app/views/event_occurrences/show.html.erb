@@ -62,7 +62,12 @@
     <div class="occurrence-actions">
       <% if @event.created_by == current_user || @group.created_by == current_user %>
         <%= link_to "Edit Occurrence", edit_group_event_event_occurrence_path(@group.slug, @event, @event_occurrence), class: "btn btn-secondary" %>
-        <% if @event_occurrence.status == "scheduled" %>
+        <% if @event_occurrence.status == "scheduled" && @event_occurrence.start_time > Time.current %>
+          <%= button_to "Send Reminder",
+              send_reminder_group_event_event_occurrence_path(@group.slug, @event, @event_occurrence),
+              method: :post,
+              data: { confirm: "Send a 'Still on?' reminder to all members who haven't RSVPd?" },
+              class: "btn btn-primary" %>
           <%= button_to "Cancel Occurrence",
               cancel_group_event_event_occurrence_path(@group.slug, @event, @event_occurrence),
               method: :patch,

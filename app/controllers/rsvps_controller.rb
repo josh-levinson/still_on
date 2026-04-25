@@ -8,6 +8,15 @@ class RsvpsController < ApplicationController
     @rsvp = @event_occurrence.rsvps.new(rsvp_params)
     @rsvp.user = current_user
 
+    if @event_occurrence.full? && @rsvp.status == "attending"
+      redirect_to group_event_event_occurrence_path(
+        @event_occurrence.event.group.slug,
+        @event_occurrence.event,
+        @event_occurrence
+      ), alert: "Sorry, this event is full."
+      return
+    end
+
     if @rsvp.save
       redirect_to group_event_event_occurrence_path(
         @event_occurrence.event.group.slug,

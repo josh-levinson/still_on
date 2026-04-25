@@ -179,6 +179,53 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  # --- max attendees enforcement ---
+
+  test "create blocks new attending RSVP when event is full" do
+    full_occurrence = create_occurrence(@event, max_attendees: 1)
+    create_rsvp(full_occurrence, guest_name: "First", guest_phone: "+15550009999", guest_count: 0)
+    token = full_occurrence.invite_token
+
+    assert_no_difference "Rsvp.count" do
+      post guest_rsvp_path(token), params: {
+        rsvp: { status: "attending", guest_name: "Late Guest", guest_count: 0 }
+      }
+    end
+
+    assert_redirected_to guest_rsvp_path(token)
+    assert_match /full/i, flash[:alert]
+  end
+
+  test "create allows maybe RSVP when event is full" do
+    full_occurrence = create_occurrence(@event, max_attendees: 1)
+    create_rsvp(full_occurrence, guest_name: "First", guest_phone: "+15550009999", guest_count: 0)
+    token = full_occurrence.invite_token
+
+    assert_difference "Rsvp.count", 1 do
+      post guest_rsvp_path(token), params: {
+        rsvp: { status: "maybe", guest_name: "Maybe Guest", guest_count: 0 }
+      }
+    end
+
+    assert_redirected_to guest_rsvp_path(token)
+  end
+
+  test "create allows updating existing RSVP to attending when event is full" do
+    full_occurrence = create_occurrence(@event, max_attendees: 1)
+    phone = "+15550001234"
+    create_rsvp(full_occurrence, guest_name: "First", guest_phone: phone, guest_count: 0)
+    phone_token = full_occurrence.invite_token(phone: phone)
+
+    assert_no_difference "Rsvp.count" do
+      post guest_rsvp_path(phone_token), params: {
+        rsvp: { status: "attending", guest_name: "First", guest_phone: phone, guest_count: 0 }
+      }
+    end
+
+    assert_redirected_to guest_rsvp_path(phone_token)
+    assert flash[:alert].blank?
+  end
+
   # --- rsvp_confirmation_message: implicit else branch ---
 
   test "rsvp_confirmation_message returns nil for unrecognized status" do
