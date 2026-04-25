@@ -122,6 +122,37 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "submit_date stores submitted time in session" do
+    post onboarding_submit_date_path, params: { date: 1.week.from_now.to_date.to_s, time: "14:30" }
+    assert_equal "14:30", session[:ob_time]
+  end
+
+  test "submit_date defaults to 19:00 when no time param" do
+    post onboarding_submit_date_path, params: { date: 1.week.from_now.to_date.to_s }
+    assert_equal "19:00", session[:ob_time]
+  end
+
+  test "submit_date sanitizes invalid time to 19:00" do
+    post onboarding_submit_date_path, params: { date: 1.week.from_now.to_date.to_s, time: "garbage" }
+    assert_equal "19:00", session[:ob_time]
+  end
+
+  test "submit_date sanitizes out-of-range time to 19:00" do
+    post onboarding_submit_date_path, params: { date: 1.week.from_now.to_date.to_s, time: "25:00" }
+    assert_equal "19:00", session[:ob_time]
+  end
+
+  test "submit_cadence creates occurrence at the submitted time" do
+    post onboarding_submit_name_path, params: { first_name: "Alex", hangout_name: "Morning Run" }
+    post onboarding_submit_date_path, params: { date: 1.week.from_now.to_date.to_s, time: "08:00" }
+    SmsService.stub(:send_message, true) do
+      post onboarding_submit_cadence_path, params: { cadence: "none" }
+    end
+    occurrence = EventOccurrence.order(:created_at).last
+    assert_equal 8, occurrence.start_time.in_time_zone("UTC").hour
+    assert_equal 0, occurrence.start_time.in_time_zone("UTC").min
+  end
+
   # ---- GET /onboarding/cadence ----
 
   test "cadence renders step 3" do

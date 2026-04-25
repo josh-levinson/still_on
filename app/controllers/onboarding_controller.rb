@@ -56,6 +56,7 @@ class OnboardingController < ApplicationController
     end
 
     session[:ob_date] = date.to_s
+    session[:ob_time] = sanitize_time(params[:time])
     redirect_to onboarding_cadence_path
   end
 
@@ -185,6 +186,13 @@ class OnboardingController < ApplicationController
     ActiveSupport::TimeZone::MAPPING.key(iana_name) || "UTC"
   end
 
+  def sanitize_time(raw)
+    return "19:00" unless raw.to_s.match?(/\A\d{1,2}:\d{2}\z/)
+    h, m = raw.split(":").map(&:to_i)
+    return "19:00" unless (0..23).cover?(h) && (0..59).cover?(m)
+    format("%02d:%02d", h, m)
+  end
+
   def nth_weekday_n(date)
     ((date.day - 1) / 7) + 1
   end
@@ -200,7 +208,8 @@ class OnboardingController < ApplicationController
     date         = Date.parse(session[:ob_date])
     cadence      = session[:ob_cadence]
     time_zone    = session[:ob_time_zone].presence || "UTC"
-    start_time   = Time.use_zone(time_zone) { Time.zone.local(date.year, date.month, date.day, 19, 0, 0) }
+    hour, min    = (session[:ob_time].presence || "19:00").split(":").map(&:to_i)
+    start_time   = Time.use_zone(time_zone) { Time.zone.local(date.year, date.month, date.day, hour, min, 0) }
     end_time     = start_time + 2.hours
 
     slug = hangout_name.parameterize.presence || "hangout"

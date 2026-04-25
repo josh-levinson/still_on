@@ -161,6 +161,44 @@ class NewHangoutControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "submit_date stores submitted time in session" do
+    sign_in(@user)
+    post new_hangout_submit_name_path, params: { hangout_name: "Drinks" }
+    post new_hangout_submit_date_path, params: { date: 1.week.from_now.to_date.to_s, time: "14:30" }
+    assert_equal "14:30", session[:nh_time]
+  end
+
+  test "submit_date defaults to 19:00 when no time param" do
+    sign_in(@user)
+    post new_hangout_submit_name_path, params: { hangout_name: "Drinks" }
+    post new_hangout_submit_date_path, params: { date: 1.week.from_now.to_date.to_s }
+    assert_equal "19:00", session[:nh_time]
+  end
+
+  test "submit_date sanitizes invalid time to 19:00" do
+    sign_in(@user)
+    post new_hangout_submit_name_path, params: { hangout_name: "Drinks" }
+    post new_hangout_submit_date_path, params: { date: 1.week.from_now.to_date.to_s, time: "garbage" }
+    assert_equal "19:00", session[:nh_time]
+  end
+
+  test "submit_date sanitizes out-of-range time to 19:00" do
+    sign_in(@user)
+    post new_hangout_submit_name_path, params: { hangout_name: "Drinks" }
+    post new_hangout_submit_date_path, params: { date: 1.week.from_now.to_date.to_s, time: "25:00" }
+    assert_equal "19:00", session[:nh_time]
+  end
+
+  test "submit_cadence creates occurrence at the submitted time" do
+    sign_in(@user)
+    post new_hangout_submit_name_path, params: { hangout_name: "Morning Run" }
+    post new_hangout_submit_date_path, params: { date: 1.week.from_now.to_date.to_s, time: "08:00" }
+    post new_hangout_submit_cadence_path, params: { cadence: "none" }
+    occurrence = EventOccurrence.order(:created_at).last
+    assert_equal 8, occurrence.start_time.in_time_zone("UTC").hour
+    assert_equal 0, occurrence.start_time.in_time_zone("UTC").min
+  end
+
   # ---- GET /hangouts/new/cadence ----
 
   test "cadence renders step 3 when date is in session" do

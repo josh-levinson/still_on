@@ -1426,6 +1426,7 @@ a.btn-onboarding-primary:hover,
 
 .card-option,
 .quick-date-btn,
+.quick-time-btn,
 .cadence-btn {
   background: #141414;
   border: 1px solid #252525;
@@ -1442,12 +1443,14 @@ a.btn-onboarding-primary:hover,
 
 .card-option:hover,
 .quick-date-btn:hover,
+.quick-time-btn:hover,
 .cadence-btn:hover {
   border-color: #e8d5b0;
 }
 
 .card-option.selected,
 .quick-date-btn.selected,
+.quick-time-btn.selected,
 .cadence-btn.selected {
   border-color: #e8d5b0;
   background: #1c1a14;
@@ -1489,6 +1492,24 @@ a.btn-onboarding-primary:hover,
 }
 
 .custom-date-wrapper {
+  margin-top: 10px;
+}
+
+.time-picker-section {
+  margin-top: 28px;
+}
+
+.time-picker-label {
+  margin-bottom: 12px;
+}
+
+.time-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.custom-time-wrapper {
   margin-top: 10px;
 }
 
