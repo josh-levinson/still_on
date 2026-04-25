@@ -1,0 +1,37 @@
+<div data-controller="phone-input">
+  <div class="onboarding-card-header">
+    <h2>Create your account</h2>
+    <p>Enter your name and phone number and we'll text you a code to verify.</p>
+  </div>
+
+  <% if flash[:error].present? %>
+    <div class="onboarding-error"><%= flash[:error] %></div>
+  <% end %>
+
+  <% if notice.present? %>
+    <div class="onboarding-notice"><%= notice %></div>
+  <% end %>
+
+  <%= form_with url: account_claim_submit_phone_path, method: :post, class: "onboarding-form" do |f| %>
+    <%= f.text_field :first_name,
+          placeholder: "First name",
+          autocomplete: "given-name",
+          class: "onboarding-input",
+          required: true,
+          autofocus: true %>
+
+    <%= f.telephone_field :phone,
+          placeholder: "(555) 000-0000",
+          inputmode: "tel",
+          autocomplete: "tel-national",
+          class: "onboarding-input phone-field",
+          required: true,
+          data: { action: "input->phone-input#format", phone_input_target: "display" } %>
+
+    <%= f.submit "Send code →", class: "btn-onboarding-primary" %>
+  <% end %>
+
+  <p class="ob-annotation" style="margin-top: 1.5rem;">
+    Already have an account? <%= link_to "Sign in →", sign_in_path %>
+  </p>
+</div>

@@ -24,8 +24,8 @@
 
 - [x] **Time selection in onboarding/new-hangout wizard** — both wizards hardcode 7pm. Organizers who create morning or afternoon hangouts get the wrong time and must manually edit the occurrence after the fact with no prompt to do so.
 - [x] **"Add to calendar" on guest RSVP page** — after a guest confirms attendance, there's no way to get the event into their calendar. An ICS download or Google Calendar link would reduce no-shows.
-- [ ] **Profile/settings page** — no route or UI exists for organizers to edit their name once signed in.
-- [ ] **Guest account claim merge** — the post-RSVP nudge links to `/onboarding/phone`, which creates a new user rather than associating the account with prior guest RSVPs. Existing RSVPs stay orphaned.
+- [x] **Profile/settings page** — no route or UI exists for organizers to edit their name once signed in.
+- [x] **Guest account claim merge** — the post-RSVP nudge links to `/onboarding/phone`, which creates a new user rather than associating the account with prior guest RSVPs. Existing RSVPs stay orphaned.
 - [ ] **Avatar/photo upload** — `avatar_url` fields exist on User and Group but there's no upload mechanism. Currently the field is unused.
 
 - [x] Co-organizer support — promote/demote members to co-organizer via group members section

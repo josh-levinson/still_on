@@ -56,7 +56,8 @@
       "Bash(RAILS_ENV=test bin/rails test test/jobs/generate_recurring_occurrences_job_test.rb)",
       "Bash(xargs cat:*)",
       "Bash(bin/importmap pin:*)",
-      "Bash(bin/rails db:rollback STEP=1)"
+      "Bash(bin/rails db:rollback STEP=1)",
+      "Bash(sqlite3 /home/josh/code/still_on/db/development.sqlite3 \".schema users\")"
     ]
   }
 }

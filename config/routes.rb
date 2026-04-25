@@ -1,5 +1,10 @@
 Rails.application.routes.draw do
   delete "sign_out",        to: "sessions#destroy",       as: :sign_out
+  get  "claim",        to: "account_claims#new",           as: :new_account_claim
+  post "claim",        to: "account_claims#submit_phone",  as: :account_claim_submit_phone
+  get  "claim/verify", to: "account_claims#verify",        as: :account_claim_verify
+  post "claim/verify", to: "account_claims#submit_verify", as: :account_claim_submit_verify
+
   get    "sign_in",         to: "sessions#phone",         as: :sign_in
   post   "sign_in",         to: "sessions#submit_phone",  as: :sign_in_submit_phone
   get    "sign_in/verify",  to: "sessions#verify",        as: :sign_in_verify
@@ -50,6 +55,7 @@ Rails.application.routes.draw do
 
   get "dashboard", to: "posts#index", as: :dashboard
 
+  resource :user, only: [ :edit, :update ]
   resource :notification_preference, only: [ :edit, :update ]
 
   # Defines the root path route ("/")
