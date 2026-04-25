@@ -56,10 +56,11 @@ Rails.application.routes.draw do
   root "onboarding#splash"
 
   # Public guest RSVP — no account required
-  get  "rsvp/resend", to: "guest_rsvp_resends#new",    as: :new_guest_rsvp_resend
-  post "rsvp/resend", to: "guest_rsvp_resends#create", as: :guest_rsvp_resend
-  get  "rsvp/:token", to: "guest_rsvps#show",          as: :guest_rsvp
-  post "rsvp/:token", to: "guest_rsvps#create"
+  get  "rsvp/resend",              to: "guest_rsvp_resends#new",    as: :new_guest_rsvp_resend
+  post "rsvp/resend",              to: "guest_rsvp_resends#create", as: :guest_rsvp_resend
+  get  "rsvp/:token/calendar.ics", to: "guest_rsvps#calendar",      as: :guest_rsvp_calendar
+  get  "rsvp/:token",              to: "guest_rsvps#show",          as: :guest_rsvp
+  post "rsvp/:token",              to: "guest_rsvps#create"
 
   # Nested resources for groups, events, occurrences, and RSVPs
   resources :groups, param: :slug do

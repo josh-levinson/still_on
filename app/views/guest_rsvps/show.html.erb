@@ -54,6 +54,19 @@
       </div>
     <% end %>
 
+    <%# ── Add to calendar (attending/maybe only) ── %>
+    <% if @existing_rsvp&.status.in?(%w[attending maybe]) %>
+      <div class="rsvp-add-to-calendar">
+        <%= link_to "Add to Google Calendar",
+              google_calendar_url(@event_occurrence, @event),
+              target: "_blank", rel: "noopener noreferrer",
+              class: "rsvp-calendar-btn" %>
+        <%= link_to "Download .ics",
+              guest_rsvp_calendar_path(@token),
+              class: "rsvp-calendar-btn rsvp-calendar-btn--secondary" %>
+      </div>
+    <% end %>
+
     <%# ── RSVP form ── %>
     <%= form_with url: guest_rsvp_path(@token), method: :post, local: true, class: "rsvp-form" do |f| %>
       <% if @rsvp.errors.any? %>

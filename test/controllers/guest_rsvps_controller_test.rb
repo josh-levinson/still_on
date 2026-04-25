@@ -226,6 +226,48 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
     assert flash[:alert].blank?
   end
 
+  # --- calendar (ICS download) ---
+
+  test "calendar returns an ICS file for a valid token" do
+    get guest_rsvp_calendar_path(@token)
+    assert_response :success
+    assert_equal "text/calendar", response.content_type
+    assert_includes response.body, "BEGIN:VCALENDAR"
+    assert_includes response.body, "BEGIN:VEVENT"
+    assert_includes response.body, "END:VEVENT"
+    assert_includes response.body, @occurrence.id
+  end
+
+  test "calendar includes event title and occurrence times" do
+    get guest_rsvp_calendar_path(@token)
+    assert_includes response.body, "SUMMARY:#{@event.title}"
+    assert_includes response.body, @occurrence.start_time.utc.strftime("%Y%m%dT%H%M%SZ")
+    assert_includes response.body, @occurrence.end_time.utc.strftime("%Y%m%dT%H%M%SZ")
+  end
+
+  test "calendar includes location when present" do
+    @occurrence.update!(location: "Central Park")
+    get guest_rsvp_calendar_path(@token)
+    assert_includes response.body, "LOCATION:Central Park"
+  end
+
+  test "calendar includes notes in description when present" do
+    @occurrence.update!(notes: "Bring snacks")
+    get guest_rsvp_calendar_path(@token)
+    assert_includes response.body, "DESCRIPTION:Bring snacks"
+  end
+
+  test "calendar omits description when notes are blank" do
+    @occurrence.update!(notes: nil)
+    get guest_rsvp_calendar_path(@token)
+    assert_not_includes response.body, "DESCRIPTION:"
+  end
+
+  test "calendar returns 404 for an invalid token" do
+    get guest_rsvp_calendar_path("bad-token")
+    assert_response :not_found
+  end
+
   # --- rsvp_confirmation_message: implicit else branch ---
 
   test "rsvp_confirmation_message returns nil for unrecognized status" do

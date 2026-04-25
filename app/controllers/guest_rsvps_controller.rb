@@ -8,6 +8,11 @@ class GuestRsvpsController < ApplicationController
     @cookie_phone = cookies[:guest_phone]
   end
 
+  def calendar
+    filename = "#{@event.title.parameterize}-#{@event_occurrence.start_time.strftime('%Y%m%d')}.ics"
+    send_data build_ics, filename: filename, type: "text/calendar", disposition: "attachment"
+  end
+
   def create
     @existing_rsvp = find_existing_rsvp
 
@@ -103,5 +108,31 @@ class GuestRsvpsController < ApplicationController
     when "maybe"     then "Got it — marked as maybe."
     when "declined"  then "No worries, you're marked as not coming."
     end
+  end
+
+  def build_ics
+    start_utc = @event_occurrence.start_time.utc
+    end_utc   = @event_occurrence.end_time.utc
+    lines = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//StillOn//EN",
+      "CALSCALE:GREGORIAN",
+      "METHOD:PUBLISH",
+      "BEGIN:VEVENT",
+      "DTSTART:#{start_utc.strftime('%Y%m%dT%H%M%SZ')}",
+      "DTEND:#{end_utc.strftime('%Y%m%dT%H%M%SZ')}",
+      "SUMMARY:#{ics_escape(@event.title)}",
+      "UID:#{@event_occurrence.id}@stilon"
+    ]
+    lines << "LOCATION:#{ics_escape(@event_occurrence.location)}" if @event_occurrence.location.present?
+    lines << "DESCRIPTION:#{ics_escape(@event_occurrence.notes)}" if @event_occurrence.notes.present?
+    lines << "END:VEVENT"
+    lines << "END:VCALENDAR"
+    lines.join("\r\n") + "\r\n"
+  end
+
+  def ics_escape(text)
+    text.to_s.gsub("\\", "\\\\").gsub(",", "\\,").gsub(";", "\\;").gsub("\n", "\\n")
   end
 end
