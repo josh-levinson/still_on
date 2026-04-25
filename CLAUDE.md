@@ -117,6 +117,7 @@ Groups have an `is_private` flag. Public groups are browsable via `/groups/disco
 - Tests run in parallel (`:number_of_processors`)
 - System tests available via Capybara + Selenium
 - To find uncovered lines/branches after a test run, read `coverage/.resultset.json` — do not try to parse `coverage/index.html`
+- **All new feature work must ship with complete test coverage.** After implementing a feature, run the test suite and check `coverage/.resultset.json` for any uncovered lines or branches introduced by the change. Do not consider a feature complete until coverage is at 100% for the new code.
 
 ---
 
