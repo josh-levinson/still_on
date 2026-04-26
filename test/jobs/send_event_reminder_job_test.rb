@@ -33,7 +33,22 @@ class SendEventReminderJobTest < ActiveSupport::TestCase
     assert_equal 1, messages.length
   end
 
-  test "does not send SMS to declined RSVPs" do
+  test "does not send SMS to non-organizer declined RSVPs" do
+    other = create_user(phone_number: "+15550000020", phone_verified_at: Time.current)
+    @group.group_memberships.create!(user: other)
+    create_rsvp(@occurrence, user: other, status: "declined")
+    create_rsvp(@occurrence, user: @user, status: "attending")
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendEventReminderJob.perform_now(@occurrence.id)
+    end
+
+    assert_equal 1, messages.length
+    assert_equal @user.phone_number, messages.first[:to]
+  end
+
+  test "always sends day-of reminder to organizer even if they declined" do
     create_rsvp(@occurrence, user: @user, status: "declined")
 
     messages = []
@@ -41,7 +56,33 @@ class SendEventReminderJobTest < ActiveSupport::TestCase
       SendEventReminderJob.perform_now(@occurrence.id)
     end
 
-    assert_empty messages
+    assert_equal 1, messages.length
+    assert_equal @user.phone_number, messages.first[:to]
+  end
+
+  test "always sends day-of reminder to organizer even without an RSVP" do
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendEventReminderJob.perform_now(@occurrence.id)
+    end
+
+    assert_equal 1, messages.length
+    assert_equal @user.phone_number, messages.first[:to]
+  end
+
+  test "skips organizer for day-of reminder when they have no contact info" do
+    @user.update!(phone_number: nil)
+    guest = create_user(phone_number: "+15550000020", phone_verified_at: Time.current)
+    create_rsvp(@occurrence, user: guest, status: "attending")
+    @group.group_memberships.create!(user: guest)
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendEventReminderJob.perform_now(@occurrence.id)
+    end
+
+    assert_equal 1, messages.length
+    assert_equal guest.phone_number, messages.first[:to]
   end
 
   test "sends SMS to guests via guest_phone" do
@@ -52,8 +93,7 @@ class SendEventReminderJobTest < ActiveSupport::TestCase
       SendEventReminderJob.perform_now(@occurrence.id)
     end
 
-    assert_equal 1, messages.length
-    assert_equal "+15550000099", messages.first[:to]
+    assert messages.any? { |m| m[:to] == "+15550000099" }, "expected guest to receive reminder"
   end
 
   test "includes location in message when present" do
@@ -119,13 +159,15 @@ class SendEventReminderJobTest < ActiveSupport::TestCase
   test "skips user RSVPs with no phone and no email" do
     no_contact = create_user(phone_number: nil)
     create_rsvp(@occurrence, user: no_contact, status: "attending")
+    create_rsvp(@occurrence, user: @user, status: "attending")
 
     messages = []
     SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
       SendEventReminderJob.perform_now(@occurrence.id)
     end
 
-    assert_empty messages
+    assert_equal 1, messages.length
+    assert_equal @user.phone_number, messages.first[:to]
   end
 
   test "skips opted-out phone numbers" do
@@ -173,7 +215,6 @@ class SendEventReminderJobTest < ActiveSupport::TestCase
       SendEventReminderJob.perform_now(@occurrence.id)
     end
 
-    assert_equal 1, messages.length
-    assert_equal "+15550000099", messages.first[:to]
+    assert messages.any? { |m| m[:to] == "+15550000099" }, "expected guest to receive reminder"
   end
 end

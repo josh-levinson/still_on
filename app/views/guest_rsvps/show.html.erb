@@ -121,7 +121,7 @@
           <div class="rsvp-field rsvp-future-reminders">
             <label class="rsvp-checkbox-label">
               <%= check_box_tag :send_future_reminders, "1",
-                    GuestGroupSubscription.exists?(group: @group, phone_number: @prefilled_phone),
+                    true,
                     class: "rsvp-checkbox" %>
               Text me a reminder to RSVP for future <%= @group.name %> events
             </label>
@@ -145,7 +145,7 @@
           <div class="rsvp-field rsvp-future-reminders">
             <label class="rsvp-checkbox-label">
               <%= check_box_tag :send_future_reminders, "1",
-                    existing_phone.present? && GuestGroupSubscription.exists?(group: @group, phone_number: existing_phone),
+                    true,
                     class: "rsvp-checkbox" %>
               Text me a reminder to RSVP for future <%= @group.name %> events
             </label>

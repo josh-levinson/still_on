@@ -239,46 +239,91 @@ class EventOccurrencesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "scheduled", @occurrence.reload.status
   end
 
-  # ---- POST /groups/:group_slug/events/:event_id/event_occurrences/:id/send_reminder ----
+  # ---- POST send_rsvp_reminder ----
 
-  test "send_reminder requires sign-in" do
-    post send_reminder_group_event_event_occurrence_path(@group, @event, @occurrence)
+  test "send_rsvp_reminder requires sign-in" do
+    post send_rsvp_reminder_group_event_event_occurrence_path(@group, @event, @occurrence)
     assert_redirected_to onboarding_splash_path
   end
 
-  test "send_reminder enqueues job and redirects for organizer" do
+  test "send_rsvp_reminder enqueues job and redirects for organizer" do
     sign_in(@organizer)
     assert_enqueued_with(job: SendRsvpReminderJob, args: [ @occurrence.id ]) do
-      post send_reminder_group_event_event_occurrence_path(@group, @event, @occurrence)
+      post send_rsvp_reminder_group_event_event_occurrence_path(@group, @event, @occurrence)
     end
     assert_redirected_to group_event_event_occurrence_path(@group, @event, @occurrence)
-    assert_match /reminder will be sent/i, flash[:notice]
+    assert_match /rsvp reminder will be sent/i, flash[:notice]
   end
 
-  test "send_reminder is forbidden for non-organizer" do
+  test "send_rsvp_reminder is forbidden for non-organizer" do
     sign_in(@other)
     assert_no_enqueued_jobs only: SendRsvpReminderJob do
-      post send_reminder_group_event_event_occurrence_path(@group, @event, @occurrence)
+      post send_rsvp_reminder_group_event_event_occurrence_path(@group, @event, @occurrence)
     end
     assert_redirected_to group_event_event_occurrence_path(@group, @event, @occurrence)
     assert_match /not authorized/i, flash[:alert]
   end
 
-  test "send_reminder alerts when occurrence is not scheduled" do
+  test "send_rsvp_reminder alerts when occurrence is not scheduled" do
     @occurrence.update!(status: "cancelled")
     sign_in(@organizer)
     assert_no_enqueued_jobs only: SendRsvpReminderJob do
-      post send_reminder_group_event_event_occurrence_path(@group, @event, @occurrence)
+      post send_rsvp_reminder_group_event_event_occurrence_path(@group, @event, @occurrence)
     end
     assert_redirected_to group_event_event_occurrence_path(@group, @event, @occurrence)
     assert_match /upcoming scheduled/i, flash[:alert]
   end
 
-  test "send_reminder alerts when occurrence is in the past" do
+  test "send_rsvp_reminder alerts when occurrence is in the past" do
     @occurrence.update!(start_time: 1.day.ago, end_time: 1.day.ago + 2.hours)
     sign_in(@organizer)
     assert_no_enqueued_jobs only: SendRsvpReminderJob do
-      post send_reminder_group_event_event_occurrence_path(@group, @event, @occurrence)
+      post send_rsvp_reminder_group_event_event_occurrence_path(@group, @event, @occurrence)
+    end
+    assert_redirected_to group_event_event_occurrence_path(@group, @event, @occurrence)
+    assert_match /upcoming scheduled/i, flash[:alert]
+  end
+
+  # ---- POST send_event_reminder ----
+
+  test "send_event_reminder requires sign-in" do
+    post send_event_reminder_group_event_event_occurrence_path(@group, @event, @occurrence)
+    assert_redirected_to onboarding_splash_path
+  end
+
+  test "send_event_reminder enqueues job and redirects for organizer" do
+    sign_in(@organizer)
+    assert_enqueued_with(job: SendEventReminderJob, args: [ @occurrence.id ]) do
+      post send_event_reminder_group_event_event_occurrence_path(@group, @event, @occurrence)
+    end
+    assert_redirected_to group_event_event_occurrence_path(@group, @event, @occurrence)
+    assert_match /day-of reminder will be sent/i, flash[:notice]
+  end
+
+  test "send_event_reminder is forbidden for non-organizer" do
+    sign_in(@other)
+    assert_no_enqueued_jobs only: SendEventReminderJob do
+      post send_event_reminder_group_event_event_occurrence_path(@group, @event, @occurrence)
+    end
+    assert_redirected_to group_event_event_occurrence_path(@group, @event, @occurrence)
+    assert_match /not authorized/i, flash[:alert]
+  end
+
+  test "send_event_reminder alerts when occurrence is not scheduled" do
+    @occurrence.update!(status: "cancelled")
+    sign_in(@organizer)
+    assert_no_enqueued_jobs only: SendEventReminderJob do
+      post send_event_reminder_group_event_event_occurrence_path(@group, @event, @occurrence)
+    end
+    assert_redirected_to group_event_event_occurrence_path(@group, @event, @occurrence)
+    assert_match /upcoming scheduled/i, flash[:alert]
+  end
+
+  test "send_event_reminder alerts when occurrence is in the past" do
+    @occurrence.update!(start_time: 1.day.ago, end_time: 1.day.ago + 2.hours)
+    sign_in(@organizer)
+    assert_no_enqueued_jobs only: SendEventReminderJob do
+      post send_event_reminder_group_event_event_occurrence_path(@group, @event, @occurrence)
     end
     assert_redirected_to group_event_event_occurrence_path(@group, @event, @occurrence)
     assert_match /upcoming scheduled/i, flash[:alert]

@@ -3,11 +3,11 @@ class SendEventReminderJob < ApplicationJob
 
   def perform(event_occurrence_id)
     occurrence = EventOccurrence
-      .includes(event: :group, rsvps: :user)
+      .includes(event: [ :group, :created_by ], rsvps: :user)
       .find(event_occurrence_id)
 
     return unless occurrence.status == "scheduled"
-    return if occurrence.start_time <= Time.current
+    return if occurrence.start_time < Time.current
 
     event = occurrence.event
     local_time = occurrence.start_time.in_time_zone(event.group.time_zone)
@@ -25,7 +25,7 @@ class SendEventReminderJob < ApplicationJob
   private
 
   def confirmed_recipients(occurrence)
-    occurrence.rsvps.where(status: %w[attending maybe]).includes(:user).filter_map do |rsvp|
+    recipients = occurrence.rsvps.where(status: %w[attending maybe]).includes(:user).filter_map do |rsvp|
       if rsvp.user.present?
         next unless NotificationPreference.allows?(rsvp.user, :event_day_reminders)
         phone = rsvp.user.phone_number.presence
@@ -39,6 +39,20 @@ class SendEventReminderJob < ApplicationJob
 
       { phone: phone, email: email }
     end
+
+    ensure_organizer_included(recipients, occurrence)
+  end
+
+  def ensure_organizer_included(recipients, occurrence)
+    organizer = occurrence.event.created_by
+    return recipients unless NotificationPreference.allows?(organizer, :event_day_reminders)
+
+    phone = organizer.phone_number.presence
+    email = organizer.email.presence
+    return recipients if phone.blank? && email.blank?
+    return recipients if phone && recipients.any? { |r| r[:phone] == phone }
+
+    recipients << { phone: phone, email: email }
   end
 
   def build_message(title, time_str, location)

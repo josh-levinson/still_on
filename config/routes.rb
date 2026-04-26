@@ -84,7 +84,8 @@ Rails.application.routes.draw do
       resources :event_occurrences do
         member do
           patch :cancel
-          post  :send_reminder
+          post  :send_rsvp_reminder
+          post  :send_event_reminder
         end
         resources :rsvps, only: [ :create, :update, :destroy ]
       end
