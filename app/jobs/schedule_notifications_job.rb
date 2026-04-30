@@ -3,43 +3,58 @@ class ScheduleNotificationsJob < ApplicationJob
 
   EVENT_REMINDER_MIN_HOURS_AHEAD = 3
   QUORUM_ALERT_HOURS_BEFORE = 24
+  LOCAL_DELIVERY_HOUR = 9
 
   def perform
-    schedule_rsvp_reminders
-    schedule_event_reminders
-    schedule_quorum_alerts
+    Group.find_each do |group|
+      schedule_rsvp_reminders(group)
+      schedule_event_reminders(group)
+      schedule_quorum_alerts(group)
+    end
   end
 
   private
 
-  def schedule_rsvp_reminders
-    Group.distinct.pluck(:reminder_days_before).each do |days|
-      window = days_from_now_window(days)
-      EventOccurrence.scheduled
-        .joins(event: :group)
-        .where(groups: { reminder_days_before: days }, start_time: window)
-        .each { |occurrence| SendRsvpReminderJob.perform_later(occurrence.id) }
+  def schedule_rsvp_reminders(group)
+    target = group.reminder_days_before.days.from_now.in_time_zone(group.time_zone)
+    window = target.beginning_of_day..target.end_of_day
+    deliver_at = local_delivery_time(group)
+
+    occurrences_for(group, window).each do |occurrence|
+      SendRsvpReminderJob.set(wait_until: deliver_at).perform_later(occurrence.id)
     end
   end
 
-  def schedule_event_reminders
-    window = EVENT_REMINDER_MIN_HOURS_AHEAD.hours.from_now..Time.current.end_of_day
-    EventOccurrence.scheduled.where(start_time: window).each do |occurrence|
-      SendEventReminderJob.perform_later(occurrence.id)
+  def schedule_event_reminders(group)
+    now_local = Time.current.in_time_zone(group.time_zone)
+    window = (Time.current + EVENT_REMINDER_MIN_HOURS_AHEAD.hours)..now_local.end_of_day
+    deliver_at = local_delivery_time(group)
+
+    occurrences_for(group, window).each do |occurrence|
+      SendEventReminderJob.set(wait_until: deliver_at).perform_later(occurrence.id)
     end
   end
 
-  def schedule_quorum_alerts
+  def schedule_quorum_alerts(group)
     window = QUORUM_ALERT_HOURS_BEFORE.hours.from_now..(QUORUM_ALERT_HOURS_BEFORE + 2).hours.from_now
-    EventOccurrence.scheduled.includes(:event).where(start_time: window).each do |occurrence|
+    deliver_at = local_delivery_time(group)
+
+    occurrences_for(group, window).includes(:event).each do |occurrence|
       next if occurrence.event.quorum.blank?
 
-      SendQuorumAlertJob.perform_later(occurrence.id)
+      SendQuorumAlertJob.set(wait_until: deliver_at).perform_later(occurrence.id)
     end
   end
 
-  def days_from_now_window(days)
-    target = days.days.from_now
-    target.beginning_of_day..target.end_of_day
+  def occurrences_for(group, window)
+    EventOccurrence.scheduled
+      .joins(:event)
+      .where(events: { group_id: group.id }, start_time: window)
+  end
+
+  def local_delivery_time(group)
+    now_local = Time.current.in_time_zone(group.time_zone)
+    target = now_local.change(hour: LOCAL_DELIVERY_HOUR)
+    target < now_local ? Time.current : target
   end
 end
