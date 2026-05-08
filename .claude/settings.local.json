@@ -57,7 +57,8 @@
       "Bash(xargs cat:*)",
       "Bash(bin/importmap pin:*)",
       "Bash(bin/rails db:rollback STEP=1)",
-      "Bash(sqlite3 /home/josh/code/still_on/db/development.sqlite3 \".schema users\")"
+      "Bash(sqlite3 /home/josh/code/still_on/db/development.sqlite3 \".schema users\")",
+      "Bash(bin/rails credentials:show)"
     ]
   }
 }
