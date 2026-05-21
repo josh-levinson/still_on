@@ -61,6 +61,15 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
     assert_match /you're in/i, flash[:notice]
   end
 
+  test "show finds existing RSVP via session after name-only submission" do
+    post guest_rsvp_path(@token), params: {
+      rsvp: { status: "attending", guest_name: "No Phone Guest", guest_count: 0 }
+    }
+    follow_redirect!
+    assert_response :success
+    assert_select ".rsvp-confirmed"
+  end
+
   test "create saves a declined RSVP and shows appropriate notice" do
     post guest_rsvp_path(@token), params: {
       rsvp: { status: "declined", guest_name: "Declining Guest", guest_count: 0 }

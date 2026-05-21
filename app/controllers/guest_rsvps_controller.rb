@@ -41,6 +41,7 @@ class GuestRsvpsController < ApplicationController
     end
 
     if @rsvp.save
+      session[:recent_rsvp_id] = @rsvp.id
       save_phone_cookie(@rsvp.guest_phone)
       update_future_reminder_subscription(@rsvp.guest_phone)
       redirect_to guest_rsvp_path(@token), notice: rsvp_confirmation_message(@rsvp)
@@ -81,7 +82,8 @@ class GuestRsvpsController < ApplicationController
       @event_occurrence.rsvps.find_by(user_id: current_user.id)
     else
       phone = @prefilled_phone.presence || cookies[:guest_phone].presence
-      @event_occurrence.rsvps.find_by(guest_phone: phone) if phone.present?
+      rsvp = @event_occurrence.rsvps.find_by(guest_phone: phone) if phone.present?
+      rsvp || @event_occurrence.rsvps.find_by(id: session[:recent_rsvp_id])
     end
   end
 
