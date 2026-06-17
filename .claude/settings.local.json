@@ -65,7 +65,9 @@
       "Bash(docker compose *)",
       "Bash(docker exec *)",
       "Bash(:)",
-      "Bash(timeout 180 bin/rails db:prepare)"
+      "Bash(timeout 180 bin/rails db:prepare)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
