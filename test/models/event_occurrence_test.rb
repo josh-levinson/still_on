@@ -156,34 +156,48 @@ class EventOccurrenceTest < ActiveSupport::TestCase
 
   # --- invite_token / find_by_invite_token ---
 
-  test "invite_token generates a URL-safe token" do
-    token = @occurrence.invite_token
-    assert_match(/\A[A-Za-z0-9_-]+\z/, token)
+  test "invite_token is generated on create and is short and URL-safe" do
+    assert_match(/\A[A-Za-z0-9_-]+\z/, @occurrence.invite_token)
+    assert @occurrence.invite_token.length <= 16, "token should be short"
+  end
+
+  test "invite_token is unique across occurrences" do
+    other = @occurrence.event.event_occurrences.create!(
+      start_time: 1.day.from_now, end_time: 1.day.from_now + 1.hour, status: "scheduled"
+    )
+    assert_not_equal @occurrence.invite_token, other.invite_token
+  end
+
+  test "an explicitly set invite_token is preserved" do
+    occ = @occurrence.event.event_occurrences.new(
+      start_time: 2.days.from_now, end_time: 2.days.from_now + 1.hour,
+      status: "scheduled", invite_token: "custom-token-123"
+    )
+    occ.save!
+    assert_equal "custom-token-123", occ.invite_token
+  end
+
+  test "invite_token generation retries on collision" do
+    taken = @occurrence.invite_token
+    candidates = [ taken, "fresh-unique-token" ]
+    SecureRandom.stub(:urlsafe_base64, ->(*) { candidates.shift }) do
+      occ = @event.event_occurrences.create!(
+        start_time: 3.days.from_now, end_time: 3.days.from_now + 1.hour, status: "scheduled"
+      )
+      assert_equal "fresh-unique-token", occ.invite_token
+    end
   end
 
   test "find_by_invite_token returns the occurrence" do
-    token = @occurrence.invite_token
-    found, phone = EventOccurrence.find_by_invite_token(token)
+    found = EventOccurrence.find_by_invite_token(@occurrence.invite_token)
     assert_equal @occurrence.id, found.id
-    assert_nil phone
   end
 
-  test "invite_token can encode a phone number" do
-    token = @occurrence.invite_token(phone: "+15551234567")
-    found, phone = EventOccurrence.find_by_invite_token(token)
-    assert_equal @occurrence.id, found.id
-    assert_equal "+15551234567", phone
-  end
-
-  test "find_by_invite_token returns nil for a tampered token" do
-    found, phone = EventOccurrence.find_by_invite_token("not-a-real-token")
-    assert_nil found
-    assert_nil phone
+  test "find_by_invite_token returns nil for an unknown token" do
+    assert_nil EventOccurrence.find_by_invite_token("not-a-real-token")
   end
 
   test "find_by_invite_token returns nil for empty string" do
-    found, phone = EventOccurrence.find_by_invite_token("")
-    assert_nil found
-    assert_nil phone
+    assert_nil EventOccurrence.find_by_invite_token("")
   end
 end

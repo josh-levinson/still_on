@@ -67,8 +67,8 @@ class SendEventChangeNotificationJob < ApplicationJob
   end
 
   def rsvp_url_for(occurrence, phone: nil)
-    token = occurrence.invite_token(phone: phone)
     url_options = Rails.application.config.action_mailer.default_url_options
-    Rails.application.routes.url_helpers.guest_rsvp_url(token, **url_options)
+    url_options = url_options.merge(p: phone) if phone.present?
+    Rails.application.routes.url_helpers.guest_rsvp_url(occurrence.invite_token, **url_options)
   end
 end

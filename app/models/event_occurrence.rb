@@ -2,6 +2,8 @@ class EventOccurrence < ApplicationRecord
   belongs_to :event
   has_many :rsvps, dependent: :destroy
 
+  before_create :ensure_invite_token
+
   validates :start_time, presence: true
   validates :end_time, presence: true
   validates :status, presence: true, inclusion: { in: %w[scheduled cancelled completed] }
@@ -35,26 +37,24 @@ class EventOccurrence < ApplicationRecord
     max_attendees.present? && attending_count >= max_attendees
   end
 
-  # Signed invite token — encodes this occurrence's ID and an optional phone
-  # number for SMS recipients. URL-safe via outer Base64 encoding.
-  def invite_token(phone: nil)
-    payload = { oid: id.to_s }
-    payload[:phone] = phone if phone.present?
-    raw = Rails.application.message_verifier(:guest_rsvp).generate(payload)
-    Base64.urlsafe_encode64(raw, padding: false)
-  end
-
+  # Look up an occurrence by its short, random invite token. Returns nil when
+  # the token is blank or doesn't match a record. Phone prefill for SMS
+  # recipients is handled separately via a query param, not the token.
   def self.find_by_invite_token(token)
-    raw = Base64.urlsafe_decode64(token)
-    payload = Rails.application.message_verifier(:guest_rsvp).verify(raw)
-    occurrence = find(payload["oid"])
-    [ occurrence, payload["phone"] ]
-  rescue ActiveSupport::MessageVerifier::InvalidSignature, ArgumentError,
-         ActiveRecord::RecordNotFound
-    [ nil, nil ]
+    return nil if token.blank?
+    find_by(invite_token: token)
   end
 
   private
+
+  def ensure_invite_token
+    return if invite_token.present?
+
+    self.invite_token = loop do
+      candidate = SecureRandom.urlsafe_base64(8)
+      break candidate unless self.class.exists?(invite_token: candidate)
+    end
+  end
 
   def end_time_after_start_time
     return unless start_time.present? && end_time.present?

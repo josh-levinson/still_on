@@ -54,7 +54,8 @@ class GuestRsvpsController < ApplicationController
 
   def load_occurrence_from_token
     @token = params[:token]
-    @event_occurrence, @prefilled_phone = EventOccurrence.find_by_invite_token(@token)
+    @event_occurrence = EventOccurrence.find_by_invite_token(@token)
+    @prefilled_phone = params[:p].presence
 
     if @event_occurrence.nil?
       render plain: "This invite link is invalid or has expired.", status: :not_found

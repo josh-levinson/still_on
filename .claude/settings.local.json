@@ -58,7 +58,14 @@
       "Bash(bin/importmap pin:*)",
       "Bash(bin/rails db:rollback STEP=1)",
       "Bash(sqlite3 /home/josh/code/still_on/db/development.sqlite3 \".schema users\")",
-      "Bash(bin/rails credentials:show)"
+      "Bash(bin/rails credentials:show)",
+      "Bash(service postgresql *)",
+      "Bash(docker --version)",
+      "Bash(docker info *)",
+      "Bash(docker compose *)",
+      "Bash(docker exec *)",
+      "Bash(:)",
+      "Bash(timeout 180 bin/rails db:prepare)"
     ]
   }
 }

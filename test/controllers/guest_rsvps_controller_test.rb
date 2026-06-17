@@ -7,7 +7,7 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
     @event = create_event(@group, @organizer)
     @occurrence = create_occurrence(@event)
     @token = @occurrence.invite_token
-    @phone_token = @occurrence.invite_token(phone: "+15550001234")
+    @phone = "+15550001234"
   end
 
   # --- show ---
@@ -27,15 +27,15 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  test "show succeeds with a phone-specific token" do
-    get guest_rsvp_path(@phone_token)
+  test "show succeeds with a prefilled phone param" do
+    get guest_rsvp_path(@token, p: @phone)
     assert_response :success
   end
 
-  test "show succeeds when a matching guest RSVP already exists for the phone token" do
-    Rsvp.create!(event_occurrence: @occurrence, guest_name: "Phone Guest", guest_phone: "+15550001234",
+  test "show succeeds when a matching guest RSVP already exists for the prefilled phone" do
+    Rsvp.create!(event_occurrence: @occurrence, guest_name: "Phone Guest", guest_phone: @phone,
                  status: "attending", guest_count: 0)
-    get guest_rsvp_path(@phone_token)
+    get guest_rsvp_path(@token, p: @phone)
     assert_response :success
   end
 
@@ -100,13 +100,13 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
     assert_nil rsvp.guest_name
   end
 
-  test "create with phone token prefills guest_phone" do
-    post guest_rsvp_path(@phone_token), params: {
-      rsvp: { status: "attending", guest_name: "Phone RSVP", guest_phone: "+15550001234", guest_count: 0 }
+  test "create with prefilled phone saves guest_phone" do
+    post guest_rsvp_path(@token, p: @phone), params: {
+      rsvp: { status: "attending", guest_name: "Phone RSVP", guest_phone: @phone, guest_count: 0 }
     }
-    assert_redirected_to guest_rsvp_path(@phone_token)
+    assert_redirected_to guest_rsvp_path(@token)
     rsvp = Rsvp.last
-    assert_equal "+15550001234", rsvp.guest_phone
+    assert_equal @phone, rsvp.guest_phone
   end
 
   # --- create (update existing) ---
@@ -116,12 +116,12 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
                             guest_phone: "+15550001234", status: "attending", guest_count: 0)
 
     assert_no_difference "Rsvp.count" do
-      post guest_rsvp_path(@phone_token), params: {
+      post guest_rsvp_path(@token, p: @phone), params: {
         rsvp: { status: "declined", guest_name: "Phone Guest", guest_phone: "+15550001234", guest_count: 0 }
       }
     end
 
-    assert_redirected_to guest_rsvp_path(@phone_token)
+    assert_redirected_to guest_rsvp_path(@token)
     assert_equal "declined", existing.reload.status
   end
 
@@ -146,7 +146,7 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
     existing = Rsvp.create!(event_occurrence: @occurrence, guest_name: "Phone Guest",
                             guest_phone: "+15550001234", status: "attending", guest_count: 0)
 
-    post guest_rsvp_path(@phone_token), params: {
+    post guest_rsvp_path(@token, p: @phone), params: {
       rsvp: { status: "invalid_status", guest_name: "Phone Guest", guest_count: 0 }
     }
     assert_response :unprocessable_entity
@@ -157,7 +157,7 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
 
   test "create with send_future_reminders subscribes the guest to future reminders" do
     assert_difference "GuestGroupSubscription.count", 1 do
-      post guest_rsvp_path(@phone_token), params: {
+      post guest_rsvp_path(@token, p: @phone), params: {
         rsvp: { status: "attending", guest_name: "Sub Guest", guest_phone: "+15550001234", guest_count: 0 },
         send_future_reminders: "1"
       }
@@ -170,8 +170,8 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
     # Create RSVP with the phone that will end up in cookie
     Rsvp.create!(event_occurrence: @occurrence, guest_name: "Cookie Person",
                  guest_phone: "+15550001234", status: "attending", guest_count: 0)
-    # POST with phone_token sets the guest_phone cookie
-    post guest_rsvp_path(@phone_token), params: {
+    # POST with prefilled phone sets the guest_phone cookie
+    post guest_rsvp_path(@token, p: @phone), params: {
       rsvp: { status: "attending", guest_name: "Cookie Person", guest_count: 0 }
     }
     # GET with base token (no phone) — finds RSVP via cookie fallback
@@ -214,15 +214,15 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
     full_occurrence = create_occurrence(@event, max_attendees: 1)
     phone = "+15550001234"
     create_rsvp(full_occurrence, guest_name: "First", guest_phone: phone, guest_count: 0)
-    phone_token = full_occurrence.invite_token(phone: phone)
+    token = full_occurrence.invite_token
 
     assert_no_difference "Rsvp.count" do
-      post guest_rsvp_path(phone_token), params: {
+      post guest_rsvp_path(token, p: phone), params: {
         rsvp: { status: "attending", guest_name: "First", guest_phone: phone, guest_count: 0 }
       }
     end
 
-    assert_redirected_to guest_rsvp_path(phone_token)
+    assert_redirected_to guest_rsvp_path(token)
     assert flash[:alert].blank?
   end
 

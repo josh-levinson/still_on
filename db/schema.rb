@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_23_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_16_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -19,6 +19,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_000001) do
     t.datetime "created_at", null: false
     t.datetime "end_time", null: false
     t.uuid "event_id", null: false
+    t.string "invite_token", null: false
     t.string "location"
     t.integer "max_attendees"
     t.text "notes"
@@ -27,6 +28,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_000001) do
     t.datetime "updated_at", null: false
     t.index ["event_id", "start_time"], name: "index_event_occurrences_on_event_id_and_start_time"
     t.index ["event_id"], name: "index_event_occurrences_on_event_id"
+    t.index ["invite_token"], name: "index_event_occurrences_on_invite_token", unique: true
     t.index ["start_time"], name: "index_event_occurrences_on_start_time"
     t.index ["status"], name: "index_event_occurrences_on_status"
   end

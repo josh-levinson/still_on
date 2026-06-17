@@ -30,8 +30,7 @@ class GuestRsvpResendsController < ApplicationController
 
   def send_link_for_rsvp(rsvp, phone_e164)
     occurrence = rsvp.event_occurrence
-    token = occurrence.invite_token(phone: phone_e164)
-    url = guest_rsvp_url(token)
+    url = guest_rsvp_url(occurrence.invite_token, p: phone_e164)
     date_str = occurrence.start_time.strftime("%b %-d")
     body = "Your RSVP link for #{occurrence.event.title} on #{date_str}: #{url}"
     SmsService.send_message(to: phone_e164, body: body)
