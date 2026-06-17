@@ -54,14 +54,25 @@ class GuestRsvpsController < ApplicationController
 
   def load_occurrence_from_token
     @token = params[:token]
-    @event_occurrence = EventOccurrence.find_by_invite_token(@token)
-    @prefilled_phone = params[:p].presence
+    @event_occurrence, @prefilled_phone = resolve_invite_token(@token)
 
     if @event_occurrence.nil?
       render plain: "This invite link is invalid or has expired.", status: :not_found
     else
       @event = @event_occurrence.event
       @group = @event.group
+    end
+  end
+
+  # A token is either an occurrence's shareable token (no phone) or a
+  # per-recipient guest invite token (carries the recipient's phone).
+  def resolve_invite_token(token)
+    if (occurrence = EventOccurrence.find_by_invite_token(token))
+      [ occurrence, nil ]
+    elsif (invite = GuestInviteToken.find_by(token: token.presence))
+      [ invite.event_occurrence, invite.phone ]
+    else
+      [ nil, nil ]
     end
   end
 

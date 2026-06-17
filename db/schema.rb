@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_16_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_16_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -85,6 +85,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_16_000001) do
     t.datetime "updated_at", null: false
     t.index ["group_id", "phone_number"], name: "index_guest_group_subscriptions_on_group_id_and_phone_number", unique: true
     t.index ["group_id"], name: "index_guest_group_subscriptions_on_group_id"
+  end
+
+  create_table "guest_invite_tokens", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.uuid "event_occurrence_id", null: false
+    t.string "phone", null: false
+    t.string "token", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_occurrence_id", "phone"], name: "index_guest_invite_tokens_on_event_occurrence_id_and_phone", unique: true
+    t.index ["event_occurrence_id"], name: "index_guest_invite_tokens_on_event_occurrence_id"
+    t.index ["token"], name: "index_guest_invite_tokens_on_token", unique: true
   end
 
   create_table "notification_preferences", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -287,6 +298,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_16_000001) do
   add_foreign_key "group_memberships", "users"
   add_foreign_key "groups", "users", column: "created_by_id"
   add_foreign_key "guest_group_subscriptions", "groups"
+  add_foreign_key "guest_invite_tokens", "event_occurrences"
   add_foreign_key "notification_preferences", "users"
   add_foreign_key "rsvps", "event_occurrences"
   add_foreign_key "rsvps", "users"
