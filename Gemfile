@@ -67,5 +67,5 @@ group :test do
   gem "simplecov", require: false
 end
 
-gem "twilio-ruby", "~> 7.10"
+gem "twilio-ruby", "~> 7.11"
 gem "ice_cube"
