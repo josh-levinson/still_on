@@ -71,3 +71,5 @@ gem "twilio-ruby", "~> 7.10"
 gem "ice_cube"
 
 gem "honeybadger", "~> 6.9"
+
+gem "ahoy_matey", "~> 5.5"

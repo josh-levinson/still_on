@@ -8,13 +8,15 @@ class OnboardingController < ApplicationController
   throttle_sms_sends only: :resend_otp,   phone: -> { session[:ob_phone] }
   throttle_otp_verifies only: :submit_verify
 
-  CADENCES = %w[none weekly monthly].freeze
+  CADENCES = %w[none weekly biweekly monthly].freeze
 
   def splash
-    redirect_to dashboard_path if user_signed_in?
+    return redirect_to dashboard_path if user_signed_in?
+    track_step "splash"
   end
 
   def name
+    track_step "name"
     @step = 1
   end
 
@@ -36,6 +38,7 @@ class OnboardingController < ApplicationController
   end
 
   def date_step
+    track_step "date"
     @step = 2
     today = Date.today
     days_until_friday = (5 - today.wday) % 7
@@ -68,6 +71,7 @@ class OnboardingController < ApplicationController
   end
 
   def cadence
+    track_step "cadence"
     @step = 3
     if session[:ob_date].present?
       date = Date.parse(session[:ob_date])
@@ -101,6 +105,7 @@ class OnboardingController < ApplicationController
   def phone
     return redirect_to dashboard_path if current_user&.phone_verified_at.present?
     return redirect_to onboarding_splash_path unless session[:ob_occurrence_id]
+    track_step "phone"
     @step = 4
   end
 
@@ -120,7 +125,8 @@ class OnboardingController < ApplicationController
   end
 
   def verify
-    redirect_to onboarding_phone_path unless session[:ob_phone]
+    return redirect_to onboarding_phone_path unless session[:ob_phone]
+    track_step "verify"
     @step = 5
   end
 
@@ -158,6 +164,7 @@ class OnboardingController < ApplicationController
     occurrence_id = session[:ob_occurrence_id]
     redirect_to onboarding_splash_path and return unless occurrence_id
 
+    track_step "invite"
     @occurrence   = EventOccurrence.find(occurrence_id)
     @hangout_name = session[:ob_hangout_name]
     @first_name   = session[:ob_first_name]
@@ -168,6 +175,11 @@ class OnboardingController < ApplicationController
   end
 
   private
+
+  # Funnel analytics; see AnalyticsReport.
+  def track_step(step)
+    ahoy.track "Onboarding step", step: step
+  end
 
   def rails_zone_from_iana(iana_name)
     return "UTC" if iana_name.blank?

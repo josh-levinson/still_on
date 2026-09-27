@@ -37,12 +37,39 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_match /valid 10-digit/i, flash[:error]
   end
 
-  test "submit_phone rejects unknown phone number" do
-    SmsService.stub(:send_message, true) do
+  test "submit_phone with unknown number responds like a known one but sends nothing" do
+    SmsService.stub(:send_message, ->(**) { flunk "should not text an unknown number" }) do
       post sign_in_submit_phone_path, params: { phone: "5550000000" }
     end
+    assert_redirected_to sign_in_verify_path
+    assert_nil session[:signin_otp]
+
+    follow_redirect!
+    assert_response :success
+    assert_match /if \(555\) 000-0000 has a StillOn account/i, response.body
+  end
+
+  test "submit_verify for unknown number rejects any code" do
+    post sign_in_submit_phone_path, params: { phone: "5550000000" }
+    post sign_in_submit_verify_path, params: { code: "123456" }
     assert_response :unprocessable_entity
-    assert_match /no account found/i, flash[:error]
+    assert_match /didn't match/i, flash[:error]
+    assert_nil session[:user_id]
+  end
+
+  test "resend_otp for unknown number sends nothing and clears any old code" do
+    SmsService.stub(:send_message, true) do
+      post sign_in_submit_phone_path, params: { phone: @phone }
+    end
+    assert session[:signin_otp].present?
+
+    SmsService.stub(:send_message, ->(**) { flunk "should not text an unknown number" }) do
+      post sign_in_submit_phone_path, params: { phone: "5550000000" }
+      post sign_in_resend_otp_path
+    end
+    assert_redirected_to sign_in_verify_path
+    assert_nil session[:signin_otp]
+    assert_nil session[:signin_otp_expires_at]
   end
 
   test "submit_phone writes OTP to session even if SMS raises" do

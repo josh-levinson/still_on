@@ -76,7 +76,7 @@ The application is built around a hierarchical event management system:
 
 - **Users**: Authenticated via phone number + SMS OTP (Devise was removed). Fields: first_name, last_name, username, avatar_url, phone_number, phone_verified_at. Only organizers have accounts.
 - **Groups**: Collections of members (id: uuid, slug: unique, is_private flag, created_by references Users)
-- **Events**: Templates/series belonging to Groups. Can be recurring (recurrence_type: none/daily/weekly/monthly, recurrence_rule stores pattern)
+- **Events**: Templates/series belonging to Groups. Can be recurring (recurrence_type: none/daily/weekly/biweekly/monthly, recurrence_rule stores pattern)
 - **EventOccurrences**: Specific instances of Events (start_time, end_time, status: scheduled/cancelled/completed, max_attendees). Can override parent Event's location.
 - **RSVPs**: Responses scoped to specific EventOccurrences, not Events — enables per-instance attendance tracking (status: attending/declined/maybe, guest_count for +1s)
 - **GroupMemberships**: Join table connecting Users to Groups
@@ -96,6 +96,9 @@ Two jobs run on a daily cron schedule (configured in `config/recurring.yml`):
 
 ### Monitoring
 Honeybadger (`config/honeybadger.yml`, key from `HONEYBADGER_API_KEY`) catches unhandled exceptions. Errors that are rescued but still matter (e.g. SMS failures in `ApplicationJob#notify`) go through `Rails.error.report(e, handled: true)`. Scheduled jobs call `check_in(:name)` at the end of `perform`, which pings the Honeybadger check-in whose ID is in `HONEYBADGER_CHECKIN_<NAME>` (no-op when unset). `:phone` is in `filter_parameters`, so phone numbers stay out of logs and error reports.
+
+### Analytics
+Ahoy (`config/initializers/ahoy.rb`) records server-side events only, in `ahoy_visits`/`ahoy_events`: an "Onboarding step" event on each onboarding GET step, plus "RSVP page viewed" and "RSVP submitted" in `GuestRsvpsController`. No IPs or geocoding are stored, and `/rsvp/:token` URLs are scrubbed before they're saved. `AnalyticsReport` turns the events into funnels; print them with `bin/rails "analytics:report[DAYS]"`. The analytics cookies are listed on `/privacy`, so update that page when tracking changes.
 
 ### Pausing a group
 Organizers can pause a group (`Group#pause!`, optional `paused_until` resume date; `GroupPausesController`). While paused, `GenerateRecurringOccurrencesJob` skips occurrences inside the pause window and `ScheduleNotificationsJob` sends no automated reminders for them. Nothing is deleted, and the pause lifts on its own at the start of `paused_until` in the group's time zone. Existing occurrences are left as they are. Manual reminder buttons still work.

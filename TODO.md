@@ -9,13 +9,13 @@ Target first niche: tabletop game groups (D&D campaigns, board game nights) — 
 - [x] **OTP brute-force protection** — `OtpVerification` concern: the code stops working after 5 wrong guesses (counted server-side in the cache, not in the cookie), verify endpoints are limited to 30/10 min per IP, and codes come from `SecureRandom`.
 - [x] **Enable SSL + host authorization in production** — `assume_ssl`/`force_ssl` are on, and hosts are `stillon.app` and its subdomains plus any hosts listed in the `APP_HOSTS` env var. `/up` is exempt from both.
 - [x] **Error monitoring** — Honeybadger reports exceptions (API key via `HONEYBADGER_API_KEY`). Failed SMS in `notify` are reported as handled errors, requests are tagged with `user_id`, and the two daily cron jobs ping check-ins (`HONEYBADGER_CHECKIN_GENERATE_RECURRING_OCCURRENCES`, `HONEYBADGER_CHECKIN_SCHEDULE_NOTIFICATIONS`). Phone params are filtered.
-- [ ] **Confirm 10DLC campaign approval** — verify the Twilio A2P campaign is approved before sending real traffic; enable Twilio Fraud Guard / SMS geo-permissions (US only).
+- [ ] **Confirm 10DLC campaign approval** — verify the Twilio A2P campaign is approved before sending real traffic; enable Twilio Fraud Guard / SMS geo-permissions (US only). *Status (2026-09-27): brand registration submitted, under review. Campaign registration comes after brand approval.*
 
 ### Should fix
-- [ ] **Biweekly cadence** — onboarding and new-hangout wizards only offer weekly/monthly/one-time. Many game groups meet every other week.
-- [ ] **Share to Discord** — invite page has iMessage/WhatsApp buttons only; game groups often coordinate in Discord. (Later: Discord bot/webhook for reminders.)
-- [ ] **Account enumeration on sign-in** — `sessions#submit_phone` says "No account found with that number." Consider a neutral response.
-- [ ] **Product analytics** — no way to see drop-off across the 6-step onboarding or guest RSVP conversion.
+- [x] **Biweekly cadence** — "Every other week" option in both wizards and the event forms (`recurrence_type: "biweekly"`, IceCube `weekly(2)`).
+- [x] **Share to Discord** — Discord button in `shared/_share_buttons` copies a ready-to-paste invite message (Discord has no share URL). (Later: Discord bot/webhook for reminders.)
+- [x] **Account enumeration on sign-in** — `sessions#submit_phone` always goes to the verify step with neutral copy; unknown numbers just get no text.
+- [x] **Product analytics** — self-hosted Ahoy (server-side events only, no IPs, RSVP tokens scrubbed from URLs). `bin/rails "analytics:report[30]"` prints the onboarding funnel and guest RSVP conversion.
 
 ### Go-to-market
 - [ ] Game-group landing page copy variant (e.g. "Know by Wednesday if Friday's session is happening")

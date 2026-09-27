@@ -59,6 +59,7 @@ class EventOccurrencesControllerTest < ActionDispatch::IntegrationTest
     sign_in(@organizer)
     get group_event_event_occurrence_path(@group, @event, @occurrence)
     assert_select ".invite-share-section"
+    assert_select ".invite-share-section button.share-btn-discord"
   end
 
   test "show does not include share RSVP link for non-organizer" do

@@ -22,14 +22,8 @@ class SessionsController < ApplicationController
       return
     end
 
-    unless User.exists?(phone_number: phone)
-      flash.now[:error] = "No account found with that number. Did you mean to get started?"
-      render :phone, status: :unprocessable_entity
-      return
-    end
-
     session[:signin_phone] = phone
-    session[:signin_otp], session[:signin_otp_expires_at] = deliver_otp(phone, log_tag: "SignIn")
+    send_signin_code(phone)
     redirect_to sign_in_verify_path
   end
 
@@ -65,7 +59,7 @@ class SessionsController < ApplicationController
     phone = session[:signin_phone]
     redirect_to sign_in_path and return unless phone
 
-    session[:signin_otp], session[:signin_otp_expires_at] = deliver_otp(phone, log_tag: "SignIn")
+    send_signin_code(phone)
     redirect_to sign_in_verify_path, notice: "Code resent!"
   end
 
@@ -75,6 +69,17 @@ class SessionsController < ApplicationController
   end
 
   private
+
+  # Only texts numbers that belong to an account, but the response is the same
+  # either way so the sign-in form can't be used to look up who has one.
+  def send_signin_code(phone)
+    if User.exists?(phone_number: phone)
+      session[:signin_otp], session[:signin_otp_expires_at] = deliver_otp(phone, log_tag: "SignIn")
+    else
+      session.delete(:signin_otp)
+      session.delete(:signin_otp_expires_at)
+    end
+  end
 
   def redirect_if_signed_in
     redirect_to dashboard_path if user_signed_in?

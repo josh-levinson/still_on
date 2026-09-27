@@ -6,6 +6,8 @@ class GuestRsvpsController < ApplicationController
     @existing_rsvp = find_existing_rsvp
     @rsvp = @existing_rsvp || @event_occurrence.rsvps.new(status: "attending")
     @cookie_phone = cookies[:guest_phone]
+    ahoy.track "RSVP page viewed", occurrence_id: @event_occurrence.id,
+      personal_link: @prefilled_phone.present?, already_responded: @existing_rsvp.present?
   end
 
   def calendar
@@ -20,6 +22,7 @@ class GuestRsvpsController < ApplicationController
       if @existing_rsvp.update(rsvp_params)
         save_phone_cookie(@existing_rsvp.guest_phone)
         update_future_reminder_subscription(@existing_rsvp.guest_phone)
+        track_rsvp(@existing_rsvp, updated: true)
         redirect_to guest_rsvp_path(@token), notice: "RSVP updated!"
       else
         @rsvp = @existing_rsvp
@@ -44,6 +47,7 @@ class GuestRsvpsController < ApplicationController
       session[:recent_rsvp_id] = @rsvp.id
       save_phone_cookie(@rsvp.guest_phone)
       update_future_reminder_subscription(@rsvp.guest_phone)
+      track_rsvp(@rsvp, updated: false)
       redirect_to guest_rsvp_path(@token), notice: rsvp_confirmation_message(@rsvp)
     else
       @cookie_phone = cookies[:guest_phone]
@@ -52,6 +56,11 @@ class GuestRsvpsController < ApplicationController
   end
 
   private
+
+  def track_rsvp(rsvp, updated:)
+    ahoy.track "RSVP submitted", occurrence_id: @event_occurrence.id,
+      status: rsvp.status, updated: updated, personal_link: @prefilled_phone.present?
+  end
 
   def load_occurrence_from_token
     @token = params[:token]

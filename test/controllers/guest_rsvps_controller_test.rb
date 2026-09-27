@@ -13,6 +13,24 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
 
   # --- show ---
 
+  test "show tracks an RSVP page view without storing the token" do
+    get guest_rsvp_path(@phone_token)
+
+    event = Ahoy::Event.last
+    assert_equal "RSVP page viewed", event.name
+    assert_equal({ "occurrence_id" => @occurrence.id, "personal_link" => true, "already_responded" => false }, event.properties)
+    assert_includes event.visit.landing_page, "/rsvp/FILTERED"
+    assert_not_includes event.visit.landing_page, @phone_token
+  end
+
+  test "create tracks new and updated RSVPs" do
+    post guest_rsvp_path(@token), params: { rsvp: { status: "attending", guest_name: "New Guest", guest_count: 0 } }
+    post guest_rsvp_path(@token), params: { rsvp: { status: "maybe" } }
+
+    submitted = Ahoy::Event.where(name: "RSVP submitted").order(:time).map(&:properties)
+    assert_equal [ [ "attending", false ], [ "maybe", true ] ], submitted.map { |p| [ p["status"], p["updated"] ] }
+  end
+
   test "show renders the RSVP page for a valid token" do
     get guest_rsvp_path(@token)
     assert_response :success
