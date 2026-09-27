@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title><%= content_for(:title) || "Still On" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -17,7 +17,6 @@
       <% unless content_for?(:hide_logo) %>
         <div class="onboarding-logo">
           <%= link_to root_path do %>
-            <span class="logo-fire-img"></span>
             <span class="logo-still">StillOn</span>
           <% end %>
         </div>

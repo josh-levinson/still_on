@@ -153,7 +153,9 @@ All steps must pass for CI to succeed.
 
 ## Code Style
 
-Follows **rubocop-rails-omakase** conventions. The `.rubocop.yml` inherits from the omakase gem with minimal overrides.
+Follows **rubocop-rails-omakase** conventions.
+
+Styling lives in `app/assets/stylesheets/application.css` and uses the theme tokens at the top of `:root` (`--bg`, `--surface`, `--text`, `--text-muted`, `--text-subtle`, `--border`, `--border-strong`, `--accent`, `--focus-ring`). Don't hardcode greys: `--text-subtle` is the dimmest text that meets WCAG AA (4.5:1), and input/control borders use `--border-strong` (3:1). Font sizes are in `rem`, with 13px (`0.8125rem`) as the minimum. The look is "Group chat": warm cream background, Bricolage Grotesque everywhere, 2px ink outlines (`--border-strong`) on controls and cards, and a hard offset shadow (`--ink-shadow`) on primary buttons and selected choices. Labels are sentence case, not uppercase. Status colours have tokens too (`--going`, `--maybe`, and `--success-*`, `--danger-*`, `--warning-*`, `--info-*` bg/text/border sets); use those instead of new hex values. Don't dim text with `opacity`, and don't remove focus outlines without replacing them. The `.rubocop.yml` inherits from the omakase gem with minimal overrides.
 
 ---
 

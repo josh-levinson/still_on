@@ -17,6 +17,11 @@ class EventOccurrence < ApplicationRecord
     rsvps.where(status: "attending").sum("1 + guest_count")
   end
 
+  # Who's going, oldest reply first, for the "who's in" list on the RSVP page.
+  def attending_rsvps
+    rsvps.where(status: "attending").includes(:user).order(:created_at)
+  end
+
   def maybe_count
     rsvps.where(status: "maybe").count
   end

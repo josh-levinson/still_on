@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title><%= content_for(:title) || "Still On" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -24,7 +24,6 @@
     <nav class="navbar">
       <div class="container">
         <%= link_to root_path, class: "navbar-brand" do %>
-          <span class="logo-fire-img"></span>
           <span class="logo-still">StillOn</span>
         <% end %>
         <ul class="navbar-nav">
@@ -33,7 +32,7 @@
             <li><%= link_to "Profile", edit_user_path %></li>
             <li><%= link_to "Settings", edit_notification_preference_path %></li>
             <li><%= button_to "Sign Out", sign_out_path, method: :delete, class: "btn btn-sm btn-outline" %></li>
-          <% else %>
+          <% elsif !content_for?(:hide_nav_cta) %>
             <li><%= link_to "Get Started", onboarding_name_path, class: "btn btn-sm btn-primary" %></li>
           <% end %>
         </ul>

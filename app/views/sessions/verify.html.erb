@@ -22,6 +22,7 @@
           pattern="[0-9]"
           autocomplete="<%= i.zero? ? 'one-time-code' : 'off' %>"
           class="otp-digit"
+          aria-label="Digit <%= i + 1 %> of 6"
           data-otp-target="digit"
           data-action="input->otp#onInput keydown->otp#onKeydown paste->otp#onPaste"
           <%= i.zero? ? "autofocus" : "" %>

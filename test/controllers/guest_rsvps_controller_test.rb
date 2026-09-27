@@ -36,6 +36,42 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "show asks as the organizer and lists who's going by first name" do
+    @organizer.update!(first_name: "Josh")
+    @event.update!(description: "Bring snacks")
+    create_rsvp(@occurrence, guest_name: "Sam Smith", guest_count: 1)
+    create_rsvp(@occurrence, guest_name: "Priya")
+    create_rsvp(@occurrence, guest_name: "Nope", status: "declined")
+
+    get guest_rsvp_path(@token)
+
+    assert_select ".rsvp-avatar", "J"
+    assert_select ".rsvp-bubble", /still on\?/
+    assert_select ".rsvp-bubble", /Bring snacks/
+    assert_select ".rsvp-going-heading", /3 in so far/
+    assert_select ".rsvp-going-name:not(.rsvp-going-you)", 2
+    assert_select ".rsvp-going-name", "Sam +1"
+    assert_select ".rsvp-going-you", "you?"
+    assert_select ".navbar a", text: "Get Started", count: 0
+  end
+
+  test "show handles an organizer without a first name and nobody going" do
+    @organizer.update!(first_name: nil)
+
+    get guest_rsvp_path(@token)
+
+    assert_select ".rsvp-ask-from", /Your organizer/
+    assert_select ".rsvp-going-heading", /No one's in yet/
+  end
+
+  test "show drops the you? chip once the guest is in" do
+    post guest_rsvp_path(@token), params: { rsvp: { status: "attending", guest_name: "Me", guest_count: 0 } }
+    follow_redirect!
+
+    assert_select ".rsvp-going-name", "Me"
+    assert_select ".rsvp-going-you", count: 0
+  end
+
   test "show returns 404 for an invalid token" do
     get guest_rsvp_path("garbage-token")
     assert_response :not_found

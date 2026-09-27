@@ -104,6 +104,16 @@ class EventOccurrenceTest < ActiveSupport::TestCase
     assert_equal 0, @occurrence.attending_count
   end
 
+  # --- attending_rsvps ---
+
+  test "attending_rsvps lists only attending RSVPs, oldest first" do
+    second = create_rsvp(@occurrence, guest_name: "Second", status: "attending", created_at: 1.minute.ago)
+    first = create_rsvp(@occurrence, guest_name: "First", status: "attending", created_at: 1.hour.ago)
+    create_rsvp(@occurrence, guest_name: "Maybe", status: "maybe")
+
+    assert_equal [ first, second ], @occurrence.attending_rsvps.to_a
+  end
+
   # --- maybe_count / declined_count / responded_count / no_response_count ---
 
   test "maybe_count returns count of maybe RSVPs" do
