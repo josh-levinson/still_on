@@ -8,4 +8,8 @@ class SmsOptOut < ApplicationRecord
   def self.opt_out!(phone_number)
     find_or_create_by!(phone_number: phone_number)
   end
+
+  def self.opt_in!(phone_number)
+    where(phone_number: phone_number).delete_all
+  end
 end

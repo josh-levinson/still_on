@@ -8,6 +8,10 @@ class GuestGroupSubscription < ApplicationRecord
     find_or_create_by(group: group, phone_number: phone_number)
   end
 
+  def self.subscribed?(group:, phone_number:)
+    phone_number.present? && exists?(group: group, phone_number: phone_number)
+  end
+
   def self.unsubscribe(group:, phone_number:)
     find_by(group: group, phone_number: phone_number)&.destroy
   end

@@ -467,7 +467,7 @@ export default function StillOnOnboarding() {
 
             <div className="invite-link" style={{ marginBottom: 12 }}>
               <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#555", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                stilon.app/join/drinks-fri-3k9x
+                stillon.app/join/drinks-fri-3k9x
               </span>
               <button className="copy-btn">Copy link</button>
             </div>

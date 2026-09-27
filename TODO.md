@@ -11,6 +11,7 @@
 - [x] **Dashboard route** — `PostsController#index` has a working query for upcoming activity across groups but no route. Wire up `/dashboard` or `/` (for signed-in users) to this view.
 - [x] **Group membership** — No join/leave actions for non-organizer users. Need a way for people to become members of a group (separate from RSVPing to a specific event).
 - [x] **SMS opt-out handling** — No Twilio webhook endpoint or model field to record STOP replies. The app will keep sending SMS to opted-out users, which is a legal/compliance risk.
+- [x] **SMS terms & carrier compliance** — `/terms` page with SMS terms; opt-in copy links Terms + Privacy and states frequency/HELP/STOP; future-reminders checkbox no longer pre-checked; all texts prefixed "StillOn: "; START/YES/UNSTOP clears `SmsOptOut`.
 
 ## Medium priority
 

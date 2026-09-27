@@ -43,6 +43,7 @@ Rails.application.routes.draw do
 
   get  "sms",     to: "pages#sms",     as: :sms_info
   get  "privacy", to: "pages#privacy", as: :privacy
+  get  "terms",   to: "pages#terms",   as: :terms
   post "twilio/sms", to: "twilio_webhooks#sms", as: :twilio_sms_webhook
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

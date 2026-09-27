@@ -174,6 +174,32 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "future reminders checkbox is unchecked by default for a prefilled phone" do
+    get guest_rsvp_path(@phone_token)
+    assert_select "input#send_future_reminders:not([checked])"
+  end
+
+  test "future reminders checkbox is checked when the prefilled phone is already subscribed" do
+    GuestGroupSubscription.subscribe(group: @group, phone_number: @phone)
+    get guest_rsvp_path(@phone_token)
+    assert_select "input#send_future_reminders[checked]"
+  end
+
+  test "future reminders checkbox is unchecked by default without a phone" do
+    get guest_rsvp_path(@token)
+    assert_select "input#send_future_reminders:not([checked])"
+  end
+
+  test "future reminders checkbox is checked when the cookie phone is already subscribed" do
+    GuestGroupSubscription.subscribe(group: @group, phone_number: @phone)
+    post guest_rsvp_path(@token), params: {
+      rsvp: { status: "attending", guest_name: "Cookie Sub", guest_phone: @phone, guest_count: 0 },
+      send_future_reminders: "1"
+    }
+    get guest_rsvp_path(@token)
+    assert_select "input#send_future_reminders[checked]"
+  end
+
   # --- cookie fallback in find_existing_rsvp ---
 
   test "show uses cookie phone to find existing RSVP when token has no phone" do

@@ -2,6 +2,8 @@ class TwilioWebhooksController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   STOP_KEYWORDS = %w[STOP STOPALL UNSUBSCRIBE CANCEL END QUIT].freeze
+  # Twilio lifts its carrier-level block on these, so we must lift ours too.
+  START_KEYWORDS = %w[START YES UNSTOP].freeze
 
   def sms
     unless valid_twilio_request?
@@ -14,6 +16,8 @@ class TwilioWebhooksController < ApplicationController
 
     if STOP_KEYWORDS.include?(body)
       SmsOptOut.opt_out!(from)
+    elsif START_KEYWORDS.include?(body)
+      SmsOptOut.opt_in!(from)
     end
 
     head :ok

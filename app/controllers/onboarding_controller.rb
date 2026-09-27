@@ -110,7 +110,7 @@ class OnboardingController < ApplicationController
     otp = rand(100_000..999_999).to_s
 
     begin
-      SmsService.send_message(to: "+1#{phone}", body: "Your StillOn code is #{otp}. It expires in 10 minutes.")
+      SmsService.send_message(to: "+1#{phone}", body: "Your verification code is #{otp}. It expires in 10 minutes.")
     rescue => e
       Rails.logger.error("[Onboarding] OTP send failed: #{e.message}")
     end
@@ -156,7 +156,7 @@ class OnboardingController < ApplicationController
     otp = rand(100_000..999_999).to_s
 
     begin
-      SmsService.send_message(to: "+1#{phone}", body: "Your StillOn code is #{otp}. It expires in 10 minutes.")
+      SmsService.send_message(to: "+1#{phone}", body: "Your verification code is #{otp}. It expires in 10 minutes.")
     rescue => e
       Rails.logger.error("[Onboarding] OTP resend failed: #{e.message}")
     end

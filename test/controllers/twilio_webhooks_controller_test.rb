@@ -53,6 +53,24 @@ class TwilioWebhooksControllerTest < ActionDispatch::IntegrationTest
     assert SmsOptOut.opted_out?("5555550107")
   end
 
+  %w[START YES UNSTOP].each do |keyword|
+    test "opts user back in on #{keyword} keyword" do
+      SmsOptOut.opt_out!("5555550112")
+      assert_difference "SmsOptOut.count", -1 do
+        post twilio_sms_webhook_path, params: { From: "+15555550112", Body: keyword.downcase }
+      end
+      assert_response :ok
+      assert_not SmsOptOut.opted_out?("5555550112")
+    end
+  end
+
+  test "START for a number that never opted out is a no-op" do
+    assert_no_difference "SmsOptOut.count" do
+      post twilio_sms_webhook_path, params: { From: "+15555550113", Body: "START" }
+    end
+    assert_response :ok
+  end
+
   test "does not opt out on non-stop body" do
     assert_no_difference "SmsOptOut.count" do
       post twilio_sms_webhook_path, params: { From: "+15555550108", Body: "Yes I'll be there!" }

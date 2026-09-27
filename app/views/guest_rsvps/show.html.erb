@@ -121,11 +121,11 @@
           <div class="rsvp-field rsvp-future-reminders">
             <label class="rsvp-checkbox-label">
               <%= check_box_tag :send_future_reminders, "1",
-                    true,
+                    GuestGroupSubscription.subscribed?(group: @group, phone_number: @prefilled_phone),
                     class: "rsvp-checkbox" %>
               Text me a reminder to RSVP for future <%= @group.name %> events
             </label>
-            <p class="rsvp-sms-consent">Msg &amp; data rates may apply. Reply STOP to opt out. <%= link_to "Privacy policy", privacy_path %>.</p>
+            <p class="rsvp-sms-consent">Up to one text per hangout. Msg &amp; data rates may apply. Reply HELP for help, STOP to opt out. <%= link_to "Terms", terms_path %> &middot; <%= link_to "Privacy", privacy_path %>.</p>
           </div>
         <% else %>
           <div class="rsvp-field rsvp-phone-opt-in">
@@ -139,13 +139,13 @@
                   inputmode: "tel",
                   autocomplete: "tel-national",
                   class: "rsvp-input" %>
-            <p class="rsvp-sms-consent">We'll send you one SMS the morning of the event. Msg &amp; data rates may apply. Reply STOP to opt out. <%= link_to "Privacy policy", privacy_path %>.</p>
+            <p class="rsvp-sms-consent">We'll send you one SMS the morning of the event. Msg &amp; data rates may apply. Reply HELP for help, STOP to opt out. <%= link_to "Terms", terms_path %> &middot; <%= link_to "Privacy", privacy_path %>.</p>
           </div>
           <% existing_phone = @rsvp.guest_phone || @cookie_phone %>
           <div class="rsvp-field rsvp-future-reminders">
             <label class="rsvp-checkbox-label">
               <%= check_box_tag :send_future_reminders, "1",
-                    true,
+                    GuestGroupSubscription.subscribed?(group: @group, phone_number: existing_phone),
                     class: "rsvp-checkbox" %>
               Text me a reminder to RSVP for future <%= @group.name %> events
             </label>

@@ -7,6 +7,16 @@ class GuestGroupSubscriptionTest < ActiveSupport::TestCase
     @phone = "+15550002001"
   end
 
+  test "subscribed? reflects whether the phone is subscribed to the group" do
+    assert_not GuestGroupSubscription.subscribed?(group: @group, phone_number: @phone)
+    GuestGroupSubscription.subscribe(group: @group, phone_number: @phone)
+    assert GuestGroupSubscription.subscribed?(group: @group, phone_number: @phone)
+  end
+
+  test "subscribed? is false for a blank phone" do
+    assert_not GuestGroupSubscription.subscribed?(group: @group, phone_number: nil)
+  end
+
   test "subscribe creates a new subscription" do
     assert_difference "GuestGroupSubscription.count", 1 do
       GuestGroupSubscription.subscribe(group: @group, phone_number: @phone)

@@ -97,6 +97,9 @@ Two jobs run on a daily cron schedule (configured in `config/recurring.yml`):
 ### Pausing a group
 Organizers can pause a group (`Group#pause!`, optional `paused_until` resume date; `GroupPausesController`). While paused, `GenerateRecurringOccurrencesJob` skips occurrences inside the pause window and `ScheduleNotificationsJob` sends no automated reminders for them. Nothing is deleted, and the pause lifts on its own at the start of `paused_until` in the group's time zone. Existing occurrences are left as they are. Manual reminder buttons still work.
 
+### SMS compliance
+Legal pages live in `PagesController`: `/terms`, `/privacy`, `/sms` (SMS Program page, used for carrier campaign review). Keep the consent copy quoted on `/sms` in sync with the actual copy on `onboarding/phone` and `guest_rsvps/show`. `SmsService` prefixes every text with "StillOn: ". Opt-in checkboxes must default to unchecked unless the phone is already subscribed. STOP-type replies create an `SmsOptOut`; START/YES/UNSTOP remove it.
+
 ### Public vs. private groups
 Groups have an `is_private` flag. Public groups are browsable via `/groups/discover`. Private group show pages are restricted to members.
 

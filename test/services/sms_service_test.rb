@@ -20,8 +20,14 @@ class SmsServiceTest < ActiveSupport::TestCase
 
     assert_equal 1, @received.length
     assert_equal "+15559999999", @received.first[:to]
-    assert_equal "Hello test", @received.first[:body]
+    assert_equal "StillOn: Hello test", @received.first[:body]
     assert_equal "+15550001111", @received.first[:from]
+  end
+
+  test "send_message does not double the StillOn prefix" do
+    SmsService.new(client: @client_mock).send_message(to: "+15559999999", body: "StillOn: Already branded")
+
+    assert_equal "StillOn: Already branded", @received.first[:body]
   end
 
   test "self.send_message class method delegates to instance" do
