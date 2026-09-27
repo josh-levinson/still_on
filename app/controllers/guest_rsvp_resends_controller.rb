@@ -1,4 +1,8 @@
 class GuestRsvpResendsController < ApplicationController
+  include SmsThrottling
+
+  throttle_sms_sends only: :create, phone: -> { params[:phone] }
+
   def new
   end
 

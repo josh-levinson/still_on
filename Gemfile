@@ -69,3 +69,5 @@ end
 
 gem "twilio-ruby", "~> 7.10"
 gem "ice_cube"
+
+gem "honeybadger", "~> 6.9"

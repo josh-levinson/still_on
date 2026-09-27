@@ -94,6 +94,9 @@ Two jobs run on a daily cron schedule (configured in `config/recurring.yml`):
 - `GenerateRecurringOccurrencesJob` — runs at 6am, generates EventOccurrence records for recurring events up to 30 days out
 - `ScheduleNotificationsJob` — runs at 8am, enqueues SMS reminders: RSVP prompts 2 days before each occurrence (to non-RSVPd members), and day-of confirmations to attending/maybe guests
 
+### Monitoring
+Honeybadger (`config/honeybadger.yml`, key from `HONEYBADGER_API_KEY`) catches unhandled exceptions. Errors that are rescued but still matter (e.g. SMS failures in `ApplicationJob#notify`) go through `Rails.error.report(e, handled: true)`. Scheduled jobs call `check_in(:name)` at the end of `perform`, which pings the Honeybadger check-in whose ID is in `HONEYBADGER_CHECKIN_<NAME>` (no-op when unset). `:phone` is in `filter_parameters`, so phone numbers stay out of logs and error reports.
+
 ### Pausing a group
 Organizers can pause a group (`Group#pause!`, optional `paused_until` resume date; `GroupPausesController`). While paused, `GenerateRecurringOccurrencesJob` skips occurrences inside the pause window and `ScheduleNotificationsJob` sends no automated reminders for them. Nothing is deleted, and the pause lifts on its own at the start of `paused_until` in the group's time zone. Existing occurrences are left as they are. Manual reminder buttons still work.
 

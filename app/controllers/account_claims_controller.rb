@@ -1,5 +1,11 @@
 class AccountClaimsController < ApplicationController
+  include OtpVerification
+  include SmsThrottling
+
   layout "onboarding"
+
+  throttle_sms_sends only: :submit_phone, phone: -> { params[:phone] }
+  throttle_otp_verifies only: :submit_verify
 
   before_action :redirect_if_signed_in
 
@@ -27,18 +33,9 @@ class AccountClaimsController < ApplicationController
       return
     end
 
-    otp = rand(100_000..999_999).to_s
-
-    begin
-      SmsService.send_message(to: "+1#{phone}", body: "Your verification code is #{otp}. It expires in 10 minutes.")
-    rescue => e
-      Rails.logger.error("[AccountClaim] OTP send failed: #{e.message}")
-    end
-
-    session[:claim_first_name]     = first_name
-    session[:claim_phone]          = phone
-    session[:claim_otp]            = otp
-    session[:claim_otp_expires_at] = 10.minutes.from_now.to_i
+    session[:claim_first_name] = first_name
+    session[:claim_phone]      = phone
+    session[:claim_otp], session[:claim_otp_expires_at] = deliver_otp(phone, log_tag: "AccountClaim")
     redirect_to account_claim_verify_path
   end
 
@@ -49,11 +46,10 @@ class AccountClaimsController < ApplicationController
   def submit_verify
     phone      = session[:claim_phone]
     first_name = session[:claim_first_name]
-    code       = params[:code].to_s.strip
-    stored     = session[:claim_otp]
-    expires_at = session[:claim_otp_expires_at].to_i
+    result     = check_otp(phone: phone, code: params[:code].to_s.strip,
+      stored: session[:claim_otp], expires_at: session[:claim_otp_expires_at])
 
-    if stored && code == stored && Time.current.to_i < expires_at
+    if result == :ok
       session.delete(:claim_otp)
       session.delete(:claim_otp_expires_at)
       session.delete(:claim_phone)
@@ -65,7 +61,7 @@ class AccountClaimsController < ApplicationController
       session[:user_id] = user.id
       redirect_to dashboard_path, notice: "Welcome to StillOn, #{first_name}!"
     else
-      flash.now[:error] = "That code didn't match. Please try again."
+      flash.now[:error] = otp_error_message(result)
       render :verify, status: :unprocessable_entity
     end
   end

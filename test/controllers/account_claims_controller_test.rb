@@ -83,6 +83,22 @@ class AccountClaimsControllerTest < ActionDispatch::IntegrationTest
     assert_match "That code", response.body
   end
 
+  test "submit_verify locks the code after too many wrong guesses" do
+    with_memory_cache do
+      SmsService.stub(:send_message, true) do
+        post account_claim_submit_phone_path, params: { first_name: "Jo", phone: "5550009999" }
+      end
+      otp = session[:claim_otp]
+      OtpVerification::MAX_OTP_ATTEMPTS.times { post account_claim_submit_verify_path, params: { code: "000000" } }
+
+      assert_no_difference "User.count" do
+        post account_claim_submit_verify_path, params: { code: otp }
+      end
+      assert_response :unprocessable_entity
+      assert_match /too many incorrect/i, flash[:error]
+    end
+  end
+
   test "submit_verify creates user and signs in on correct code" do
     SmsService.stub(:send_message, true) do
       post account_claim_submit_phone_path, params: { first_name: "Jo", phone: "5550009999" }

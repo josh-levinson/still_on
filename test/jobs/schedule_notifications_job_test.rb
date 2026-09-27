@@ -185,4 +185,16 @@ class ScheduleNotificationsJobTest < ActiveSupport::TestCase
       ScheduleNotificationsJob.perform_now
     end
   end
+
+  test "pings its Honeybadger check-in after running" do
+    pinged = []
+    ENV["HONEYBADGER_CHECKIN_SCHEDULE_NOTIFICATIONS"] = "hb-check-in"
+    Honeybadger.stub(:check_in, ->(id) { pinged << id }) do
+      ScheduleNotificationsJob.perform_now
+    end
+
+    assert_equal [ "hb-check-in" ], pinged
+  ensure
+    ENV.delete("HONEYBADGER_CHECKIN_SCHEDULE_NOTIFICATIONS")
+  end
 end

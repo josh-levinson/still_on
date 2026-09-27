@@ -7,6 +7,8 @@ class ApplicationController < ActionController::Base
 
   helper_method :current_user, :user_signed_in?
 
+  before_action :set_error_context
+
   def current_user
     @current_user ||= User.find_by(id: session[:user_id]) if session[:user_id]
   end
@@ -19,5 +21,11 @@ class ApplicationController < ActionController::Base
     unless user_signed_in?
       redirect_to onboarding_splash_path, alert: "Please sign in to continue."
     end
+  end
+
+  private
+
+  def set_error_context
+    Honeybadger.context(user_id: session[:user_id]) if session[:user_id]
   end
 end

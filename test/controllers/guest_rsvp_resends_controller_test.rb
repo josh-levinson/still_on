@@ -83,6 +83,35 @@ class GuestRsvpResendsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_guest_rsvp_resend_path
   end
 
+  test "create is rate limited per phone number" do
+    create_rsvp(@occurrence, guest_phone: "+15550001111")
+
+    with_memory_cache do
+      sms_calls = 0
+      SmsService.stub(:send_message, ->(**) { sms_calls += 1 }) do
+        # Vary the IP so only the per-phone limit applies.
+        (SmsThrottling::SENDS_PER_PHONE_PER_HOUR + 1).times do |i|
+          post guest_rsvp_resend_path, params: { phone: "5550001111" }, env: { "REMOTE_ADDR" => "10.0.0.#{i}" }
+        end
+      end
+      assert_equal SmsThrottling::SENDS_PER_PHONE_PER_HOUR, sms_calls
+      assert_match /too many attempts/i, flash[:alert]
+    end
+  end
+
+  test "create buckets blank phone numbers by IP" do
+    with_memory_cache do
+      SmsThrottling::SENDS_PER_PHONE_PER_HOUR.times do
+        post guest_rsvp_resend_path, params: { phone: "" }, env: { "REMOTE_ADDR" => "10.0.0.1" }
+      end
+      post guest_rsvp_resend_path, params: { phone: "" }, env: { "REMOTE_ADDR" => "10.0.0.1" }
+      assert_match /too many attempts/i, flash[:alert]
+
+      post guest_rsvp_resend_path, params: { phone: "" }, env: { "REMOTE_ADDR" => "10.0.0.2" }
+      assert_match "we'll text you", flash[:notice]
+    end
+  end
+
   test "create continues and logs error when SMS fails" do
     create_rsvp(@occurrence, guest_phone: "+15550005555")
 

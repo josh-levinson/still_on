@@ -26,6 +26,35 @@ class ApplicationJobTest < ActiveSupport::TestCase
     assert_match "[notify] SMS failed", warned.first
   end
 
+  test "reports the SMS failure to the error reporter as handled" do
+    SmsService.stub(:send_message, ->(**_) { raise twilio_error }) do
+      assert_error_reported(Twilio::REST::RestError) do
+        NotifyTestJob.perform_now(phone: "+15550001111", email: "fallback@example.com", body: "Hi")
+      end
+    end
+  end
+
+  test "check_in pings Honeybadger with the ID from the env var" do
+    pinged = []
+    ENV["HONEYBADGER_CHECKIN_NOTIFY_TEST"] = "abc123"
+    Honeybadger.stub(:check_in, ->(id) { pinged << id }) do
+      NotifyTestJob.new.send(:check_in, :notify_test)
+    end
+
+    assert_equal [ "abc123" ], pinged
+  ensure
+    ENV.delete("HONEYBADGER_CHECKIN_NOTIFY_TEST")
+  end
+
+  test "check_in does nothing when the env var is unset" do
+    pinged = []
+    Honeybadger.stub(:check_in, ->(id) { pinged << id }) do
+      NotifyTestJob.new.send(:check_in, :notify_test)
+    end
+
+    assert_empty pinged
+  end
+
   test "sends nothing when both phone and email are absent" do
     messages = []
     SmsService.stub(:send_message, ->(**_) { messages << true }) do

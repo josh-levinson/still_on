@@ -1,5 +1,27 @@
 # StillOn — To Do
 
+## Launch readiness (before marketing)
+
+Target first niche: tabletop game groups (D&D campaigns, board game nights) — recurring, one organizer, quorum-dependent.
+
+### Must fix before launch
+- [x] **Rate limit SMS-sending endpoints** — `SmsThrottling` concern: 20 sends/hour per IP and 5/hour per phone, shared across onboarding, sign-in, account claim, and RSVP-resend endpoints.
+- [x] **OTP brute-force protection** — `OtpVerification` concern: the code stops working after 5 wrong guesses (counted server-side in the cache, not in the cookie), verify endpoints are limited to 30/10 min per IP, and codes come from `SecureRandom`.
+- [x] **Enable SSL + host authorization in production** — `assume_ssl`/`force_ssl` are on, and hosts are `stillon.app` and its subdomains plus any hosts listed in the `APP_HOSTS` env var. `/up` is exempt from both.
+- [x] **Error monitoring** — Honeybadger reports exceptions (API key via `HONEYBADGER_API_KEY`). Failed SMS in `notify` are reported as handled errors, requests are tagged with `user_id`, and the two daily cron jobs ping check-ins (`HONEYBADGER_CHECKIN_GENERATE_RECURRING_OCCURRENCES`, `HONEYBADGER_CHECKIN_SCHEDULE_NOTIFICATIONS`). Phone params are filtered.
+- [ ] **Confirm 10DLC campaign approval** — verify the Twilio A2P campaign is approved before sending real traffic; enable Twilio Fraud Guard / SMS geo-permissions (US only).
+
+### Should fix
+- [ ] **Biweekly cadence** — onboarding and new-hangout wizards only offer weekly/monthly/one-time. Many game groups meet every other week.
+- [ ] **Share to Discord** — invite page has iMessage/WhatsApp buttons only; game groups often coordinate in Discord. (Later: Discord bot/webhook for reminders.)
+- [ ] **Account enumeration on sign-in** — `sessions#submit_phone` says "No account found with that number." Consider a neutral response.
+- [ ] **Product analytics** — no way to see drop-off across the 6-step onboarding or guest RSVP conversion.
+
+### Go-to-market
+- [ ] Game-group landing page copy variant (e.g. "Know by Wednesday if Friday's session is happening")
+- [ ] Soft launch with 3–5 real game groups; watch onboarding drop-off and guest RSVP rates
+- [ ] Then post to r/DnD, r/lfg, r/boardgames, Discord servers, local game stores
+
 ## High priority
 
 - [x] **Timezone support** — `start_time`/`end_time` stored in server timezone with no per-group or per-user timezone. Ambiguous times will confuse real users immediately. Store a timezone on Group (or Event), display and accept times in that zone, and include timezone in SMS/email notifications.

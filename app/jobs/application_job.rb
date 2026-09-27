@@ -15,11 +15,19 @@ class ApplicationJob < ActiveJob::Base
         return
       rescue Twilio::REST::RestError => e
         Rails.logger.warn("[notify] SMS failed for #{phone}, trying email: #{e.message}")
+        Rails.error.report(e, handled: true, context: { twilio_code: e.code })
       end
     end
 
     return if email.blank?
 
     EventMailer.notification(to: email, subject: subject || "StillOn notification", body: body).deliver_now
+  end
+
+  # Ping a Honeybadger check-in so we get alerted if a scheduled job stops running.
+  # The check-in ID comes from HONEYBADGER_CHECKIN_<NAME>; no-op when unset.
+  def check_in(name)
+    id = ENV["HONEYBADGER_CHECKIN_#{name.to_s.upcase}"]
+    Honeybadger.check_in(id) if id.present?
   end
 end

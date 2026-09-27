@@ -295,6 +295,21 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
     assert_match /didn't match/i, flash[:error]
   end
 
+  test "submit_verify locks the code after too many wrong guesses" do
+    with_memory_cache do
+      complete_cadence_step
+      SmsService.stub(:send_message, true) do
+        post onboarding_submit_phone_path, params: { phone: "5559876543" }
+      end
+      otp = session[:ob_otp]
+      OtpVerification::MAX_OTP_ATTEMPTS.times { post onboarding_submit_verify_path, params: { code: "000000" } }
+
+      post onboarding_submit_verify_path, params: { code: otp }
+      assert_response :unprocessable_entity
+      assert_match /too many incorrect/i, flash[:error]
+    end
+  end
+
   test "submit_verify with expired OTP re-renders with error" do
     complete_cadence_step
     SmsService.stub(:send_message, true) do

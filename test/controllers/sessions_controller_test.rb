@@ -117,6 +117,88 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_match /didn't match/i, flash[:error]
   end
 
+  test "submit_verify locks the code after too many wrong guesses" do
+    with_memory_cache do
+      SmsService.stub(:send_message, true) do
+        post sign_in_submit_phone_path, params: { phone: @phone }
+      end
+      otp = session[:signin_otp]
+
+      (OtpVerification::MAX_OTP_ATTEMPTS - 1).times do
+        post sign_in_submit_verify_path, params: { code: "000000" }
+        assert_match /didn't match/i, flash[:error]
+      end
+      post sign_in_submit_verify_path, params: { code: "000000" }
+      assert_match /too many incorrect/i, flash[:error]
+
+      post sign_in_submit_verify_path, params: { code: otp }
+      assert_response :unprocessable_entity
+      assert_match /too many incorrect/i, flash[:error]
+      assert_nil session[:user_id]
+    end
+  end
+
+  test "submit_verify accepts a freshly resent code after lockout" do
+    with_memory_cache do
+      SmsService.stub(:send_message, true) do
+        post sign_in_submit_phone_path, params: { phone: @phone }
+        OtpVerification::MAX_OTP_ATTEMPTS.times { post sign_in_submit_verify_path, params: { code: "000000" } }
+        post sign_in_resend_otp_path
+      end
+      post sign_in_submit_verify_path, params: { code: session[:signin_otp] }
+      assert_redirected_to dashboard_path
+    end
+  end
+
+  test "submit_phone is rate limited per phone number" do
+    with_memory_cache do
+      SmsService.stub(:send_message, true) do
+        SmsThrottling::SENDS_PER_PHONE_PER_HOUR.times do
+          post sign_in_submit_phone_path, params: { phone: @phone }
+          assert_redirected_to sign_in_verify_path
+        end
+        post sign_in_submit_phone_path, params: { phone: @phone }, headers: { "HTTP_REFERER" => sign_in_url }
+      end
+      assert_redirected_to sign_in_url
+      assert_match /too many attempts/i, flash[:alert]
+    end
+  end
+
+  test "resend_otp shares the per-phone limit with submit_phone" do
+    with_memory_cache do
+      SmsService.stub(:send_message, true) do
+        post sign_in_submit_phone_path, params: { phone: @phone }
+        (SmsThrottling::SENDS_PER_PHONE_PER_HOUR - 1).times { post sign_in_resend_otp_path }
+        post sign_in_resend_otp_path
+      end
+      assert_redirected_to root_path
+      assert_match /too many attempts/i, flash[:alert]
+    end
+  end
+
+  test "submit_phone is rate limited per IP across different numbers" do
+    with_memory_cache do
+      SmsService.stub(:send_message, true) do
+        SmsThrottling::SENDS_PER_IP_PER_HOUR.times do |i|
+          post sign_in_submit_phone_path, params: { phone: "555000#{i.to_s.rjust(4, "0")}" }
+        end
+        post sign_in_submit_phone_path, params: { phone: @phone }
+      end
+      assert_match /too many attempts/i, flash[:alert]
+    end
+  end
+
+  test "submit_verify is rate limited per IP" do
+    with_memory_cache do
+      SmsThrottling::VERIFIES_PER_IP_PER_10_MIN.times do
+        post sign_in_submit_verify_path, params: { code: "000000" }
+      end
+      post sign_in_submit_verify_path, params: { code: "000000" }
+      assert_redirected_to root_path
+      assert_match /too many attempts/i, flash[:alert]
+    end
+  end
+
   # --- POST /sign_in/resend ---
 
   test "resend_otp sends new OTP and redirects back to verify" do
