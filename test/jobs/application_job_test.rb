@@ -26,12 +26,24 @@ class ApplicationJobTest < ActiveSupport::TestCase
     assert_match "[notify] SMS failed", warned.first
   end
 
-  test "reports the SMS failure to the error reporter as handled" do
+  test "does not report the SMS failure again (SmsService already did)" do
     SmsService.stub(:send_message, ->(**_) { raise twilio_error }) do
-      assert_error_reported(Twilio::REST::RestError) do
+      assert_no_error_reported do
         NotifyTestJob.perform_now(phone: "+15550001111", email: "fallback@example.com", body: "Hi")
       end
     end
+  end
+
+  test "masks the phone number in the fallback warning" do
+    warned = []
+    Rails.logger.stub(:warn, ->(msg) { warned << msg }) do
+      SmsService.stub(:send_message, ->(**_) { raise twilio_error }) do
+        NotifyTestJob.perform_now(phone: "+15550001111", email: "fallback@example.com", body: "Hi")
+      end
+    end
+
+    assert_includes warned.first, "***1111"
+    assert_not_includes warned.first, "5550001111"
   end
 
   test "check_in pings Honeybadger with the ID from the env var" do

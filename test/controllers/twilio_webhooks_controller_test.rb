@@ -128,4 +128,100 @@ class TwilioWebhooksControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, validate_calls.length
     assert_equal [ "https://example.com/twilio/sms", {}, "abc123" ], validate_calls.first
   end
+
+  # ---- POST /twilio/status ----
+
+  def capture_honeybadger(&block)
+    notices = []
+    Honeybadger.stub(:notify, ->(*args, **kwargs) { notices << [ args, kwargs ] }, &block)
+    notices
+  end
+
+  %w[failed undelivered].each do |status|
+    test "reports a #{status} message to Honeybadger, fingerprinted by error code" do
+      notices = capture_honeybadger do
+        post twilio_status_webhook_path, params: { MessageSid: "SM123", MessageStatus: status, ErrorCode: "30007", To: "+15555550101" }
+      end
+
+      assert_response :ok
+      assert_equal 1, notices.length
+      args, kwargs = notices.first
+      assert_equal "SMS #{status} (Twilio error 30007)", args.first
+      assert_equal "Twilio::DeliveryFailure", kwargs[:error_class]
+      assert_equal "Twilio::DeliveryFailure-30007", kwargs[:fingerprint]
+      assert_equal({ message_sid: "SM123", message_status: status, twilio_code: "30007" }, kwargs[:context])
+    end
+  end
+
+  %w[queued sent delivered].each do |status|
+    test "does not report a #{status} message" do
+      notices = capture_honeybadger do
+        post twilio_status_webhook_path, params: { MessageSid: "SM123", MessageStatus: status }
+      end
+
+      assert_response :ok
+      assert_empty notices
+    end
+  end
+
+  test "status callback returns 403 when Twilio signature is invalid" do
+    original = TwilioWebhooksController.instance_method(:valid_twilio_request?)
+    TwilioWebhooksController.define_method(:valid_twilio_request?) { false }
+    notices = capture_honeybadger do
+      post twilio_status_webhook_path, params: { MessageSid: "SM123", MessageStatus: "failed", ErrorCode: "30007" }
+    end
+    assert_response :forbidden
+    assert_empty notices
+  ensure
+    TwilioWebhooksController.define_method(:valid_twilio_request?, original)
+  end
+
+  # ---- POST /twilio/debugger ----
+
+  def debugger_params(error_code, level: "ERROR")
+    {
+      Sid: "NO123", AccountSid: "AC123", Level: level, PayloadType: "application/json",
+      Payload: { resource_sid: "SM456", error_code: error_code, more_info: { Msg: "To: +15555550101" } }.to_json
+    }
+  end
+
+  test "reports a debugger alert with only the code and SIDs" do
+    notices = capture_honeybadger do
+      post twilio_debugger_webhook_path, params: debugger_params("11200")
+    end
+
+    assert_response :ok
+    args, kwargs = notices.first
+    assert_equal "Twilio error 11200", args.first
+    assert_equal "Twilio::DebuggerAlert", kwargs[:error_class]
+    assert_equal "Twilio::DebuggerAlert-11200", kwargs[:fingerprint]
+    assert_equal({ level: "ERROR", sid: "NO123", resource_sid: "SM456", twilio_code: "11200" }, kwargs[:context])
+    assert_not_includes kwargs.to_s, "5555550101"
+  end
+
+  test "reports debugger warnings too" do
+    notices = capture_honeybadger do
+      post twilio_debugger_webhook_path, params: debugger_params("12300", level: "WARNING")
+    end
+
+    assert_equal "Twilio warning 12300", notices.first.first.first
+  end
+
+  test "skips message delivery errors that the status callback already reports" do
+    notices = capture_honeybadger do
+      post twilio_debugger_webhook_path, params: debugger_params("30007")
+    end
+
+    assert_response :ok
+    assert_empty notices
+  end
+
+  test "still reports when the debugger payload is not valid JSON" do
+    notices = capture_honeybadger do
+      post twilio_debugger_webhook_path, params: { Sid: "NO123", Level: "ERROR", Payload: "not json" }
+    end
+
+    assert_response :ok
+    assert_equal "Twilio::DebuggerAlert-", notices.first.last[:fingerprint]
+  end
 end

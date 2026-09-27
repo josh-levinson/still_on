@@ -14,8 +14,8 @@ class ApplicationJob < ActiveJob::Base
         SmsService.send_message(to: phone, body: body)
         return
       rescue Twilio::REST::RestError => e
-        Rails.logger.warn("[notify] SMS failed for #{phone}, trying email: #{e.message}")
-        Rails.error.report(e, handled: true, context: { twilio_code: e.code })
+        # SmsService has already reported the error.
+        Rails.logger.warn("[notify] SMS failed for #{SmsService.mask(phone)}, trying email: #{e.message}")
       end
     end
 

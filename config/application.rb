@@ -17,6 +17,9 @@ module StillOn
     config.autoload_lib(ignore: %w[assets tasks])
     config.active_record.schema_format = :ruby
 
+    # Whether SmsService asks Twilio for delivery status callbacks. Turned on in production.
+    config.x.twilio_status_callbacks = false
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

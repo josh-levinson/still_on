@@ -39,6 +39,6 @@ class GuestRsvpResendsController < ApplicationController
     body = "Your RSVP link for #{occurrence.event.title} on #{date_str}: #{url}"
     SmsService.send_message(to: phone_e164, body: body)
   rescue StandardError => e
-    Rails.logger.error("[GuestRsvpResends] Failed to send link to #{phone_e164}: #{e.message}")
+    Rails.logger.error("[GuestRsvpResends] Failed to send link to #{SmsService.mask(phone_e164)}: #{e.message}")
   end
 end

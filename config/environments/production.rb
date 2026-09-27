@@ -59,6 +59,10 @@ Rails.application.configure do
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: "stillon.app" }
 
+  # Ask Twilio to post delivery results to /twilio/status (built from the host above).
+  # Off in other environments, where Twilio can't reach the app.
+  config.x.twilio_status_callbacks = true
+
   # Specify outgoing SMTP server. Remember to add smtp/* credentials via bin/rails credentials:edit.
   # config.action_mailer.smtp_settings = {
   #   user_name: Rails.application.credentials.dig(:smtp, :user_name),
