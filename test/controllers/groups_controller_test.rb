@@ -59,6 +59,36 @@ class GroupsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "show offers organizers a way to pause the group" do
+    sign_in(@organizer)
+    get group_path(@group)
+    assert_select "form[action=?]", group_pause_path(@group.slug)
+    assert_select ".badge-warning", text: "Paused", count: 0
+  end
+
+  test "show hides pause controls from non-organizers" do
+    sign_in(@other)
+    get group_path(@group)
+    assert_select "form[action=?]", group_pause_path(@group.slug), count: 0
+  end
+
+  test "show indicates an indefinitely paused group and offers resume" do
+    @group.pause!
+    sign_in(@organizer)
+    get group_path(@group)
+    assert_select ".badge-warning", text: "Paused"
+    assert_select ".alert-warning", text: /Paused\./
+    assert_select "button", text: "Resume now"
+  end
+
+  test "show indicates the resume date for a group paused until a date" do
+    resume_date = 10.days.from_now.to_date
+    @group.pause!(until_date: resume_date)
+    sign_in(@organizer)
+    get group_path(@group)
+    assert_select ".alert-warning", text: /Paused until #{resume_date.strftime("%A, %b %-d")}/
+  end
+
   test "show renders a private group for a member" do
     private_group = create_group(@organizer, is_private: true)
     GroupMembership.create!(group: private_group, user: @organizer)

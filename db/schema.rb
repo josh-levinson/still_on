@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_16_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_27_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -70,6 +70,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_16_000002) do
     t.text "description"
     t.boolean "is_private", default: false, null: false
     t.string "name", null: false
+    t.datetime "paused_at"
+    t.date "paused_until"
     t.integer "reminder_days_before", default: 2, null: false
     t.string "slug", null: false
     t.string "time_zone", default: "UTC", null: false

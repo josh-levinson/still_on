@@ -819,6 +819,19 @@ tbody tr:hover {
   margin-bottom: var(--spacing-2xl);
 }
 
+.group-pause {
+  margin-bottom: var(--spacing-xl);
+}
+
+.group-pause summary {
+  cursor: pointer;
+  color: var(--color-gray-400);
+}
+
+.group-pause p {
+  margin: var(--spacing-sm) 0;
+}
+
 .group-avatar-large {
   width: 120px;
   height: 120px;

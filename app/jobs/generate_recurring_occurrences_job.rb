@@ -6,7 +6,7 @@ class GenerateRecurringOccurrencesJob < ApplicationJob
   def perform
     horizon = LOOKAHEAD_DAYS.days.from_now
 
-    Event.active.recurring.find_each do |event|
+    Event.active.recurring.includes(:group).find_each do |event|
       schedule = event.schedule
       next unless schedule
 
@@ -18,6 +18,7 @@ class GenerateRecurringOccurrencesJob < ApplicationJob
 
   def generate_occurrences(event, schedule, horizon)
     upcoming = schedule.occurrences_between(Time.current, horizon)
+      .reject { |time| event.group.paused_during?(time) }
     return if upcoming.empty?
 
     existing_times = event.event_occurrences

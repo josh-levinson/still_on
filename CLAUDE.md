@@ -94,6 +94,9 @@ Two jobs run on a daily cron schedule (configured in `config/recurring.yml`):
 - `GenerateRecurringOccurrencesJob` — runs at 6am, generates EventOccurrence records for recurring events up to 30 days out
 - `ScheduleNotificationsJob` — runs at 8am, enqueues SMS reminders: RSVP prompts 2 days before each occurrence (to non-RSVPd members), and day-of confirmations to attending/maybe guests
 
+### Pausing a group
+Organizers can pause a group (`Group#pause!`, optional `paused_until` resume date; `GroupPausesController`). While paused, `GenerateRecurringOccurrencesJob` skips occurrences inside the pause window and `ScheduleNotificationsJob` sends no automated reminders for them. Nothing is deleted, and the pause lifts on its own at the start of `paused_until` in the group's time zone. Existing occurrences are left as they are. Manual reminder buttons still work.
+
 ### Public vs. private groups
 Groups have an `is_private` flag. Public groups are browsable via `/groups/discover`. Private group show pages are restricted to members.
 

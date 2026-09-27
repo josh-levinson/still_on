@@ -74,6 +74,7 @@ Rails.application.routes.draw do
       get :discover
     end
     resource :membership, only: [ :create, :destroy ], controller: "group_memberships"
+    resource :pause, only: [ :create, :destroy ], controller: "group_pauses"
     resources :group_memberships, only: [], param: :user_id do
       member do
         post :promote

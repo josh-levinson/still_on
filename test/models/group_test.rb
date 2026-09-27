@@ -71,4 +71,64 @@ class GroupTest < ActiveSupport::TestCase
     GroupMembership.create!(group: group, user: member)
     assert_includes group.members, member
   end
+
+  # --- pausing ---
+
+  test "a new group is not paused" do
+    group = create_group(@user)
+    assert_not group.paused?
+    assert_nil group.resumes_at
+  end
+
+  test "pause! without a date pauses indefinitely" do
+    group = create_group(@user)
+    group.pause!
+    assert group.paused?
+    assert group.paused_during?(1.year.from_now)
+    assert_nil group.resumes_at
+  end
+
+  test "pause! with a date pauses until the start of that day in the group time zone" do
+    group = create_group(@user, time_zone: "Pacific Time (US & Canada)")
+    resume_date = 10.days.from_now.in_time_zone(group.time_zone).to_date
+    group.pause!(until_date: resume_date)
+
+    resumes_at = resume_date.in_time_zone("Pacific Time (US & Canada)")
+    assert_equal resumes_at, group.resumes_at
+    assert group.paused?
+    assert group.paused_during?(resumes_at - 1.minute)
+    assert_not group.paused_during?(resumes_at)
+  end
+
+  test "pause lifts automatically once the resume date arrives" do
+    group = create_group(@user)
+    group.pause!(until_date: 3.days.from_now.to_date)
+    travel 4.days do
+      assert_not group.paused?
+    end
+  end
+
+  test "resume! clears the pause" do
+    group = create_group(@user)
+    group.pause!(until_date: 3.days.from_now.to_date)
+    group.resume!
+    assert_not group.paused?
+    assert_nil group.paused_at
+    assert_nil group.paused_until
+  end
+
+  test "paused_until must be in the future" do
+    group = create_group(@user)
+    today = Time.current.in_time_zone(group.time_zone).to_date
+    assert_raises(ActiveRecord::RecordInvalid) { group.pause!(until_date: today) }
+    assert_includes group.errors[:paused_until], "must be in the future"
+  end
+
+  test "an elapsed paused_until does not block unrelated updates" do
+    group = create_group(@user)
+    group.pause!(until_date: 2.days.from_now.to_date)
+    travel 5.days do
+      assert group.update(name: "Renamed")
+    end
+  end
 end

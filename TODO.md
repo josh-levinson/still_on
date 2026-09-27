@@ -30,6 +30,7 @@
 
 - [x] Co-organizer support — promote/demote members to co-organizer via group members section
 - [x] Email fallback — if SMS fails to deliver there's no backup contact method
+- [x] **Pause a group** — organizers can temporarily stop occurrence generation and automated reminders (indefinitely or until a date) instead of deleting the group
 - [x] Occurrence notes in SMS reminders — `notes` field on EventOccurrence isn't included in reminder messages
 
 ---
