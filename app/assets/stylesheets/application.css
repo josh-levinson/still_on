@@ -2535,3 +2535,112 @@ input[type="checkbox"].toggle-checkbox:focus-visible {
   background-color: #f5f3ff;
   color: #6d28d9;
 }
+
+/* ========================================
+   DASHBOARD
+   ======================================== */
+
+.dashboard {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.dashboard-header h1 {
+  margin: 0;
+}
+
+.dashboard-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.dashboard-section-title {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #555;
+  margin: 0;
+}
+
+.hangout-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  background: #141414;
+  border: 1px solid #252525;
+  border-radius: var(--radius-lg);
+}
+
+.hangout-card p {
+  margin: 0;
+}
+
+.hangout-card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.hangout-card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #f0e8d8;
+  text-decoration: none;
+}
+
+a.hangout-card-title:hover {
+  color: #e8d5b0;
+}
+
+.hangout-card-cadence {
+  font-size: 0.8125rem;
+  color: #555;
+  flex-shrink: 0;
+}
+
+.hangout-card-when {
+  font-size: 0.9375rem;
+  color: #ccc;
+}
+
+.hangout-card-event {
+  color: #555;
+}
+
+.hangout-card-notice {
+  font-size: 0.875rem;
+  color: #c9a84c;
+}
+
+.hangout-card-actions,
+.hangout-card-rsvp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+}
+
+.hangout-card-link {
+  margin-left: auto;
+  font-size: 0.875rem;
+  color: #888;
+  text-decoration: none;
+}
+
+.hangout-card-link:hover {
+  color: #e8d5b0;
+}

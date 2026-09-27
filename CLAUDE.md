@@ -100,6 +100,9 @@ Honeybadger (`config/honeybadger.yml`, key from `HONEYBADGER_API_KEY`) catches u
 ### Analytics
 Ahoy (`config/initializers/ahoy.rb`) records server-side events only, in `ahoy_visits`/`ahoy_events`: an "Onboarding step" event on each onboarding GET step, plus "RSVP page viewed" and "RSVP submitted" in `GuestRsvpsController`. No IPs or geocoding are stored, and `/rsvp/:token` URLs are scrubbed before they're saved. `AnalyticsReport` turns the events into funnels; print them with `bin/rails "analytics:report[DAYS]"`. The analytics cookies are listed on `/privacy`, so update that page when tracking changes.
 
+### Dashboard
+`/dashboard` (`DashboardController#show`) shows one card per hangout (group), split by the user's role. **You organize** covers groups they created or co-organize. Each card shows the next occurrence, an RSVP tally (`EventOccurrence#awaiting_reply_count` counts members plus SMS subscribers who haven't replied), a Nudge button (sends an RSVP reminder), the invite link, and pause/quorum warnings. **You're in** covers groups they're a member of, subscribed to as a guest (by phone), or have RSVP'd to, so guests who claimed an account see their hangouts, with one-tap Going/Maybe/Can't buttons. The Nudge and RSVP actions `redirect_back_or_to` the occurrence page, so they return to the dashboard. Full management (events, members, pausing) lives on the group page.
+
 ### Pausing a group
 Organizers can pause a group (`Group#pause!`, optional `paused_until` resume date; `GroupPausesController`). While paused, `GenerateRecurringOccurrencesJob` skips occurrences inside the pause window and `ScheduleNotificationsJob` sends no automated reminders for them. Nothing is deleted, and the pause lifts on its own at the start of `paused_until` in the group's time zone. Existing occurrences are left as they are. Manual reminder buttons still work.
 

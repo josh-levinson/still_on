@@ -70,7 +70,7 @@ Target first niche: tabletop game groups (D&D campaigns, board game nights) — 
 - [x] `GroupMembershipsController` — join/leave
 - [x] `RsvpsController` — organizer-facing RSVP management
 - [x] `TwilioWebhooksController` — SMS opt-out and status callbacks
-- [x] `PagesController` / `PostsController` — dashboard and static pages
+- [x] `PagesController` / `DashboardController` — dashboard and static pages
 
 ### Jobs (medium priority)
 

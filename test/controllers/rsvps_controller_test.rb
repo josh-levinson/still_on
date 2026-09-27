@@ -90,6 +90,19 @@ class RsvpsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "maybe", @rsvp.reload.status
   end
 
+  test "create and update return to the dashboard when made from there" do
+    sign_in(@other)
+    post event_occurrence_rsvps_path(@occurrence), params: { rsvp: { status: "maybe" } },
+      headers: { "HTTP_REFERER" => dashboard_url }
+    assert_redirected_to dashboard_url
+
+    rsvp = @occurrence.rsvps.find_by(user: @other)
+    patch event_occurrence_rsvp_path(@occurrence, rsvp), params: { rsvp: { status: "attending" } },
+      headers: { "HTTP_REFERER" => dashboard_url }
+    assert_redirected_to dashboard_url
+    assert_equal "attending", rsvp.reload.status
+  end
+
   test "update re-renders edit with unprocessable_entity on invalid params" do
     sign_in(@organizer)
     patch event_occurrence_rsvp_path(@occurrence, @rsvp), params: { rsvp: { status: "bad_status" } }

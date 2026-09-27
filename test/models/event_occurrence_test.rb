@@ -200,4 +200,36 @@ class EventOccurrenceTest < ActiveSupport::TestCase
   test "find_by_invite_token returns nil for empty string" do
     assert_nil EventOccurrence.find_by_invite_token("")
   end
+
+  # --- awaiting_reply_count ---
+
+  test "awaiting_reply_count counts members and subscribers who haven't replied" do
+    member = create_user
+    GroupMembership.create!(group: @group, user: member)
+    GroupMembership.create!(group: @group, user: @user)
+    GuestGroupSubscription.subscribe(group: @group, phone_number: "+15550001111")
+    GuestGroupSubscription.subscribe(group: @group, phone_number: "+15550002222")
+
+    assert_equal 4, @occurrence.awaiting_reply_count
+
+    create_rsvp(@occurrence, user: member, guest_name: nil)
+    create_rsvp(@occurrence, guest_phone: "+15550001111")
+    assert_equal 2, @occurrence.awaiting_reply_count
+  end
+
+  test "awaiting_reply_count doesn't double count a member who is also subscribed" do
+    member = create_user
+    GroupMembership.create!(group: @group, user: member)
+    GuestGroupSubscription.subscribe(group: @group, phone_number: member.phone_number)
+
+    assert_equal 1, @occurrence.awaiting_reply_count
+  end
+
+  test "awaiting_reply_count treats a subscriber who replied with their account as replied" do
+    guest = create_user
+    GuestGroupSubscription.subscribe(group: @group, phone_number: guest.phone_number)
+    create_rsvp(@occurrence, user: guest, guest_name: nil)
+
+    assert_equal 0, @occurrence.awaiting_reply_count
+  end
 end

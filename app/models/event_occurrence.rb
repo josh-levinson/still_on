@@ -33,6 +33,24 @@ class EventOccurrence < ApplicationRecord
     [ member_count - responded_count, 0 ].max
   end
 
+  # Members and SMS subscribers who haven't RSVP'd yet: the people an RSVP
+  # reminder would go to.
+  def awaiting_reply_count
+    group = event.group
+    user_ids = rsvps.where.not(user_id: nil).pluck(:user_id)
+    member_ids = group.group_memberships.pluck(:user_id)
+    member_phones = User.where(id: member_ids).where.not(phone_number: nil).pluck(:phone_number)
+    replied_phones = rsvps.where.not(guest_phone: nil).pluck(:guest_phone) +
+      User.where(id: user_ids).where.not(phone_number: nil).pluck(:phone_number)
+
+    unreplied_members = (member_ids - user_ids).size
+    unreplied_subscribers = group.guest_group_subscriptions
+      .where.not(phone_number: member_phones + replied_phones)
+      .count
+
+    unreplied_members + unreplied_subscribers
+  end
+
   def full?
     max_attendees.present? && attending_count >= max_attendees
   end

@@ -131,4 +131,24 @@ class GroupTest < ActiveSupport::TestCase
       assert group.update(name: "Renamed")
     end
   end
+
+  # --- next_occurrence ---
+
+  test "next_occurrence returns the soonest scheduled upcoming occurrence across events" do
+    group = create_group(@user)
+    weekly = create_event(group, @user)
+    one_off = create_event(group, @user, recurrence_type: "none")
+    create_occurrence(weekly, start_time: 1.day.ago, end_time: 1.day.ago + 1.hour)
+    create_occurrence(weekly, start_time: 2.days.from_now, end_time: 2.days.from_now + 1.hour, status: "cancelled")
+    later = create_occurrence(weekly, start_time: 5.days.from_now, end_time: 5.days.from_now + 1.hour)
+    sooner = create_occurrence(one_off, start_time: 3.days.from_now, end_time: 3.days.from_now + 1.hour)
+
+    assert_equal sooner, group.next_occurrence
+    sooner.update!(status: "cancelled")
+    assert_equal later, group.next_occurrence
+  end
+
+  test "next_occurrence is nil when nothing is scheduled" do
+    assert_nil create_group(@user).next_occurrence
+  end
 end

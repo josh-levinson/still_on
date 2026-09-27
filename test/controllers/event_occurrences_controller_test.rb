@@ -256,6 +256,13 @@ class EventOccurrencesControllerTest < ActionDispatch::IntegrationTest
     assert_match /rsvp reminder will be sent/i, flash[:notice]
   end
 
+  test "send_rsvp_reminder returns to the dashboard when sent from there" do
+    sign_in(@organizer)
+    post send_rsvp_reminder_group_event_event_occurrence_path(@group, @event, @occurrence),
+      headers: { "HTTP_REFERER" => dashboard_url }
+    assert_redirected_to dashboard_url
+  end
+
   test "send_rsvp_reminder is forbidden for non-organizer" do
     sign_in(@other)
     assert_no_enqueued_jobs only: SendRsvpReminderJob do

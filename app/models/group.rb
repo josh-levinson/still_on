@@ -31,6 +31,11 @@ class Group < ApplicationRecord
     group_memberships.organizers.exists?(user_id: user.id)
   end
 
+  # The soonest scheduled occurrence across all of the group's events.
+  def next_occurrence
+    EventOccurrence.joins(:event).where(events: { group_id: id }).scheduled.upcoming.includes(:event).first
+  end
+
   # A paused group generates no new occurrences and sends no automated
   # reminders. With a paused_until date, the pause lifts automatically at the
   # start of that day in the group's time zone; without one it lasts until
