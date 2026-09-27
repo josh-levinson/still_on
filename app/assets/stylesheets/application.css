@@ -33,7 +33,8 @@
   --going: #1f5f5b;           /* white text on it, 7.5:1 */
   --going-soft: #d4ebe6;
   --going-ink: #123b38;
-  --maybe: #f2c14e;           /* ink text on it */
+  --maybe: #f2c14e;           /* --on-maybe text on it */
+  --on-maybe: #1f1a17;
   --maybe-text: #7a5a0c;      /* 5.9:1 */
   --success-bg: var(--going-soft);
   --success-text: var(--going-ink);
@@ -47,12 +48,16 @@
   --info-bg: #dde9f5;
   --info-text: #1d3f63;
   --info-border: #3b6a9a;
+  --secondary-bg: #ece6fa;
+  --secondary-text: #4b2f8a;
+  --secondary-border: #4b2f8a;
+  --popover-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
   /* Colors */
   --color-primary: var(--accent);
   --color-primary-dark: var(--accent-hover);
   --color-primary-light: var(--accent);
-  --color-secondary: #4b2f8a;
+  --color-secondary: var(--secondary-text);
   --color-success: var(--going);
   --color-danger: var(--danger-text);
   --color-warning: var(--maybe-text);
@@ -105,6 +110,87 @@
   --max-width-lg: 1024px;
   --max-width-xl: 1280px;
   --max-width-2xl: 1536px;
+}
+
+/* Dark theme — "Group chat after dark": deep navy, cream ink outlines
+   and hard cream shadows, bright pop-art fills with navy text on them.
+   Applies when the visitor picks Dark (data-theme="dark" on <html>, from
+   the theme cookie) or leaves it on Auto with a dark device. The two token
+   sets below must stay identical. Contrast ratios are against --surface. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0f1733;
+  --surface: #18234a;
+  --surface-raised: #223066;
+  --border: #34437a;
+  --border-strong: #fff3dc;   /* cream ink, 13.9:1 */
+  --text: #fff3dc;            /* 13.9:1 */
+  --text-muted: #d9ccb4;      /* 9.6:1 */
+  --text-subtle: #b3a996;     /* 6.6:1, 5.4:1 on --surface-raised */
+  --accent: #ff7a59;          /* 5.9:1, and --on-accent on it 6.9:1 */
+  --accent-hover: #ff9a7f;
+  --accent-soft: #3f2238;
+  --on-accent: #0f1733;
+  --focus-ring: #8fd3ff;
+
+  --going: #4fd1b8;           /* --on-accent on it, 9.4:1 */
+  --going-soft: #143d44;
+  --going-ink: #b8f0e3;
+  --maybe: #f7c948;
+  --maybe-text: #f7c948;      /* 9.7:1 */
+  --danger-text: #ff9b8f;
+  --danger-bg: #3d1a24;
+  --danger-border: #ff9b8f;
+  --warning-bg: #3a2f12;
+  --warning-text: #ffe08a;
+  --warning-border: #d9a93a;
+  --info-bg: #16305a;
+  --info-text: #b9d8ff;
+  --info-border: #6aa3e0;
+  --secondary-bg: #2b2258;
+  --secondary-text: #c9b8ff;
+  --secondary-border: #c9b8ff;
+  --popover-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg: #0f1733;
+    --surface: #18234a;
+    --surface-raised: #223066;
+    --border: #34437a;
+    --border-strong: #fff3dc;   /* cream ink, 13.9:1 */
+    --text: #fff3dc;            /* 13.9:1 */
+    --text-muted: #d9ccb4;      /* 9.6:1 */
+    --text-subtle: #b3a996;     /* 6.6:1, 5.4:1 on --surface-raised */
+    --accent: #ff7a59;          /* 5.9:1, and --on-accent on it 6.9:1 */
+    --accent-hover: #ff9a7f;
+    --accent-soft: #3f2238;
+    --on-accent: #0f1733;
+    --focus-ring: #8fd3ff;
+
+    --going: #4fd1b8;           /* --on-accent on it, 9.4:1 */
+    --going-soft: #143d44;
+    --going-ink: #b8f0e3;
+    --maybe: #f7c948;
+    --maybe-text: #f7c948;      /* 9.7:1 */
+    --danger-text: #ff9b8f;
+    --danger-bg: #3d1a24;
+    --danger-border: #ff9b8f;
+    --warning-bg: #3a2f12;
+    --warning-text: #ffe08a;
+    --warning-border: #d9a93a;
+    --info-bg: #16305a;
+    --info-text: #b9d8ff;
+    --info-border: #6aa3e0;
+    --secondary-bg: #2b2258;
+    --secondary-text: #c9b8ff;
+    --secondary-border: #c9b8ff;
+    --popover-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
 }
 
 /* ========================================
@@ -162,6 +248,48 @@ body {
 
 .footer-dot {
   margin: 0 var(--spacing-sm);
+}
+
+/* Auto / Light / Dark switch in the footers */
+.theme-switcher {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: var(--spacing-md);
+  padding: 2px;
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  vertical-align: middle;
+}
+
+.theme-option {
+  padding: 2px 10px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.theme-option:hover {
+  color: var(--text);
+  background: var(--surface-raised);
+}
+
+.theme-option[aria-pressed="true"] {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.onboarding-footer {
+  margin-top: var(--spacing-2xl);
+  text-align: center;
+}
+
+.onboarding-footer .theme-switcher {
+  margin-left: 0;
 }
 
 /* ========================================
@@ -575,9 +703,9 @@ input[type="radio"] {
 
 .badge-secondary,
 .badge-recurring {
-  background-color: #ece6fa;
-  color: #4b2f8a;
-  border-color: #4b2f8a;
+  background-color: var(--secondary-bg);
+  color: var(--secondary-text);
+  border-color: var(--secondary-border);
 }
 
 .badge-success,
@@ -1838,7 +1966,7 @@ a.btn-onboarding-primary:hover,
   border-radius: 50%;
   background: var(--maybe);
   border: 2px solid var(--border-strong);
-  color: var(--text);
+  color: var(--on-maybe);
   font-weight: 800;
   font-size: 0.875rem;
 }
@@ -1993,9 +2121,9 @@ a.btn-onboarding-primary:hover,
 }
 
 .rsvp-capacity-warning {
-  background: #fdf0c8;
+  background: var(--warning-bg);
   color: var(--text);
-  border-color: #c9962f;
+  border-color: var(--warning-border);
 }
 
 .rsvp-notice {
@@ -2005,7 +2133,7 @@ a.btn-onboarding-primary:hover,
 }
 
 .rsvp-error {
-  background: #fde2dc;
+  background: var(--danger-bg);
   color: var(--danger-text);
   border-color: var(--danger-text);
 }
@@ -2034,7 +2162,7 @@ a.btn-onboarding-primary:hover,
 
 .rsvp-confirmed-maybe {
   background: var(--maybe);
-  color: var(--text);
+  color: var(--on-maybe);
 }
 
 .rsvp-confirmed-declined {
@@ -2139,7 +2267,7 @@ a.btn-onboarding-primary:hover,
 
 .rsvp-status-maybe:has(input:checked) {
   background: var(--maybe);
-  color: var(--text);
+  color: var(--on-maybe);
 }
 
 .rsvp-status-declined:has(input:checked) {
@@ -2616,7 +2744,7 @@ input[type="checkbox"].toggle-checkbox:focus-visible {
   border: 1px solid var(--border-strong);
   border-top: none;
   border-radius: 0 0 6px 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--popover-shadow);
   max-height: 240px;
   overflow-y: auto;
 }

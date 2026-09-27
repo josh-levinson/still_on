@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"<% if theme_preference != "system" %> data-theme="<%= theme_preference %>"<% end %>>
   <head>
     <title><%= content_for(:title) || "Still On" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= render "shared/theme_meta" %>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Still On">
     <meta name="mobile-web-app-capable" content="yes">
@@ -64,6 +65,7 @@
         <%= link_to "Privacy", privacy_path %>
         <span class="footer-dot">&middot;</span>
         <%= link_to "SMS Program", sms_info_path %>
+        <%= render "shared/theme_switcher" %>
       </div>
     </footer>
   </body>

@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"<% if theme_preference != "system" %> data-theme="<%= theme_preference %>"<% end %>>
   <head>
     <title><%= content_for(:title) || "Still On" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= render "shared/theme_meta" %>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -41,6 +42,10 @@
       <% end %>
 
       <%= yield %>
+
+      <div class="onboarding-footer">
+        <%= render "shared/theme_switcher" %>
+      </div>
     </div>
   </body>
 </html>

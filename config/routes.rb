@@ -44,6 +44,7 @@ Rails.application.routes.draw do
   get  "sms",     to: "pages#sms",     as: :sms_info
   get  "privacy", to: "pages#privacy", as: :privacy
   get  "terms",   to: "pages#terms",   as: :terms
+  patch "theme",  to: "themes#update", as: :theme
   post "twilio/sms",      to: "twilio_webhooks#sms",      as: :twilio_sms_webhook
   post "twilio/status",   to: "twilio_webhooks#status",   as: :twilio_status_webhook
   post "twilio/debugger", to: "twilio_webhooks#debugger", as: :twilio_debugger_webhook

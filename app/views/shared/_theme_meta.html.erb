@@ -1,0 +1,6 @@
+<% if theme_preference == "system" %>
+  <meta name="theme-color" content="<%= ApplicationHelper::THEME_COLORS["light"] %>" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="<%= ApplicationHelper::THEME_COLORS["dark"] %>" media="(prefers-color-scheme: dark)">
+<% else %>
+  <meta name="theme-color" content="<%= ApplicationHelper::THEME_COLORS[theme_preference] %>">
+<% end %>
