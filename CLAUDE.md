@@ -87,7 +87,7 @@ All core domain tables use UUID primary keys for scalability and security.
 Guests receive a signed token link. The token encodes the EventOccurrence and optionally a phone number. RSVPs from guests are stored with a lightweight guest record that can be claimed/merged if they later create an account. This is the primary interaction path for most people who use the app.
 
 ### Organizer auth flow
-Organizers sign up (or sign in) via phone number + SMS OTP. The onboarding wizard collects first name, hangout name, date, and cadence — then creates the User, Group, Event, and first EventOccurrence in one step. Returning users sign in through the same phone/verify flow at `/onboarding/phone`.
+Organizers sign up (or sign in) via phone number + SMS OTP. The onboarding wizard collects first name, hangout name, date, and cadence — then creates the User, Group, Event, and first EventOccurrence in one step. Returning users sign in through the same phone/verify flow at `/onboarding/phone`. The session cookie (`config/initializers/session_store.rb`) lasts 60 days from the last visit, so organizers rarely need a new code. In development, `config.x.otp_sms` is off and codes are written to the Rails log instead of texted; run with `SEND_OTP_SMS=1` to send real texts.
 
 ### Background jobs
 Two jobs run on a daily cron schedule (configured in `config/recurring.yml`):

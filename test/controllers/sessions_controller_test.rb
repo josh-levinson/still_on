@@ -112,6 +112,32 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_match /welcome back/i, flash[:notice]
   end
 
+  test "signing in sets a session cookie that outlives the browser session" do
+    SmsService.stub(:send_message, true) do
+      post sign_in_submit_phone_path, params: { phone: @phone }
+    end
+    post sign_in_submit_verify_path, params: { code: session[:signin_otp] }
+
+    session_cookie = Array(response.headers["Set-Cookie"]).join("\n").lines.find { |c| c.start_with?("_still_on_session=") }
+    expires = Time.httpdate(session_cookie[/expires=([^;]+)/i, 1])
+    assert_in_delta (Time.now + 60.days).to_i, expires.to_i, 60
+  end
+
+  test "submit_phone logs the code instead of texting when OTP SMS is off" do
+    log = StringIO.new
+    logger = ActiveSupport::Logger.new(log)
+    Rails.configuration.x.stub(:otp_sms, false) do
+      Rails.stub(:logger, logger) do
+        SmsService.stub(:send_message, ->(**) { flunk "should not text when OTP SMS is off" }) do
+          post sign_in_submit_phone_path, params: { phone: @phone }
+        end
+      end
+    end
+
+    assert_redirected_to sign_in_verify_path
+    assert_includes log.string, "Code for #{SmsService.mask(@phone)}: #{session[:signin_otp]}"
+  end
+
   test "submit_verify with wrong code re-renders verify" do
     SmsService.stub(:send_message, true) do
       post sign_in_submit_phone_path, params: { phone: @phone }

@@ -30,6 +30,7 @@ Target first niche: tabletop game groups (D&D campaigns, board game nights) — 
 - [x] **Max attendees enforcement** — `EventOccurrence#full?` exists but the RSVP controllers don't check it. A 10-person cap currently does nothing.
 
 - [x] **Returning user sign-in** — `/sign_in` flow in `SessionsController`: phone → OTP → `find_by(phone_number:)` → groups dashboard. Splash and navbar links updated.
+- [x] **Fewer OTP texts** — session cookie lasts 60 days (sliding); development logs sign-in codes instead of texting them (`SEND_OTP_SMS=1` to send).
 - [x] **Dashboard route** — `PostsController#index` has a working query for upcoming activity across groups but no route. Wire up `/dashboard` or `/` (for signed-in users) to this view.
 - [x] **Group membership** — No join/leave actions for non-organizer users. Need a way for people to become members of a group (separate from RSVPing to a specific event).
 - [x] **SMS opt-out handling** — No Twilio webhook endpoint or model field to record STOP replies. The app will keep sending SMS to opted-out users, which is a legal/compliance risk.

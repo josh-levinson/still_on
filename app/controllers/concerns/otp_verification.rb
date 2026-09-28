@@ -14,8 +14,14 @@ module OtpVerification
 
   # Sends a new code to the 10-digit `phone` and returns [otp, expires_at].
   # SMS failures are logged, not raised, so the user can still hit "resend".
+  # With config.x.otp_sms off (development), the code is only logged.
   def deliver_otp(phone, log_tag:)
     otp = SecureRandom.random_number(100_000..999_999).to_s
+
+    unless Rails.configuration.x.otp_sms
+      Rails.logger.info("[#{log_tag}] Code for #{SmsService.mask(phone)}: #{otp} (SMS disabled)")
+      return [ otp, OTP_TTL.from_now.to_i ]
+    end
 
     begin
       SmsService.send_message(to: "+1#{phone}", body: "Your verification code is #{otp}. It expires in 10 minutes.")
