@@ -11,8 +11,6 @@ class ScheduleNotificationsJob < ApplicationJob
       schedule_event_reminders(group)
       schedule_quorum_alerts(group)
     end
-
-    check_in(:schedule_notifications)
   end
 
   private

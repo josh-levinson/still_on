@@ -12,8 +12,6 @@ class GenerateRecurringOccurrencesJob < ApplicationJob
 
       generate_occurrences(event, schedule, horizon)
     end
-
-    check_in(:generate_recurring_occurrences)
   end
 
   private

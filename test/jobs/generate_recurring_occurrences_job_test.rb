@@ -120,16 +120,4 @@ class GenerateRecurringOccurrencesJobTest < ActiveSupport::TestCase
     assert times.any?
     assert times.all? { |t| t >= @group.resumes_at }
   end
-
-  test "pings its Honeybadger check-in after running" do
-    pinged = []
-    ENV["HONEYBADGER_CHECKIN_GENERATE_RECURRING_OCCURRENCES"] = "hb-check-in"
-    Honeybadger.stub(:check_in, ->(id) { pinged << id }) do
-      GenerateRecurringOccurrencesJob.perform_now
-    end
-
-    assert_equal [ "hb-check-in" ], pinged
-  ensure
-    ENV.delete("HONEYBADGER_CHECKIN_GENERATE_RECURRING_OCCURRENCES")
-  end
 end
