@@ -65,6 +65,15 @@ class GroupTest < ActiveSupport::TestCase
     end
   end
 
+  test "destroying group removes guest invite tokens for its occurrences" do
+    group = create_group(@user)
+    occurrence = create_occurrence(create_event(group, @user))
+    GuestInviteToken.for(occurrence, "+15555550123")
+    assert_difference "GuestInviteToken.count", -1 do
+      group.destroy
+    end
+  end
+
   test "has many members through group_memberships" do
     group = create_group(@user)
     member = create_user

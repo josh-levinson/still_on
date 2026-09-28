@@ -123,6 +123,7 @@ Groups have an `is_private` flag. Public groups are browsable via `/groups/disco
 - **Propshaft**: Asset pipeline
 - **IceCube**: Recurrence scheduling for recurring events
 - **Twilio**: SMS delivery for OTP auth and event reminders
+- **Resend**: email fallback when an SMS fails or a guest gave only an email. Production sends through its HTTPS API (`delivery_method = :resend`, key in `RESEND_API_KEY`) because Railway blocks outbound SMTP. The from address is `noreply@stillon.app`, so the domain must be verified in Resend.
 - **Kamal**: Deployment via Docker
 - **Thruster**: HTTP caching/compression for Puma
 

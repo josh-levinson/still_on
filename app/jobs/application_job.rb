@@ -21,7 +21,12 @@ class ApplicationJob < ActiveJob::Base
 
     return if email.blank?
 
-    EventMailer.notification(to: email, subject: subject || "StillOn notification", body: body).deliver_now
+    begin
+      EventMailer.notification(to: email, subject: subject || "StillOn notification", body: body).deliver_now
+    rescue => e
+      # Report and move on, so one bad address doesn't stop the rest of a job's sends.
+      Rails.error.report(e, handled: true)
+    end
   end
 
   # Ping a Honeybadger check-in so we get alerted if a scheduled job stops running.

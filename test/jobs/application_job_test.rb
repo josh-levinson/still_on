@@ -85,6 +85,17 @@ class ApplicationJobTest < ActiveSupport::TestCase
     assert_equal "Hey", ActionMailer::Base.deliveries.first.subject
   end
 
+  test "reports and swallows email delivery failures" do
+    failing_mail = Object.new
+    def failing_mail.deliver_now = raise(Resend::Error, "invalid address")
+
+    EventMailer.stub(:notification, failing_mail) do
+      assert_error_reported(Resend::Error) do
+        NotifyTestJob.perform_now(email: "bad@example.com", body: "Hi")
+      end
+    end
+  end
+
   test "uses default subject when none provided" do
     NotifyTestJob.perform_now(email: "no-subject@example.com", body: "Something")
 

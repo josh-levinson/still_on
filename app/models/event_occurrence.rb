@@ -1,6 +1,7 @@
 class EventOccurrence < ApplicationRecord
   belongs_to :event
   has_many :rsvps, dependent: :destroy
+  has_many :guest_invite_tokens, dependent: :delete_all
 
   before_create :ensure_invite_token
 

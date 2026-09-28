@@ -73,3 +73,5 @@ gem "ice_cube"
 gem "honeybadger", "~> 6.9"
 
 gem "ahoy_matey", "~> 5.5"
+
+gem "resend", "~> 1.17"

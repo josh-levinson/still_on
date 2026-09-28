@@ -9,7 +9,7 @@ Target first niche: tabletop game groups (D&D campaigns, board game nights) — 
 - [x] **OTP brute-force protection** — `OtpVerification` concern: the code stops working after 5 wrong guesses (counted server-side in the cache, not in the cookie), verify endpoints are limited to 30/10 min per IP, and codes come from `SecureRandom`.
 - [x] **Enable SSL + host authorization in production** — `assume_ssl`/`force_ssl` are on, and hosts are `stillon.app` and its subdomains plus any hosts listed in the `APP_HOSTS` env var. `/up` is exempt from both.
 - [x] **Error monitoring** — Honeybadger reports exceptions (API key via `HONEYBADGER_API_KEY`). Failed SMS in `notify` are reported as handled errors, requests are tagged with `user_id`, and the two daily cron jobs ping check-ins (`HONEYBADGER_CHECKIN_GENERATE_RECURRING_OCCURRENCES`, `HONEYBADGER_CHECKIN_SCHEDULE_NOTIFICATIONS`). Phone params are filtered.
-- [ ] **Confirm 10DLC campaign approval** — verify the Twilio A2P campaign is approved before sending real traffic; enable Twilio Fraud Guard / SMS geo-permissions (US only). *Status (2026-09-27): brand registration submitted, under review. Campaign registration comes after brand approval.*
+- [x] **Toll-free verification** — StillOn sends from a Twilio toll-free number (not 10DLC), and its verification is approved (confirmed 2026-09-27). Also worth doing: Twilio Fraud Guard and SMS geo-permissions set to US only.
 
 ### Should fix
 - [x] **Biweekly cadence** — "Every other week" option in both wizards and the event forms (`recurrence_type: "biweekly"`, IceCube `weekly(2)`).
