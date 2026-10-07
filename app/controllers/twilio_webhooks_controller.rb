@@ -58,6 +58,29 @@ class TwilioWebhooksController < ApplicationController
     head :ok
   end
 
+  # Callback URL for Usage Triggers (Twilio Console → Usage → Triggers), e.g. a
+  # daily cap on SMS spend. Fingerprinted by usage category so each kind of
+  # trigger gets its own Honeybadger error.
+  def usage
+    category = params[:UsageCategory].to_s
+
+    Honeybadger.notify(
+      "Twilio usage trigger: #{category} reached #{params[:CurrentValue]} (limit #{params[:TriggerValue]} #{params[:TriggerBy]})",
+      error_class: "Twilio::UsageTrigger",
+      fingerprint: "Twilio::UsageTrigger-#{category}",
+      context: {
+        usage_category: category,
+        trigger_by: params[:TriggerBy],
+        trigger_value: params[:TriggerValue],
+        current_value: params[:CurrentValue],
+        recurring: params[:Recurring],
+        trigger_sid: params[:UsageTriggerSid]
+      }
+    )
+
+    head :ok
+  end
+
   private
 
   def debugger_payload

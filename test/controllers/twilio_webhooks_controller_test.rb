@@ -224,4 +224,26 @@ class TwilioWebhooksControllerTest < ActionDispatch::IntegrationTest
     assert_response :ok
     assert_equal "Twilio::DebuggerAlert-", notices.first.last[:fingerprint]
   end
+
+  # ---- POST /twilio/usage ----
+
+  test "reports a usage trigger with the category, value, and limit" do
+    notices = capture_honeybadger do
+      post twilio_usage_webhook_path, params: {
+        AccountSid: "AC123", UsageTriggerSid: "UT123", DateFired: "2026-10-07", Recurring: "daily",
+        UsageCategory: "sms", TriggerBy: "price", TriggerValue: "20", CurrentValue: "21.53"
+      }
+    end
+
+    assert_response :ok
+    args, kwargs = notices.first
+    assert_equal "Twilio usage trigger: sms reached 21.53 (limit 20 price)", args.first
+    assert_equal "Twilio::UsageTrigger", kwargs[:error_class]
+    assert_equal "Twilio::UsageTrigger-sms", kwargs[:fingerprint]
+    assert_equal(
+      { usage_category: "sms", trigger_by: "price", trigger_value: "20", current_value: "21.53",
+        recurring: "daily", trigger_sid: "UT123" },
+      kwargs[:context]
+    )
+  end
 end
