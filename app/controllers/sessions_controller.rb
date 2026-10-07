@@ -1,5 +1,12 @@
 class SessionsController < ApplicationController
+  include OtpVerification
+  include SmsThrottling
+
   layout "onboarding"
+
+  throttle_sms_sends only: :submit_phone, phone: -> { params[:phone] }
+  throttle_sms_sends only: :resend_otp,   phone: -> { session[:signin_phone] }
+  throttle_otp_verifies only: :submit_verify
 
   before_action :redirect_if_signed_in, only: [ :phone, :verify ]
 
@@ -15,23 +22,8 @@ class SessionsController < ApplicationController
       return
     end
 
-    unless User.exists?(phone_number: phone)
-      flash.now[:error] = "No account found with that number. Did you mean to get started?"
-      render :phone, status: :unprocessable_entity
-      return
-    end
-
-    otp = rand(100_000..999_999).to_s
-
-    begin
-      SmsService.send_message(to: "+1#{phone}", body: "Your StillOn code is #{otp}. It expires in 10 minutes.")
-    rescue => e
-      Rails.logger.error("[SignIn] OTP send failed: #{e.message}")
-    end
-
     session[:signin_phone] = phone
-    session[:signin_otp] = otp
-    session[:signin_otp_expires_at] = 10.minutes.from_now.to_i
+    send_signin_code(phone)
     redirect_to sign_in_verify_path
   end
 
@@ -40,12 +32,11 @@ class SessionsController < ApplicationController
   end
 
   def submit_verify
-    phone      = session[:signin_phone]
-    code       = params[:code].to_s.strip
-    stored     = session[:signin_otp]
-    expires_at = session[:signin_otp_expires_at].to_i
+    phone  = session[:signin_phone]
+    result = check_otp(phone: phone, code: params[:code].to_s.strip,
+      stored: session[:signin_otp], expires_at: session[:signin_otp_expires_at])
 
-    if stored && code == stored && Time.current.to_i < expires_at
+    if result == :ok
       session.delete(:signin_otp)
       session.delete(:signin_otp_expires_at)
       user = User.find_by(phone_number: phone)
@@ -59,7 +50,7 @@ class SessionsController < ApplicationController
         render :verify, status: :unprocessable_entity
       end
     else
-      flash.now[:error] = "That code didn't match. Please try again."
+      flash.now[:error] = otp_error_message(result)
       render :verify, status: :unprocessable_entity
     end
   end
@@ -68,16 +59,7 @@ class SessionsController < ApplicationController
     phone = session[:signin_phone]
     redirect_to sign_in_path and return unless phone
 
-    otp = rand(100_000..999_999).to_s
-
-    begin
-      SmsService.send_message(to: "+1#{phone}", body: "Your StillOn code is #{otp}. It expires in 10 minutes.")
-    rescue => e
-      Rails.logger.error("[SignIn] OTP resend failed: #{e.message}")
-    end
-
-    session[:signin_otp] = otp
-    session[:signin_otp_expires_at] = 10.minutes.from_now.to_i
+    send_signin_code(phone)
     redirect_to sign_in_verify_path, notice: "Code resent!"
   end
 
@@ -87,6 +69,17 @@ class SessionsController < ApplicationController
   end
 
   private
+
+  # Only texts numbers that belong to an account, but the response is the same
+  # either way so the sign-in form can't be used to look up who has one.
+  def send_signin_code(phone)
+    if User.exists?(phone_number: phone)
+      session[:signin_otp], session[:signin_otp_expires_at] = deliver_otp(phone, log_tag: "SignIn")
+    else
+      session.delete(:signin_otp)
+      session.delete(:signin_otp_expires_at)
+    end
+  end
 
   def redirect_if_signed_in
     redirect_to dashboard_path if user_signed_in?

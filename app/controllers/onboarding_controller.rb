@@ -1,13 +1,22 @@
 class OnboardingController < ApplicationController
+  include OtpVerification
+  include SmsThrottling
+
   layout "onboarding"
 
-  CADENCES = %w[none weekly monthly].freeze
+  throttle_sms_sends only: :submit_phone, phone: -> { params[:phone] }
+  throttle_sms_sends only: :resend_otp,   phone: -> { session[:ob_phone] }
+  throttle_otp_verifies only: :submit_verify
+
+  CADENCES = %w[none weekly biweekly monthly].freeze
 
   def splash
-    redirect_to dashboard_path if user_signed_in?
+    return redirect_to dashboard_path if user_signed_in?
+    track_step "splash"
   end
 
   def name
+    track_step "name"
     @step = 1
   end
 
@@ -29,6 +38,7 @@ class OnboardingController < ApplicationController
   end
 
   def date_step
+    track_step "date"
     @step = 2
     today = Date.today
     days_until_friday = (5 - today.wday) % 7
@@ -61,6 +71,7 @@ class OnboardingController < ApplicationController
   end
 
   def cadence
+    track_step "cadence"
     @step = 3
     if session[:ob_date].present?
       date = Date.parse(session[:ob_date])
@@ -94,6 +105,7 @@ class OnboardingController < ApplicationController
   def phone
     return redirect_to dashboard_path if current_user&.phone_verified_at.present?
     return redirect_to onboarding_splash_path unless session[:ob_occurrence_id]
+    track_step "phone"
     @step = 4
   end
 
@@ -107,32 +119,23 @@ class OnboardingController < ApplicationController
       return
     end
 
-    otp = rand(100_000..999_999).to_s
-
-    begin
-      SmsService.send_message(to: "+1#{phone}", body: "Your StillOn code is #{otp}. It expires in 10 minutes.")
-    rescue => e
-      Rails.logger.error("[Onboarding] OTP send failed: #{e.message}")
-    end
-
     session[:ob_phone] = phone
-    session[:ob_otp] = otp
-    session[:ob_otp_expires_at] = 10.minutes.from_now.to_i
+    session[:ob_otp], session[:ob_otp_expires_at] = deliver_otp(phone, log_tag: "Onboarding")
     redirect_to onboarding_verify_path
   end
 
   def verify
-    redirect_to onboarding_phone_path unless session[:ob_phone]
+    return redirect_to onboarding_phone_path unless session[:ob_phone]
+    track_step "verify"
     @step = 5
   end
 
   def submit_verify
-    phone      = session[:ob_phone]
-    code       = params[:code].to_s.strip
-    stored     = session[:ob_otp]
-    expires_at = session[:ob_otp_expires_at].to_i
+    phone  = session[:ob_phone]
+    result = check_otp(phone: phone, code: params[:code].to_s.strip,
+      stored: session[:ob_otp], expires_at: session[:ob_otp_expires_at])
 
-    if stored && code == stored && Time.current.to_i < expires_at
+    if result == :ok
       session.delete(:ob_otp)
       session.delete(:ob_otp_expires_at)
 
@@ -143,7 +146,7 @@ class OnboardingController < ApplicationController
 
       redirect_to onboarding_invite_path
     else
-      flash.now[:error] = "That code didn't match. Please try again."
+      flash.now[:error] = otp_error_message(result)
       @step = 5
       render :verify, status: :unprocessable_entity
     end
@@ -153,16 +156,7 @@ class OnboardingController < ApplicationController
     phone = session[:ob_phone]
     redirect_to onboarding_phone_path and return unless phone
 
-    otp = rand(100_000..999_999).to_s
-
-    begin
-      SmsService.send_message(to: "+1#{phone}", body: "Your StillOn code is #{otp}. It expires in 10 minutes.")
-    rescue => e
-      Rails.logger.error("[Onboarding] OTP resend failed: #{e.message}")
-    end
-
-    session[:ob_otp] = otp
-    session[:ob_otp_expires_at] = 10.minutes.from_now.to_i
+    session[:ob_otp], session[:ob_otp_expires_at] = deliver_otp(phone, log_tag: "Onboarding")
     redirect_to onboarding_verify_path, notice: "Code resent!"
   end
 
@@ -170,6 +164,7 @@ class OnboardingController < ApplicationController
     occurrence_id = session[:ob_occurrence_id]
     redirect_to onboarding_splash_path and return unless occurrence_id
 
+    track_step "invite"
     @occurrence   = EventOccurrence.find(occurrence_id)
     @hangout_name = session[:ob_hangout_name]
     @first_name   = session[:ob_first_name]
@@ -180,6 +175,11 @@ class OnboardingController < ApplicationController
   end
 
   private
+
+  # Funnel analytics; see AnalyticsReport.
+  def track_step(step)
+    ahoy.track "Onboarding step", step: step
+  end
 
   def rails_zone_from_iana(iana_name)
     return "UTC" if iana_name.blank?

@@ -14,12 +14,25 @@ class ApplicationJob < ActiveJob::Base
         SmsService.send_message(to: phone, body: body)
         return
       rescue Twilio::REST::RestError => e
-        Rails.logger.warn("[notify] SMS failed for #{phone}, trying email: #{e.message}")
+        # SmsService has already reported the error.
+        Rails.logger.warn("[notify] SMS failed for #{SmsService.mask(phone)}, trying email: #{e.message}")
       end
     end
 
     return if email.blank?
 
-    EventMailer.notification(to: email, subject: subject || "StillOn notification", body: body).deliver_now
+    begin
+      EventMailer.notification(to: email, subject: subject || "StillOn notification", body: body).deliver_now
+    rescue => e
+      # Report and move on, so one bad address doesn't stop the rest of a job's sends.
+      Rails.error.report(e, handled: true)
+    end
+  end
+
+  # Ping a Honeybadger check-in so we get alerted if a scheduled job stops running.
+  # The check-in ID comes from HONEYBADGER_CHECKIN_<NAME>; no-op when unset.
+  def check_in(name)
+    id = ENV["HONEYBADGER_CHECKIN_#{name.to_s.upcase}"]
+    Honeybadger.check_in(id) if id.present?
   end
 end

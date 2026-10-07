@@ -1,4 +1,8 @@
 class GuestRsvpResendsController < ApplicationController
+  include SmsThrottling
+
+  throttle_sms_sends only: :create, phone: -> { params[:phone] }
+
   def new
   end
 
@@ -30,13 +34,11 @@ class GuestRsvpResendsController < ApplicationController
 
   def send_link_for_rsvp(rsvp, phone_e164)
     occurrence = rsvp.event_occurrence
-    token = occurrence.invite_token(phone: phone_e164)
-    host = Rails.application.credentials.dig(:app, :host) || ENV.fetch("APP_HOST", "localhost:3000")
-    url = Rails.application.routes.url_helpers.guest_rsvp_url(token, host: host)
+    url = guest_rsvp_url(GuestInviteToken.for(occurrence, phone_e164).token)
     date_str = occurrence.start_time.strftime("%b %-d")
     body = "Your RSVP link for #{occurrence.event.title} on #{date_str}: #{url}"
     SmsService.send_message(to: phone_e164, body: body)
   rescue StandardError => e
-    Rails.logger.error("[GuestRsvpResends] Failed to send link to #{phone_e164}: #{e.message}")
+    Rails.logger.error("[GuestRsvpResends] Failed to send link to #{SmsService.mask(phone_e164)}: #{e.message}")
   end
 end

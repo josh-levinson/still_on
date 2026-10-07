@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en"<% if theme_preference != "system" %> data-theme="<%= theme_preference %>"<% end %>>
   <head>
     <title><%= content_for(:title) || "Still On" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= render "shared/theme_meta" %>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
@@ -17,7 +19,6 @@
       <% unless content_for?(:hide_logo) %>
         <div class="onboarding-logo">
           <%= link_to root_path do %>
-            <span class="logo-fire-img"></span>
             <span class="logo-still">StillOn</span>
           <% end %>
         </div>
@@ -42,6 +43,10 @@
       <% end %>
 
       <%= yield %>
+
+      <div class="onboarding-footer">
+        <%= render "shared/theme_switcher" %>
+      </div>
     </div>
   </body>
 </html>

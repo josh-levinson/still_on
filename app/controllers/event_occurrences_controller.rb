@@ -79,9 +79,9 @@ class EventOccurrencesController < ApplicationController
   def send_rsvp_reminder
     if @event_occurrence.status == "scheduled" && @event_occurrence.start_time > Time.current
       SendRsvpReminderJob.perform_later(@event_occurrence.id)
-      redirect_to [ @group, @event, @event_occurrence ], notice: "RSVP reminder will be sent shortly."
+      redirect_back_or_to [ @group, @event, @event_occurrence ], notice: "RSVP reminder will be sent shortly."
     else
-      redirect_to [ @group, @event, @event_occurrence ], alert: "Reminders can only be sent for upcoming scheduled occurrences."
+      redirect_back_or_to [ @group, @event, @event_occurrence ], alert: "Reminders can only be sent for upcoming scheduled occurrences."
     end
   end
 

@@ -1,0 +1,11 @@
+<%= form_with url: theme_path, method: :patch, class: "theme-switcher",
+      aria: { label: "Colour theme" },
+      data: { turbo: false, controller: "theme", action: "submit->theme#choose",
+              theme_colors_value: ApplicationHelper::THEME_COLORS.to_json } do %>
+  <% { "system" => "Auto", "light" => "Light", "dark" => "Dark" }.each do |value, label| %>
+    <button type="submit" name="theme" value="<%= value %>" class="theme-option"
+            aria-pressed="<%= theme_preference == value %>" data-theme-target="option">
+      <%= label %>
+    </button>
+  <% end %>
+<% end %>

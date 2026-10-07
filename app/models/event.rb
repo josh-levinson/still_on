@@ -4,7 +4,7 @@ class Event < ApplicationRecord
   has_many :event_occurrences, dependent: :destroy
 
   validates :title, presence: true
-  validates :recurrence_type, presence: true, inclusion: { in: %w[none daily weekly monthly] }
+  validates :recurrence_type, presence: true, inclusion: { in: %w[none daily weekly biweekly monthly] }
   validates :quorum, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
 
   scope :active, -> { where(is_active: true) }
@@ -29,8 +29,8 @@ class Event < ApplicationRecord
   # Builds an IceCube::Schedule from a start_time and recurrence params.
   # Saves it to recurrence_rule.
   #
-  # recurrence_type: "weekly" | "monthly"
-  # For "weekly": pass day_of_week (e.g. :thursday)
+  # recurrence_type: "weekly" | "biweekly" | "monthly"
+  # For "weekly"/"biweekly": pass day_of_week (e.g. :thursday)
   # For "monthly": pass nth_weekday: { day: :thursday, n: 3 }
   #                or day_of_month: 17
   def build_schedule(start_time, **opts)
@@ -39,8 +39,9 @@ class Event < ApplicationRecord
     rule = case recurrence_type
     when "daily"
       IceCube::Rule.daily
-    when "weekly"
-      IceCube::Rule.weekly.day(opts[:day_of_week] || start_time.strftime("%A").downcase.to_sym)
+    when "weekly", "biweekly"
+      interval = recurrence_type == "biweekly" ? 2 : 1
+      IceCube::Rule.weekly(interval).day(opts[:day_of_week] || start_time.strftime("%A").downcase.to_sym)
     when "monthly"
       if opts[:nth_weekday]
         day  = opts[:nth_weekday][:day]

@@ -1,4 +1,6 @@
 class GroupMembership < ApplicationRecord
+  include LimitedByGroupSize
+
   belongs_to :group
   belongs_to :user
 

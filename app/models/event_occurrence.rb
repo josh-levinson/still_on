@@ -1,6 +1,9 @@
 class EventOccurrence < ApplicationRecord
   belongs_to :event
   has_many :rsvps, dependent: :destroy
+  has_many :guest_invite_tokens, dependent: :delete_all
+
+  before_create :ensure_invite_token
 
   validates :start_time, presence: true
   validates :end_time, presence: true
@@ -13,6 +16,11 @@ class EventOccurrence < ApplicationRecord
 
   def attending_count
     rsvps.where(status: "attending").sum("1 + guest_count")
+  end
+
+  # Who's going, oldest reply first, for the "who's in" list on the RSVP page.
+  def attending_rsvps
+    rsvps.where(status: "attending").includes(:user).order(:created_at)
   end
 
   def maybe_count
@@ -31,30 +39,46 @@ class EventOccurrence < ApplicationRecord
     [ member_count - responded_count, 0 ].max
   end
 
+  # Members and SMS subscribers who haven't RSVP'd yet: the people an RSVP
+  # reminder would go to.
+  def awaiting_reply_count
+    group = event.group
+    user_ids = rsvps.where.not(user_id: nil).pluck(:user_id)
+    member_ids = group.group_memberships.pluck(:user_id)
+    member_phones = User.where(id: member_ids).where.not(phone_number: nil).pluck(:phone_number)
+    replied_phones = rsvps.where.not(guest_phone: nil).pluck(:guest_phone) +
+      User.where(id: user_ids).where.not(phone_number: nil).pluck(:phone_number)
+
+    unreplied_members = (member_ids - user_ids).size
+    unreplied_subscribers = group.guest_group_subscriptions
+      .where.not(phone_number: member_phones + replied_phones)
+      .count
+
+    unreplied_members + unreplied_subscribers
+  end
+
   def full?
     max_attendees.present? && attending_count >= max_attendees
   end
 
-  # Signed invite token — encodes this occurrence's ID and an optional phone
-  # number for SMS recipients. URL-safe via outer Base64 encoding.
-  def invite_token(phone: nil)
-    payload = { oid: id.to_s }
-    payload[:phone] = phone if phone.present?
-    raw = Rails.application.message_verifier(:guest_rsvp).generate(payload)
-    Base64.urlsafe_encode64(raw, padding: false)
-  end
-
+  # Look up an occurrence by its short, random invite token. Returns nil when
+  # the token is blank or doesn't match a record. Phone prefill for SMS
+  # recipients is handled separately via a query param, not the token.
   def self.find_by_invite_token(token)
-    raw = Base64.urlsafe_decode64(token)
-    payload = Rails.application.message_verifier(:guest_rsvp).verify(raw)
-    occurrence = find(payload["oid"])
-    [ occurrence, payload["phone"] ]
-  rescue ActiveSupport::MessageVerifier::InvalidSignature, ArgumentError,
-         ActiveRecord::RecordNotFound
-    [ nil, nil ]
+    return nil if token.blank?
+    find_by(invite_token: token)
   end
 
   private
+
+  def ensure_invite_token
+    return if invite_token.present?
+
+    self.invite_token = loop do
+      candidate = SecureRandom.urlsafe_base64(8)
+      break candidate unless self.class.exists?(invite_token: candidate)
+    end
+  end
 
   def end_time_after_start_time
     return unless start_time.present? && end_time.present?

@@ -10,15 +10,50 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_23_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_27_163929) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
+
+  create_table "ahoy_events", force: :cascade do |t|
+    t.string "name"
+    t.jsonb "properties"
+    t.datetime "time"
+    t.uuid "user_id"
+    t.bigint "visit_id"
+    t.index ["name", "time"], name: "index_ahoy_events_on_name_and_time"
+    t.index ["properties"], name: "index_ahoy_events_on_properties", opclass: :jsonb_path_ops, using: :gin
+    t.index ["user_id"], name: "index_ahoy_events_on_user_id"
+    t.index ["visit_id"], name: "index_ahoy_events_on_visit_id"
+  end
+
+  create_table "ahoy_visits", force: :cascade do |t|
+    t.string "browser"
+    t.string "device_type"
+    t.text "landing_page"
+    t.string "os"
+    t.text "referrer"
+    t.string "referring_domain"
+    t.datetime "started_at"
+    t.text "user_agent"
+    t.uuid "user_id"
+    t.string "utm_campaign"
+    t.string "utm_content"
+    t.string "utm_medium"
+    t.string "utm_source"
+    t.string "utm_term"
+    t.string "visit_token"
+    t.string "visitor_token"
+    t.index ["user_id"], name: "index_ahoy_visits_on_user_id"
+    t.index ["visit_token"], name: "index_ahoy_visits_on_visit_token", unique: true
+    t.index ["visitor_token", "started_at"], name: "index_ahoy_visits_on_visitor_token_and_started_at"
+  end
 
   create_table "event_occurrences", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "end_time", null: false
     t.uuid "event_id", null: false
+    t.string "invite_token", null: false
     t.string "location"
     t.integer "max_attendees"
     t.text "notes"
@@ -27,6 +62,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_000001) do
     t.datetime "updated_at", null: false
     t.index ["event_id", "start_time"], name: "index_event_occurrences_on_event_id_and_start_time"
     t.index ["event_id"], name: "index_event_occurrences_on_event_id"
+    t.index ["invite_token"], name: "index_event_occurrences_on_invite_token", unique: true
     t.index ["start_time"], name: "index_event_occurrences_on_start_time"
     t.index ["status"], name: "index_event_occurrences_on_status"
   end
@@ -68,6 +104,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_000001) do
     t.text "description"
     t.boolean "is_private", default: false, null: false
     t.string "name", null: false
+    t.datetime "paused_at"
+    t.date "paused_until"
     t.integer "reminder_days_before", default: 2, null: false
     t.string "slug", null: false
     t.string "time_zone", default: "UTC", null: false
@@ -83,6 +121,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_000001) do
     t.datetime "updated_at", null: false
     t.index ["group_id", "phone_number"], name: "index_guest_group_subscriptions_on_group_id_and_phone_number", unique: true
     t.index ["group_id"], name: "index_guest_group_subscriptions_on_group_id"
+  end
+
+  create_table "guest_invite_tokens", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.uuid "event_occurrence_id", null: false
+    t.string "phone", null: false
+    t.string "token", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_occurrence_id", "phone"], name: "index_guest_invite_tokens_on_event_occurrence_id_and_phone", unique: true
+    t.index ["event_occurrence_id"], name: "index_guest_invite_tokens_on_event_occurrence_id"
+    t.index ["token"], name: "index_guest_invite_tokens_on_token", unique: true
   end
 
   create_table "notification_preferences", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -285,6 +334,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_000001) do
   add_foreign_key "group_memberships", "users"
   add_foreign_key "groups", "users", column: "created_by_id"
   add_foreign_key "guest_group_subscriptions", "groups"
+  add_foreign_key "guest_invite_tokens", "event_occurrences"
   add_foreign_key "notification_preferences", "users"
   add_foreign_key "rsvps", "event_occurrences"
   add_foreign_key "rsvps", "users"

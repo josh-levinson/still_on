@@ -44,18 +44,7 @@
             Copy
           </button>
         </div>
-        <div class="invite-share-btns">
-          <a href="sms:&body=<%= ERB::Util.url_encode("Hey! RSVP for #{@event.title} here: #{guest_rsvp_url(@event_occurrence.invite_token)}") %>"
-             class="share-btn">
-            📱 iMessage
-          </a>
-          <a href="https://wa.me/?text=<%= ERB::Util.url_encode("Hey! RSVP for #{@event.title} here: #{guest_rsvp_url(@event_occurrence.invite_token)}") %>"
-             target="_blank"
-             rel="noopener"
-             class="share-btn">
-            💬 WhatsApp
-          </a>
-        </div>
+        <%= render "shared/share_buttons", title: @event.title, url: guest_rsvp_url(@event_occurrence.invite_token) %>
       </div>
     <% end %>
 

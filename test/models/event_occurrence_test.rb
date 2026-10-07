@@ -104,6 +104,16 @@ class EventOccurrenceTest < ActiveSupport::TestCase
     assert_equal 0, @occurrence.attending_count
   end
 
+  # --- attending_rsvps ---
+
+  test "attending_rsvps lists only attending RSVPs, oldest first" do
+    second = create_rsvp(@occurrence, guest_name: "Second", status: "attending", created_at: 1.minute.ago)
+    first = create_rsvp(@occurrence, guest_name: "First", status: "attending", created_at: 1.hour.ago)
+    create_rsvp(@occurrence, guest_name: "Maybe", status: "maybe")
+
+    assert_equal [ first, second ], @occurrence.attending_rsvps.to_a
+  end
+
   # --- maybe_count / declined_count / responded_count / no_response_count ---
 
   test "maybe_count returns count of maybe RSVPs" do
@@ -156,34 +166,80 @@ class EventOccurrenceTest < ActiveSupport::TestCase
 
   # --- invite_token / find_by_invite_token ---
 
-  test "invite_token generates a URL-safe token" do
-    token = @occurrence.invite_token
-    assert_match(/\A[A-Za-z0-9_-]+\z/, token)
+  test "invite_token is generated on create and is short and URL-safe" do
+    assert_match(/\A[A-Za-z0-9_-]+\z/, @occurrence.invite_token)
+    assert @occurrence.invite_token.length <= 16, "token should be short"
+  end
+
+  test "invite_token is unique across occurrences" do
+    other = @occurrence.event.event_occurrences.create!(
+      start_time: 1.day.from_now, end_time: 1.day.from_now + 1.hour, status: "scheduled"
+    )
+    assert_not_equal @occurrence.invite_token, other.invite_token
+  end
+
+  test "an explicitly set invite_token is preserved" do
+    occ = @occurrence.event.event_occurrences.new(
+      start_time: 2.days.from_now, end_time: 2.days.from_now + 1.hour,
+      status: "scheduled", invite_token: "custom-token-123"
+    )
+    occ.save!
+    assert_equal "custom-token-123", occ.invite_token
+  end
+
+  test "invite_token generation retries on collision" do
+    taken = @occurrence.invite_token
+    candidates = [ taken, "fresh-unique-token" ]
+    SecureRandom.stub(:urlsafe_base64, ->(*) { candidates.shift }) do
+      occ = @event.event_occurrences.create!(
+        start_time: 3.days.from_now, end_time: 3.days.from_now + 1.hour, status: "scheduled"
+      )
+      assert_equal "fresh-unique-token", occ.invite_token
+    end
   end
 
   test "find_by_invite_token returns the occurrence" do
-    token = @occurrence.invite_token
-    found, phone = EventOccurrence.find_by_invite_token(token)
+    found = EventOccurrence.find_by_invite_token(@occurrence.invite_token)
     assert_equal @occurrence.id, found.id
-    assert_nil phone
   end
 
-  test "invite_token can encode a phone number" do
-    token = @occurrence.invite_token(phone: "+15551234567")
-    found, phone = EventOccurrence.find_by_invite_token(token)
-    assert_equal @occurrence.id, found.id
-    assert_equal "+15551234567", phone
-  end
-
-  test "find_by_invite_token returns nil for a tampered token" do
-    found, phone = EventOccurrence.find_by_invite_token("not-a-real-token")
-    assert_nil found
-    assert_nil phone
+  test "find_by_invite_token returns nil for an unknown token" do
+    assert_nil EventOccurrence.find_by_invite_token("not-a-real-token")
   end
 
   test "find_by_invite_token returns nil for empty string" do
-    found, phone = EventOccurrence.find_by_invite_token("")
-    assert_nil found
-    assert_nil phone
+    assert_nil EventOccurrence.find_by_invite_token("")
+  end
+
+  # --- awaiting_reply_count ---
+
+  test "awaiting_reply_count counts members and subscribers who haven't replied" do
+    member = create_user
+    GroupMembership.create!(group: @group, user: member)
+    GroupMembership.create!(group: @group, user: @user)
+    GuestGroupSubscription.subscribe(group: @group, phone_number: "+15550001111")
+    GuestGroupSubscription.subscribe(group: @group, phone_number: "+15550002222")
+
+    assert_equal 4, @occurrence.awaiting_reply_count
+
+    create_rsvp(@occurrence, user: member, guest_name: nil)
+    create_rsvp(@occurrence, guest_phone: "+15550001111")
+    assert_equal 2, @occurrence.awaiting_reply_count
+  end
+
+  test "awaiting_reply_count doesn't double count a member who is also subscribed" do
+    member = create_user
+    GroupMembership.create!(group: @group, user: member)
+    GuestGroupSubscription.subscribe(group: @group, phone_number: member.phone_number)
+
+    assert_equal 1, @occurrence.awaiting_reply_count
+  end
+
+  test "awaiting_reply_count treats a subscriber who replied with their account as replied" do
+    guest = create_user
+    GuestGroupSubscription.subscribe(group: @group, phone_number: guest.phone_number)
+    create_rsvp(@occurrence, user: guest, guest_name: nil)
+
+    assert_equal 0, @occurrence.awaiting_reply_count
   end
 end

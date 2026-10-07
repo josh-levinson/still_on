@@ -295,6 +295,21 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
     assert_match /didn't match/i, flash[:error]
   end
 
+  test "submit_verify locks the code after too many wrong guesses" do
+    with_memory_cache do
+      complete_cadence_step
+      SmsService.stub(:send_message, true) do
+        post onboarding_submit_phone_path, params: { phone: "5559876543" }
+      end
+      otp = session[:ob_otp]
+      OtpVerification::MAX_OTP_ATTEMPTS.times { post onboarding_submit_verify_path, params: { code: "000000" } }
+
+      post onboarding_submit_verify_path, params: { code: otp }
+      assert_response :unprocessable_entity
+      assert_match /too many incorrect/i, flash[:error]
+    end
+  end
+
   test "submit_verify with expired OTP re-renders with error" do
     complete_cadence_step
     SmsService.stub(:send_message, true) do
@@ -336,6 +351,27 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to onboarding_verify_path
   end
 
+  # ---- analytics ----
+
+  test "tracks each onboarding step viewed" do
+    get onboarding_splash_path
+    get onboarding_name_path
+    get onboarding_date_path
+    complete_cadence_step
+    get onboarding_cadence_path
+    get onboarding_phone_path
+    SmsService.stub(:send_message, true) do
+      post onboarding_submit_phone_path, params: { phone: "5559876543" }
+    end
+    get onboarding_verify_path
+    post onboarding_submit_verify_path, params: { code: session[:ob_otp] }
+    get onboarding_invite_path
+
+    steps = Ahoy::Event.where(name: "Onboarding step").order(:time).map { |e| e.properties["step"] }
+    assert_equal AnalyticsReport::ONBOARDING_STEPS, steps
+    assert_equal 1, Ahoy::Visit.count
+  end
+
   # ---- GET /onboarding/invite ----
 
   test "invite renders with hangout details when session is complete" do
@@ -346,6 +382,18 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
     post onboarding_submit_verify_path, params: { code: session[:ob_otp] }
     get onboarding_invite_path
     assert_response :success
+  end
+
+  test "invite shows every other week for biweekly cadence and a Discord share button" do
+    complete_cadence_step(cadence: "biweekly")
+    SmsService.stub(:send_message, true) do
+      post onboarding_submit_phone_path, params: { phone: "5559876543" }
+    end
+    post onboarding_submit_verify_path, params: { code: session[:ob_otp] }
+    get onboarding_invite_path
+    assert_match /Every other week/, response.body
+    assert_select "button.share-btn-discord[data-clipboard-text-param*=?]", "RSVP for Friday Night"
+    assert_equal "biweekly", Event.order(:created_at).last.recurrence_type
   end
 
   test "invite redirects to splash when no occurrence_id in session" do

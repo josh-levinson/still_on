@@ -1,25 +1,69 @@
 <% content_for :title, "#{@event.title} – RSVP" %>
+<% content_for :hide_nav_cta, true %>
+<% organizer = @event.created_by.first_name.presence || "Your organizer" %>
+<% starts = @event_occurrence.start_time %>
 
 <div class="rsvp-page">
   <div class="rsvp-shell">
 
-    <%# ── Event header ── %>
-    <div class="rsvp-event-header">
-      <div class="rsvp-fire"></div>
-      <p class="rsvp-group-name"><%= @group.name %></p>
-      <h1 class="rsvp-event-title"><%= @event.title %></h1>
-      <div class="rsvp-event-meta">
-        <span class="rsvp-date"><%= @event_occurrence.start_time.strftime("%A, %B %-d") %></span>
-        <span class="rsvp-dot">&middot;</span>
-        <span class="rsvp-time">
-          <%= @event_occurrence.start_time.strftime("%-l:%M %p") %> &ndash;
-          <%= @event_occurrence.end_time.strftime("%-l:%M %p") %>
-          <%= @event_occurrence.start_time.zone %>
-        </span>
+    <%# ── The ask, as a text from the organizer ── %>
+    <div class="rsvp-ask">
+      <div class="rsvp-ask-row">
+        <span class="rsvp-avatar" aria-hidden="true"><%= organizer.first %></span>
+        <div class="rsvp-bubble">
+          <p><%= @event.title %> <%= starts.strftime("%A") %>, still on?</p>
+          <% if @event.description.present? %>
+            <p><%= @event.description %></p>
+          <% end %>
+        </div>
       </div>
-      <% if @event_occurrence.location.present? %>
-        <p class="rsvp-location"><%= @event_occurrence.location %></p>
-      <% end %>
+      <p class="rsvp-ask-from"><%= organizer %> · organizer</p>
+    </div>
+
+    <%# ── Event details ── %>
+    <div class="rsvp-event-card">
+      <div class="rsvp-date-tile" aria-hidden="true">
+        <span class="rsvp-date-tile-day"><%= starts.strftime("%a").upcase %></span>
+        <span class="rsvp-date-tile-num"><%= starts.day %></span>
+        <span class="rsvp-date-tile-month"><%= starts.strftime("%b") %></span>
+      </div>
+      <div class="rsvp-event-info">
+        <% if @group.name != @event.title %>
+          <p class="rsvp-group-name"><%= @group.name %></p>
+        <% end %>
+        <h1 class="rsvp-event-title"><%= @event.title %></h1>
+        <p class="rsvp-event-meta">
+          <span class="rsvp-date"><%= starts.strftime("%A, %B %-d") %></span><br>
+          <span class="rsvp-time">
+            <%= starts.strftime("%-l:%M %p") %> &ndash;
+            <%= @event_occurrence.end_time.strftime("%-l:%M %p") %>
+            <%= starts.zone %>
+          </span>
+        </p>
+        <% if @event_occurrence.location.present? %>
+          <p class="rsvp-location"><%= @event_occurrence.location %></p>
+        <% end %>
+      </div>
+    </div>
+
+    <%# ── Who's in ── %>
+    <% going = @event_occurrence.attending_rsvps.to_a %>
+    <div class="rsvp-going">
+      <p class="rsvp-going-heading">
+        <% if going.any? %>
+          <%= @event_occurrence.attending_count %> in so far
+        <% else %>
+          No one's in yet
+        <% end %>
+      </p>
+      <ul class="rsvp-going-list">
+        <% going.each do |rsvp| %>
+          <li class="rsvp-going-name"><%= rsvp.short_name %><%= " +#{rsvp.guest_count}" if rsvp.guest_count.positive? %></li>
+        <% end %>
+        <% unless @existing_rsvp&.status == "attending" %>
+          <li class="rsvp-going-name rsvp-going-you">you?</li>
+        <% end %>
+      </ul>
     </div>
 
     <%# ── Capacity warning ── %>
@@ -90,11 +134,11 @@
 
       <%# RSVP status — big tap targets %>
       <fieldset class="rsvp-status-group">
-        <legend class="rsvp-label">Are you coming?</legend>
+        <legend class="rsvp-label">You in?</legend>
         <div class="rsvp-status-options">
-          <% [["attending", "Yes, I'm in"], ["maybe", "Maybe"], ["declined", "Can't make it"]].each do |value, label| %>
-            <label class="rsvp-status-option rsvp-status-<%= value %> <%= 'selected' if @rsvp.status == value %>">
-              <%= f.radio_button :status, value, class: "rsvp-status-radio" %>
+          <% [["attending", "I'm in"], ["maybe", "Maybe"], ["declined", "Can't"]].each do |value, label| %>
+            <label class="rsvp-status-option rsvp-status-<%= value %>">
+              <%= f.radio_button :status, value, checked: @rsvp.status == value, class: "rsvp-status-radio" %>
               <span class="rsvp-status-label"><%= label %></span>
             </label>
           <% end %>
@@ -103,15 +147,15 @@
 
       <%# Guest count %>
       <div class="rsvp-field rsvp-field-inline">
-        <label class="rsvp-label" for="rsvp_guest_count">Bringing guests?</label>
+        <label class="rsvp-label" for="rsvp_guest_count">Bringing anyone?</label>
         <div class="rsvp-stepper" data-controller="stepper">
-          <button type="button" class="rsvp-stepper-btn" data-action="click->stepper#decrement">−</button>
+          <button type="button" class="rsvp-stepper-btn" aria-label="One fewer guest" data-action="click->stepper#decrement">−</button>
           <%= f.number_field :guest_count,
                 value: @rsvp.guest_count || 0,
                 min: 0, max: 20,
                 class: "rsvp-stepper-input",
                 data: { stepper_target: "value" } %>
-          <button type="button" class="rsvp-stepper-btn" data-action="click->stepper#increment">+</button>
+          <button type="button" class="rsvp-stepper-btn" aria-label="One more guest" data-action="click->stepper#increment">+</button>
         </div>
       </div>
 
@@ -121,16 +165,16 @@
           <div class="rsvp-field rsvp-future-reminders">
             <label class="rsvp-checkbox-label">
               <%= check_box_tag :send_future_reminders, "1",
-                    true,
+                    GuestGroupSubscription.subscribed?(group: @group, phone_number: @prefilled_phone),
                     class: "rsvp-checkbox" %>
               Text me a reminder to RSVP for future <%= @group.name %> events
             </label>
-            <p class="rsvp-sms-consent">Msg &amp; data rates may apply. Reply STOP to opt out. <%= link_to "Privacy policy", privacy_path %>.</p>
+            <p class="rsvp-sms-consent">Up to one text per hangout. Msg &amp; data rates may apply. Reply HELP for help, STOP to opt out. <%= link_to "Terms", terms_path %> &middot; <%= link_to "Privacy", privacy_path %>.</p>
           </div>
         <% else %>
           <div class="rsvp-field rsvp-phone-opt-in">
             <label class="rsvp-label" for="rsvp_guest_phone">
-              Remind me the day of
+              Text me the day of
               <span class="rsvp-optional">(optional)</span>
             </label>
             <%= f.telephone_field :guest_phone,
@@ -139,13 +183,13 @@
                   inputmode: "tel",
                   autocomplete: "tel-national",
                   class: "rsvp-input" %>
-            <p class="rsvp-sms-consent">We'll send you one SMS the morning of the event. Msg &amp; data rates may apply. Reply STOP to opt out. <%= link_to "Privacy policy", privacy_path %>.</p>
+            <p class="rsvp-sms-consent">We'll send you one SMS the morning of the event. Msg &amp; data rates may apply. Reply HELP for help, STOP to opt out. <%= link_to "Terms", terms_path %> &middot; <%= link_to "Privacy", privacy_path %>.</p>
           </div>
           <% existing_phone = @rsvp.guest_phone || @cookie_phone %>
           <div class="rsvp-field rsvp-future-reminders">
             <label class="rsvp-checkbox-label">
               <%= check_box_tag :send_future_reminders, "1",
-                    true,
+                    GuestGroupSubscription.subscribed?(group: @group, phone_number: existing_phone),
                     class: "rsvp-checkbox" %>
               Text me a reminder to RSVP for future <%= @group.name %> events
             </label>
@@ -157,7 +201,7 @@
       <% unless current_user %>
         <div class="rsvp-field rsvp-email-opt-in">
           <label class="rsvp-label" for="rsvp_email">
-            Email for updates
+            Email
             <span class="rsvp-optional">(optional)</span>
           </label>
           <%= f.email_field :email,
@@ -169,15 +213,7 @@
         </div>
       <% end %>
 
-      <%= f.submit(@existing_rsvp ? "Update RSVP" : "RSVP", class: "rsvp-submit-btn") %>
-    <% end %>
-
-    <%# ── Attendee count pill ── %>
-    <% attending = @event_occurrence.attending_count %>
-    <% if attending > 0 %>
-      <p class="rsvp-attendee-count">
-        <%= attending %> <%= "person".pluralize(attending) %> going
-      </p>
+      <%= f.submit(@existing_rsvp ? "Update RSVP" : "Send it", class: "rsvp-submit-btn") %>
     <% end %>
 
     <%# ── Account claim nudge (shown after RSVP, guests only) ── %>
@@ -191,7 +227,7 @@
 
     <%# ── Resend link ── %>
     <p class="rsvp-resend-prompt">
-      Lost your link? <%= link_to "Get it texted to you again \u2192", new_guest_rsvp_resend_path, class: "rsvp-resend-link" %>
+      Lost your link? <%= link_to "Text it to me again", new_guest_rsvp_resend_path, class: "rsvp-resend-link" %>
     </p>
 
   </div>

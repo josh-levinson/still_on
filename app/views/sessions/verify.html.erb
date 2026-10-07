@@ -3,7 +3,7 @@
 
   <div class="onboarding-card-header">
     <h2>Check your texts</h2>
-    <p>Sent to <%= session[:signin_phone]&.then { |p| "(#{p[0..2]}) #{p[3..5]}-#{p[6..9]}" } %></p>
+    <p>If <%= session[:signin_phone]&.then { |p| "(#{p[0..2]}) #{p[3..5]}-#{p[6..9]}" } %> has a StillOn account, we just texted it a code.</p>
   </div>
 
   <% if flash[:error].present? %>
@@ -22,6 +22,7 @@
           pattern="[0-9]"
           autocomplete="<%= i.zero? ? 'one-time-code' : 'off' %>"
           class="otp-digit"
+          aria-label="Digit <%= i + 1 %> of 6"
           data-otp-target="digit"
           data-action="input->otp#onInput keydown->otp#onKeydown paste->otp#onPaste"
           <%= i.zero? ? "autofocus" : "" %>
@@ -40,4 +41,8 @@
     &nbsp;&middot;&nbsp;
     <%= link_to "Wrong number?", sign_in_path %>
   </div>
+
+  <p class="ob-annotation" style="margin-top: 1.5rem;">
+    No account yet? <%= link_to "Get started \u2192", onboarding_name_path %>
+  </p>
 </div>

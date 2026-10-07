@@ -13,6 +13,9 @@
         <% if @group.is_private %>
           <span class="badge">Private</span>
         <% end %>
+        <% if @group.paused? %>
+          <span class="badge badge-warning">Paused</span>
+        <% end %>
       </div>
     </div>
     <div class="group-actions">
@@ -24,6 +27,34 @@
       <% end %>
     </div>
   </div>
+
+  <% if @group.organizer?(current_user) %>
+    <% if @group.paused? %>
+      <div class="alert alert-warning group-pause">
+        <p>
+          <% if @group.paused_until %>
+            Paused until <%= @group.paused_until.strftime("%A, %b %-d") %>.
+          <% else %>
+            Paused.
+          <% end %>
+          No new dates are being scheduled and no reminders will go out.
+        </p>
+        <%= button_to "Resume now", group_pause_path(@group.slug), method: :delete, class: "btn btn-primary btn-sm" %>
+      </div>
+    <% else %>
+      <details class="group-pause">
+        <summary>Pause this hangout</summary>
+        <p>Taking a break? Pausing stops new dates from being scheduled and stops all reminder texts. Nothing is deleted.</p>
+        <%= form_with url: group_pause_path(@group.slug), method: :post, local: true do |f| %>
+          <div class="form-group">
+            <%= f.label :paused_until, "Resume on (optional)" %>
+            <%= f.date_field :paused_until, min: Time.current.in_time_zone(@group.time_zone).to_date + 1, class: "form-control" %>
+          </div>
+          <%= f.submit "Pause", class: "btn btn-secondary" %>
+        <% end %>
+      </details>
+    <% end %>
+  <% end %>
 
   <% if (@group.created_by == current_user || @group.member?(current_user)) && @upcoming_occurrences.any? %>
     <div class="rsvp-summary-section">

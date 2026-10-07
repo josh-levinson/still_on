@@ -26,6 +26,18 @@ class GroupMembershipsControllerTest < ActionDispatch::IntegrationTest
     assert_match /joined/i, flash[:notice]
   end
 
+  test "create redirects with alert when the group is full" do
+    GuestGroupSubscription.insert_all(
+      Array.new(Group::MAX_PEOPLE) { |i| { group_id: @group.id, phone_number: "+1555900#{format("%04d", i)}" } }
+    )
+    sign_in(@other)
+    assert_no_difference "GroupMembership.count" do
+      post group_membership_path(@group.slug)
+    end
+    assert_redirected_to group_path(@group.slug)
+    assert_equal "This group is full.", flash[:alert]
+  end
+
   test "create redirects with alert if already a member" do
     sign_in(@member)
     assert_no_difference "GroupMembership.count" do
