@@ -1,0 +1,77 @@
+<% content_for :title, "Profile" %>
+
+<div class="settings-page">
+  <h1>Profile</h1>
+  <p class="text-muted">Update your name, email, and other account details.</p>
+
+  <%= form_with model: @user, url: user_path, method: :patch do |f| %>
+    <div class="card">
+      <div class="settings-list">
+        <div class="settings-row">
+          <div class="settings-row-label">
+            <strong>First name</strong>
+          </div>
+          <div class="settings-row-control">
+            <%= f.text_field :first_name, class: "form-control", placeholder: "First name" %>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-label">
+            <strong>Last name</strong>
+          </div>
+          <div class="settings-row-control">
+            <%= f.text_field :last_name, class: "form-control", placeholder: "Last name" %>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-label">
+            <strong>Username</strong>
+          </div>
+          <div class="settings-row-control">
+            <%= f.text_field :username, class: "form-control", placeholder: "username" %>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-label">
+            <strong>Email</strong>
+            <p>Used for notifications when SMS is unavailable</p>
+          </div>
+          <div class="settings-row-control">
+            <%= f.email_field :email, class: "form-control", placeholder: "you@example.com" %>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-label">
+            <strong>Phone number</strong>
+            <p>Used for SMS notifications and sign-in</p>
+          </div>
+          <div class="settings-row-control">
+            <span class="form-control-static"><%= current_user.phone_number %></span>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-label">
+            <strong>Time zone</strong>
+            <p>Used for event times and reminders</p>
+          </div>
+          <div class="settings-row-control">
+            <%= f.time_zone_select :time_zone,
+                  ActiveSupport::TimeZone.us_zones,
+                  { include_blank: "Select a time zone" },
+                  class: "form-control" %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <%= f.submit "Save profile", class: "btn btn-primary" %>
+      <%= link_to "Notification settings", edit_notification_preference_path, class: "btn btn-outline" %>
+    </div>
+  <% end %>
+</div>

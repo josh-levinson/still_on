@@ -216,4 +216,18 @@ class SendEventChangeNotificationJobTest < ActiveSupport::TestCase
     assert_not_includes phones, nil
     assert_equal 1, messages.size  # only the verified attendee with a phone
   end
+
+  test "skips users who have disabled event_change_notifications" do
+    NotificationPreference.create!(user: @attendee, event_change_notifications: false)
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendEventChangeNotificationJob.perform_now(
+        @occurrence.id, [ "start_time" ], @old_start_time.iso8601, @old_location
+      )
+    end
+
+    phones = messages.map { |m| m[:to] }
+    assert_not_includes phones, @attendee.phone_number
+  end
 end

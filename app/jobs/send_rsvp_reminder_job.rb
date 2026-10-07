@@ -44,7 +44,11 @@ class SendRsvpReminderJob < ApplicationJob
     occurrence.event.group.group_memberships
       .includes(:user)
       .map(&:user)
-      .select { |u| (u.phone_number.present? || u.email.present?) && !rsvped_user_ids.include?(u.id) }
+      .select do |u|
+        (u.phone_number.present? || u.email.present?) &&
+          !rsvped_user_ids.include?(u.id) &&
+          NotificationPreference.allows?(u, :rsvp_reminders)
+      end
   end
 
   def unresvped_subscribers(occurrence)
@@ -56,8 +60,8 @@ class SendRsvpReminderJob < ApplicationJob
   end
 
   def rsvp_url_for(occurrence, phone: nil)
-    token = occurrence.invite_token(phone: phone)
-    host = Rails.application.credentials.dig(:app, :host) || ENV["APP_HOST"] || "localhost:3000"
-    Rails.application.routes.url_helpers.guest_rsvp_url(token, host: host)
+    token = phone.present? ? GuestInviteToken.for(occurrence, phone).token : occurrence.invite_token
+    url_options = Rails.application.config.action_mailer.default_url_options
+    Rails.application.routes.url_helpers.guest_rsvp_url(token, **url_options)
   end
 end

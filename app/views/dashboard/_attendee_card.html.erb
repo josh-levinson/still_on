@@ -1,0 +1,30 @@
+<% occurrence = group.next_occurrence %>
+<div class="hangout-card">
+  <div class="hangout-card-header">
+    <% if occurrence %>
+      <%= link_to group.name, guest_rsvp_path(occurrence.invite_token), class: "hangout-card-title" %>
+    <% else %>
+      <span class="hangout-card-title"><%= group.name %></span>
+    <% end %>
+  </div>
+
+  <% if occurrence %>
+    <p class="hangout-card-when"><%= hangout_time(occurrence, group) %></p>
+
+    <% rsvp = occurrence.rsvps.find_by(user: current_user) %>
+    <div class="hangout-card-rsvp">
+      <% [ [ "attending", "Going" ], [ "maybe", "Maybe" ], [ "declined", "Can't" ] ].each do |status, label| %>
+        <% css = "btn btn-sm #{rsvp&.status == status ? "btn-primary" : "btn-secondary"}" %>
+        <% if rsvp %>
+          <%= button_to label, event_occurrence_rsvp_path(occurrence, rsvp),
+                method: :patch, params: { rsvp: { status: status } }, class: css %>
+        <% else %>
+          <%= button_to label, event_occurrence_rsvps_path(occurrence),
+                params: { rsvp: { status: status } }, class: css %>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="hangout-card-when">No upcoming dates.</p>
+  <% end %>
+</div>

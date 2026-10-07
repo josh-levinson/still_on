@@ -113,4 +113,15 @@ class SendCancellationNotificationJobTest < ActiveSupport::TestCase
 
     assert_equal 2, messages.length
   end
+
+  test "skips users who have disabled cancellation_notifications" do
+    NotificationPreference.create!(user: @attendee, cancellation_notifications: false)
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendCancellationNotificationJob.perform_now(@occurrence.id)
+    end
+
+    assert_empty messages
+  end
 end

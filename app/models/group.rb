@@ -1,4 +1,8 @@
 class Group < ApplicationRecord
+  # Members and SMS subscribers both get automated texts, so capping them
+  # together bounds what one group can cost in Twilio fees.
+  MAX_PEOPLE = 50
+
   belongs_to :created_by, class_name: "User"
   has_many :group_memberships, dependent: :destroy
   has_many :members, through: :group_memberships, source: :user
@@ -9,6 +13,8 @@ class Group < ApplicationRecord
   validates :slug, presence: true, uniqueness: true
   validates :is_private, inclusion: { in: [ true, false ] }
   validates :time_zone, inclusion: { in: ActiveSupport::TimeZone.all.map(&:name) }
+  validates :reminder_days_before, inclusion: { in: 1..7 }
+  validate :paused_until_in_future, if: -> { paused_until.present? && will_save_change_to_paused_until? }
 
   scope :public_groups, -> { where(is_private: false) }
 
@@ -23,13 +29,53 @@ class Group < ApplicationRecord
     members.include?(user)
   end
 
+  def full?
+    group_memberships.count + guest_group_subscriptions.count >= MAX_PEOPLE
+  end
+
   def organizer?(user)
     return false unless user
     return true if created_by == user
     group_memberships.organizers.exists?(user_id: user.id)
   end
 
+  # The soonest scheduled occurrence across all of the group's events.
+  def next_occurrence
+    EventOccurrence.joins(:event).where(events: { group_id: id }).scheduled.upcoming.includes(:event).first
+  end
+
+  # A paused group generates no new occurrences and sends no automated
+  # reminders. With a paused_until date, the pause lifts automatically at the
+  # start of that day in the group's time zone; without one it lasts until
+  # an organizer resumes it.
+  def pause!(until_date: nil)
+    update!(paused_at: Time.current, paused_until: until_date)
+  end
+
+  def resume!
+    update!(paused_at: nil, paused_until: nil)
+  end
+
+  def paused?
+    paused_during?(Time.current)
+  end
+
+  def paused_during?(time)
+    return false if paused_at.nil?
+    resumes_at.nil? || time < resumes_at
+  end
+
+  def resumes_at
+    paused_until&.in_time_zone(time_zone)
+  end
+
   private
+
+  def paused_until_in_future
+    if paused_until <= Time.current.in_time_zone(time_zone).to_date
+      errors.add(:paused_until, "must be in the future")
+    end
+  end
 
   def generate_slug
     return if slug.present?

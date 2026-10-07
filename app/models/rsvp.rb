@@ -16,6 +16,12 @@ class Rsvp < ApplicationRecord
     guest_name.presence || "Guest"
   end
 
+  # First name only, for lists other guests can see.
+  def short_name
+    return user.first_name if user&.first_name.present?
+    guest_name.to_s.split.first || "Guest"
+  end
+
   private
 
   def user_or_guest_name_present

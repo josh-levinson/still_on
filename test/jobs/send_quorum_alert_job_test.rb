@@ -171,4 +171,28 @@ class SendQuorumAlertJobTest < ActiveSupport::TestCase
     phones = messages.map { |m| m[:to] }
     assert_not_includes phones, nil
   end
+
+  test "skips organizer who has disabled quorum_alerts" do
+    NotificationPreference.create!(user: @organizer, quorum_alerts: false)
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendQuorumAlertJob.perform_now(@occurrence.id)
+    end
+
+    phones = messages.map { |m| m[:to] }
+    assert_not_includes phones, @organizer.phone_number
+  end
+
+  test "skips attendees who have disabled quorum_alerts" do
+    NotificationPreference.create!(user: @attendee, quorum_alerts: false)
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendQuorumAlertJob.perform_now(@occurrence.id)
+    end
+
+    phones = messages.map { |m| m[:to] }
+    assert_not_includes phones, @attendee.phone_number
+  end
 end

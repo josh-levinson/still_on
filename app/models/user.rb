@@ -4,6 +4,7 @@ class User < ApplicationRecord
   has_many :group_memberships, dependent: :destroy
   has_many :groups, through: :group_memberships
   has_many :rsvps, dependent: :destroy
+  has_one :notification_preference, dependent: :destroy
 
   validates :phone_number, uniqueness: true, allow_blank: true
   validates :username, uniqueness: true, allow_nil: true

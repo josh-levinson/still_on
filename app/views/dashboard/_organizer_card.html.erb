@@ -1,0 +1,57 @@
+<% occurrence = group.next_occurrence %>
+<div class="hangout-card" data-controller="clipboard">
+  <div class="hangout-card-header">
+    <%= link_to group.name, group_path(group.slug), class: "hangout-card-title" %>
+    <% if occurrence %>
+      <span class="hangout-card-cadence"><%= cadence_label(occurrence.event) %></span>
+    <% end %>
+  </div>
+
+  <% if group.paused? %>
+    <p class="hangout-card-notice">
+      Paused<%= " until #{group.paused_until.strftime("%b %-d")}" if group.paused_until %>. No reminders are going out.
+    </p>
+  <% end %>
+
+  <% if occurrence %>
+    <% event = occurrence.event %>
+    <p class="hangout-card-when">
+      <%= hangout_time(occurrence, group) %>
+      <% if event.title != group.name %>
+        <span class="hangout-card-event">· <%= event.title %></span>
+      <% end %>
+    </p>
+
+    <% attending = occurrence.attending_count %>
+    <% awaiting = occurrence.awaiting_reply_count %>
+    <p class="rsvp-summary-counts">
+      <span class="rsvp-count attending"><%= attending %> in</span>
+      <span class="rsvp-count-sep">·</span>
+      <span class="rsvp-count maybe"><%= occurrence.maybe_count %> maybe</span>
+      <span class="rsvp-count-sep">·</span>
+      <span class="rsvp-count no-response"><%= awaiting %> no reply</span>
+    </p>
+
+    <% if event.quorum.present? && attending < event.quorum %>
+      <p class="hangout-card-notice">Needs <%= event.quorum - attending %> more to happen.</p>
+    <% end %>
+
+    <div class="hangout-card-actions">
+      <% if awaiting.positive? %>
+        <%= button_to "Nudge #{awaiting}",
+              send_rsvp_reminder_group_event_event_occurrence_path(group.slug, event, occurrence),
+              class: "btn btn-sm btn-primary" %>
+      <% end %>
+      <span hidden data-clipboard-target="source"><%= guest_rsvp_url(occurrence.invite_token) %></span>
+      <button type="button" class="btn btn-sm btn-secondary"
+              data-action="click->clipboard#copy"
+              data-clipboard-target="button">Copy invite link</button>
+      <%= link_to "Manage ›", group_path(group.slug), class: "hangout-card-link" %>
+    </div>
+  <% else %>
+    <p class="hangout-card-when">Nothing scheduled.</p>
+    <div class="hangout-card-actions">
+      <%= link_to "Manage ›", group_path(group.slug), class: "hangout-card-link" %>
+    </div>
+  <% end %>
+</div>

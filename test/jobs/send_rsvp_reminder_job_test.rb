@@ -136,6 +136,41 @@ class SendRsvpReminderJobTest < ActiveSupport::TestCase
     assert_match "Bring snacks", subscriber_msg[:body]
   end
 
+  test "skips members who have disabled rsvp_reminders" do
+    NotificationPreference.create!(user: @user, rsvp_reminders: false)
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendRsvpReminderJob.perform_now(@occurrence.id)
+    end
+
+    assert_empty messages
+  end
+
+  test "still sends to members who have enabled rsvp_reminders" do
+    NotificationPreference.create!(user: @user, rsvp_reminders: true)
+
+    messages = []
+    SmsService.stub(:send_message, ->(to:, body:) { messages << { to: to, body: body } }) do
+      SendRsvpReminderJob.perform_now(@occurrence.id)
+    end
+
+    assert_equal 1, messages.length
+  end
+
+  test "emails members who have an email but no phone, with an RSVP link" do
+    email_only = create_user(phone_number: nil, email: "noPhone@example.com")
+    GroupMembership.create!(group: @group, user: email_only)
+
+    SmsOptOut.opt_out!(@user.phone_number) # silence the phone member
+    EventMailer.stub(:notification, ->(to:, subject:, body:) {
+      assert_match(/\/rsvp\//, body)
+      Class.new { def deliver_now; end }.new
+    }) do
+      SendRsvpReminderJob.perform_now(@occurrence.id)
+    end
+  end
+
   test "sends to multiple unresponded members" do
     second_user = create_user(phone_number: "+15550000002", phone_verified_at: Time.current)
     GroupMembership.create!(group: @group, user: second_user)

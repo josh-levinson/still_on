@@ -103,4 +103,23 @@ class RsvpTest < ActiveSupport::TestCase
     rsvp = Rsvp.new(event_occurrence: @occurrence, user: nil, guest_name: nil, status: "attending", guest_count: 0)
     assert_equal "Guest", rsvp.display_name
   end
+
+  # --- short_name ---
+
+  test "short_name returns the user's first name" do
+    member = create_user(first_name: "Jordan", last_name: "Lee")
+    rsvp = Rsvp.create!(event_occurrence: @occurrence, user: member, status: "attending", guest_count: 0)
+    assert_equal "Jordan", rsvp.short_name
+  end
+
+  test "short_name falls back to the guest's first name when the user has none" do
+    member = create_user(first_name: nil)
+    rsvp = Rsvp.new(event_occurrence: @occurrence, user: member, guest_name: "Sam Guestperson")
+    assert_equal "Sam", rsvp.short_name
+  end
+
+  test "short_name returns Guest when there is no name at all" do
+    rsvp = Rsvp.new(event_occurrence: @occurrence, guest_name: nil)
+    assert_equal "Guest", rsvp.short_name
+  end
 end

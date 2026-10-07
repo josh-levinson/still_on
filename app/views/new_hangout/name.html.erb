@@ -44,6 +44,7 @@
         <input type="text"
                class="onboarding-input"
                placeholder="Name your hangout"
+               aria-label="Hangout name"
                value="<%= session[:nh_hangout_name].present? && !["Drinks","Dinner","Game night","Gym","Hike","Movie night","Coffee"].include?(session[:nh_hangout_name]) ? session[:nh_hangout_name] : '' %>"
                data-hangout-name-target="customInput"
                data-action="input->hangout-name#updateCustom" />

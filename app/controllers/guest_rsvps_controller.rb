@@ -6,6 +6,13 @@ class GuestRsvpsController < ApplicationController
     @existing_rsvp = find_existing_rsvp
     @rsvp = @existing_rsvp || @event_occurrence.rsvps.new(status: "attending")
     @cookie_phone = cookies[:guest_phone]
+    ahoy.track "RSVP page viewed", occurrence_id: @event_occurrence.id,
+      personal_link: @prefilled_phone.present?, already_responded: @existing_rsvp.present?
+  end
+
+  def calendar
+    filename = "#{@event.title.parameterize}-#{@event_occurrence.start_time.strftime('%Y%m%d')}.ics"
+    send_data build_ics, filename: filename, type: "text/calendar", disposition: "attachment"
   end
 
   def create
@@ -14,13 +21,19 @@ class GuestRsvpsController < ApplicationController
     if @existing_rsvp
       if @existing_rsvp.update(rsvp_params)
         save_phone_cookie(@existing_rsvp.guest_phone)
-        update_future_reminder_subscription(@existing_rsvp.guest_phone)
-        redirect_to guest_rsvp_path(@token), notice: "RSVP updated!"
+        subscribed = update_future_reminder_subscription(@existing_rsvp.guest_phone)
+        track_rsvp(@existing_rsvp, updated: true)
+        redirect_to guest_rsvp_path(@token), notice: with_reminders_full_note("RSVP updated!", subscribed)
       else
         @rsvp = @existing_rsvp
         @cookie_phone = cookies[:guest_phone]
         render :show, status: :unprocessable_entity
       end
+      return
+    end
+
+    if @event_occurrence.full? && params.dig(:rsvp, :status) == "attending"
+      redirect_to guest_rsvp_path(@token), alert: "Sorry, this event is full."
       return
     end
 
@@ -31,9 +44,11 @@ class GuestRsvpsController < ApplicationController
     end
 
     if @rsvp.save
+      session[:recent_rsvp_id] = @rsvp.id
       save_phone_cookie(@rsvp.guest_phone)
-      update_future_reminder_subscription(@rsvp.guest_phone)
-      redirect_to guest_rsvp_path(@token), notice: rsvp_confirmation_message(@rsvp)
+      subscribed = update_future_reminder_subscription(@rsvp.guest_phone)
+      track_rsvp(@rsvp, updated: false)
+      redirect_to guest_rsvp_path(@token), notice: with_reminders_full_note(rsvp_confirmation_message(@rsvp), subscribed)
     else
       @cookie_phone = cookies[:guest_phone]
       render :show, status: :unprocessable_entity
@@ -42,9 +57,14 @@ class GuestRsvpsController < ApplicationController
 
   private
 
+  def track_rsvp(rsvp, updated:)
+    ahoy.track "RSVP submitted", occurrence_id: @event_occurrence.id,
+      status: rsvp.status, updated: updated, personal_link: @prefilled_phone.present?
+  end
+
   def load_occurrence_from_token
     @token = params[:token]
-    @event_occurrence, @prefilled_phone = EventOccurrence.find_by_invite_token(@token)
+    @event_occurrence, @prefilled_phone = resolve_invite_token(@token)
 
     if @event_occurrence.nil?
       render plain: "This invite link is invalid or has expired.", status: :not_found
@@ -54,12 +74,25 @@ class GuestRsvpsController < ApplicationController
     end
   end
 
+  # A token is either an occurrence's shareable token (no phone) or a
+  # per-recipient guest invite token (carries the recipient's phone).
+  def resolve_invite_token(token)
+    if (occurrence = EventOccurrence.find_by_invite_token(token))
+      [ occurrence, nil ]
+    elsif (invite = GuestInviteToken.find_by(token: token.presence))
+      [ invite.event_occurrence, invite.phone ]
+    else
+      [ nil, nil ]
+    end
+  end
+
   def find_existing_rsvp
     if current_user
       @event_occurrence.rsvps.find_by(user_id: current_user.id)
     else
       phone = @prefilled_phone.presence || cookies[:guest_phone].presence
-      @event_occurrence.rsvps.find_by(guest_phone: phone) if phone.present?
+      rsvp = @event_occurrence.rsvps.find_by(guest_phone: phone) if phone.present?
+      rsvp || @event_occurrence.rsvps.find_by(id: session[:recent_rsvp_id])
     end
   end
 
@@ -77,15 +110,22 @@ class GuestRsvpsController < ApplicationController
     current_user ? permitted.except(:guest_name, :guest_phone, :email) : permitted
   end
 
+  # Returns false only when the guest asked for reminders and the group is full.
   def update_future_reminder_subscription(phone)
-    return if current_user
-    return if phone.blank?
+    return true if current_user || phone.blank?
 
     if params[:send_future_reminders] == "1"
-      GuestGroupSubscription.subscribe(group: @group, phone_number: phone)
+      GuestGroupSubscription.subscribe(group: @group, phone_number: phone).persisted?
     else
       GuestGroupSubscription.unsubscribe(group: @group, phone_number: phone)
+      true
     end
+  end
+
+  def with_reminders_full_note(message, subscribed)
+    return message if subscribed
+
+    "#{message} This group's reminder list is full, so we can't text you about future hangouts."
   end
 
   def use_group_timezone
@@ -98,5 +138,31 @@ class GuestRsvpsController < ApplicationController
     when "maybe"     then "Got it — marked as maybe."
     when "declined"  then "No worries, you're marked as not coming."
     end
+  end
+
+  def build_ics
+    start_utc = @event_occurrence.start_time.utc
+    end_utc   = @event_occurrence.end_time.utc
+    lines = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//StillOn//EN",
+      "CALSCALE:GREGORIAN",
+      "METHOD:PUBLISH",
+      "BEGIN:VEVENT",
+      "DTSTART:#{start_utc.strftime('%Y%m%dT%H%M%SZ')}",
+      "DTEND:#{end_utc.strftime('%Y%m%dT%H%M%SZ')}",
+      "SUMMARY:#{ics_escape(@event.title)}",
+      "UID:#{@event_occurrence.id}@stilon"
+    ]
+    lines << "LOCATION:#{ics_escape(@event_occurrence.location)}" if @event_occurrence.location.present?
+    lines << "DESCRIPTION:#{ics_escape(@event_occurrence.notes)}" if @event_occurrence.notes.present?
+    lines << "END:VEVENT"
+    lines << "END:VCALENDAR"
+    lines.join("\r\n") + "\r\n"
+  end
+
+  def ics_escape(text)
+    text.to_s.gsub("\\", "\\\\").gsub(",", "\\,").gsub(";", "\\;").gsub("\n", "\\n")
   end
 end

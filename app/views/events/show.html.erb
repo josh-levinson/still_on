@@ -40,7 +40,7 @@
             <%= link_to group_event_event_occurrence_path(@group.slug, @event, occurrence) do %>
               <div class="occurrence-time">
                 <span class="date"><%= occurrence.start_time.strftime("%B %d, %Y") %></span>
-                <span class="time"><%= occurrence.start_time.strftime("%l:%M %p") %> - <%= occurrence.end_time.strftime("%l:%M %p") %></span>
+                <span class="time"><%= occurrence.start_time.strftime("%l:%M %p") %> - <%= occurrence.end_time.strftime("%l:%M %p") %> <%= occurrence.start_time.zone %></span>
               </div>
               <% if occurrence.location.present? && occurrence.location != @event.location %>
                 <div class="occurrence-location"><%= occurrence.location %></div>
@@ -70,7 +70,7 @@
             <%= link_to group_event_event_occurrence_path(@group.slug, @event, occurrence) do %>
               <div class="occurrence-time">
                 <span class="date"><%= occurrence.start_time.strftime("%B %d, %Y") %></span>
-                <span class="time"><%= occurrence.start_time.strftime("%l:%M %p") %></span>
+                <span class="time"><%= occurrence.start_time.strftime("%l:%M %p") %> <%= occurrence.start_time.zone %></span>
               </div>
               <div class="occurrence-meta">
                 <span><%= pluralize(occurrence.rsvps.where(status: 'attending').count, 'attendee') %></span>

@@ -1,0 +1,21 @@
+<%# Expects a surrounding data-controller="clipboard" element. %>
+<% message = "Hey! RSVP for #{title} here: #{url}" %>
+<div class="invite-share-btns">
+  <a href="sms:&body=<%= ERB::Util.url_encode(message) %>"
+     class="share-btn">
+    📱 iMessage
+  </a>
+  <a href="https://wa.me/?text=<%= ERB::Util.url_encode(message) %>"
+     target="_blank"
+     rel="noopener"
+     class="share-btn">
+    💬 WhatsApp
+  </a>
+  <button type="button"
+          class="share-btn share-btn-discord"
+          data-action="click->clipboard#copy"
+          data-clipboard-text-param="<%= message %>"
+          title="Copy an invite message to paste into Discord">
+    🎲 Discord
+  </button>
+</div>

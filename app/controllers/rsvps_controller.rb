@@ -8,28 +8,21 @@ class RsvpsController < ApplicationController
     @rsvp = @event_occurrence.rsvps.new(rsvp_params)
     @rsvp.user = current_user
 
+    if @event_occurrence.full? && @rsvp.status == "attending"
+      redirect_back_to_occurrence alert: "Sorry, this event is full."
+      return
+    end
+
     if @rsvp.save
-      redirect_to group_event_event_occurrence_path(
-        @event_occurrence.event.group.slug,
-        @event_occurrence.event,
-        @event_occurrence
-      ), notice: "RSVP was successfully created."
+      redirect_back_to_occurrence notice: "RSVP was successfully created."
     else
-      redirect_to group_event_event_occurrence_path(
-        @event_occurrence.event.group.slug,
-        @event_occurrence.event,
-        @event_occurrence
-      ), alert: @rsvp.errors.full_messages.join(", ")
+      redirect_back_to_occurrence alert: @rsvp.errors.full_messages.join(", ")
     end
   end
 
   def update
     if @rsvp.update(rsvp_params)
-      redirect_to group_event_event_occurrence_path(
-        @event_occurrence.event.group.slug,
-        @event_occurrence.event,
-        @event_occurrence
-      ), notice: "RSVP was successfully updated."
+      redirect_back_to_occurrence notice: "RSVP was successfully updated."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -46,6 +39,16 @@ class RsvpsController < ApplicationController
 
   private
 
+  # RSVPs can be changed from the occurrence page or the dashboard; send the
+  # user back to whichever one they came from.
+  def redirect_back_to_occurrence(**flash)
+    redirect_back_or_to group_event_event_occurrence_path(
+      @event_occurrence.event.group.slug,
+      @event_occurrence.event,
+      @event_occurrence
+    ), **flash
+  end
+
   def set_event_occurrence
     @event_occurrence = EventOccurrence.find(params[:event_occurrence_id])
   end
@@ -56,11 +59,7 @@ class RsvpsController < ApplicationController
 
   def authorize_rsvp_owner
     unless @rsvp.user == current_user
-      redirect_to group_event_event_occurrence_path(
-        @event_occurrence.event.group.slug,
-        @event_occurrence.event,
-        @event_occurrence
-      ), alert: "You are not authorized to perform this action."
+      redirect_back_to_occurrence alert: "You are not authorized to perform this action."
     end
   end
 

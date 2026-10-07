@@ -29,6 +29,7 @@
     <div class="form-group">
       <%= f.label :end_time, "End Time" %>
       <%= f.datetime_local_field :end_time, required: true, class: "form-control" %>
+      <small class="form-text">Times are in <%= @group.time_zone %></small>
     </div>
 
     <div class="form-group">

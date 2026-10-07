@@ -1,5 +1,10 @@
 Rails.application.routes.draw do
   delete "sign_out",        to: "sessions#destroy",       as: :sign_out
+  get  "claim",        to: "account_claims#new",           as: :new_account_claim
+  post "claim",        to: "account_claims#submit_phone",  as: :account_claim_submit_phone
+  get  "claim/verify", to: "account_claims#verify",        as: :account_claim_verify
+  post "claim/verify", to: "account_claims#submit_verify", as: :account_claim_submit_verify
+
   get    "sign_in",         to: "sessions#phone",         as: :sign_in
   post   "sign_in",         to: "sessions#submit_phone",  as: :sign_in_submit_phone
   get    "sign_in/verify",  to: "sessions#verify",        as: :sign_in_verify
@@ -38,7 +43,12 @@ Rails.application.routes.draw do
 
   get  "sms",     to: "pages#sms",     as: :sms_info
   get  "privacy", to: "pages#privacy", as: :privacy
-  post "twilio/sms", to: "twilio_webhooks#sms", as: :twilio_sms_webhook
+  get  "terms",   to: "pages#terms",   as: :terms
+  patch "theme",  to: "themes#update", as: :theme
+  post "twilio/sms",      to: "twilio_webhooks#sms",      as: :twilio_sms_webhook
+  post "twilio/status",   to: "twilio_webhooks#status",   as: :twilio_status_webhook
+  post "twilio/debugger", to: "twilio_webhooks#debugger", as: :twilio_debugger_webhook
+  post "twilio/usage",    to: "twilio_webhooks#usage",    as: :twilio_usage_webhook
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
@@ -48,16 +58,20 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  get "dashboard", to: "posts#index", as: :dashboard
+  get "dashboard", to: "dashboard#show", as: :dashboard
+
+  resource :user, only: [ :edit, :update ]
+  resource :notification_preference, only: [ :edit, :update ]
 
   # Defines the root path route ("/")
   root "onboarding#splash"
 
   # Public guest RSVP — no account required
-  get  "rsvp/resend", to: "guest_rsvp_resends#new",    as: :new_guest_rsvp_resend
-  post "rsvp/resend", to: "guest_rsvp_resends#create", as: :guest_rsvp_resend
-  get  "rsvp/:token", to: "guest_rsvps#show",          as: :guest_rsvp
-  post "rsvp/:token", to: "guest_rsvps#create"
+  get  "rsvp/resend",              to: "guest_rsvp_resends#new",    as: :new_guest_rsvp_resend
+  post "rsvp/resend",              to: "guest_rsvp_resends#create", as: :guest_rsvp_resend
+  get  "rsvp/:token/calendar.ics", to: "guest_rsvps#calendar",      as: :guest_rsvp_calendar
+  get  "rsvp/:token",              to: "guest_rsvps#show",          as: :guest_rsvp
+  post "rsvp/:token",              to: "guest_rsvps#create"
 
   # Nested resources for groups, events, occurrences, and RSVPs
   resources :groups, param: :slug do
@@ -65,6 +79,7 @@ Rails.application.routes.draw do
       get :discover
     end
     resource :membership, only: [ :create, :destroy ], controller: "group_memberships"
+    resource :pause, only: [ :create, :destroy ], controller: "group_pauses"
     resources :group_memberships, only: [], param: :user_id do
       member do
         post :promote
@@ -75,6 +90,8 @@ Rails.application.routes.draw do
       resources :event_occurrences do
         member do
           patch :cancel
+          post  :send_rsvp_reminder
+          post  :send_event_reminder
         end
         resources :rsvps, only: [ :create, :update, :destroy ]
       end

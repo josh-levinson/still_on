@@ -56,6 +56,34 @@
       Selected: <strong data-date-picker-target="label"></strong>
     </div>
 
+    <div class="time-picker-section" data-controller="time-picker">
+      <%= f.hidden_field :time, value: session[:ob_time] || "19:00", data: { time_picker_target: "value" } %>
+      <p class="ob-label time-picker-label">What time?</p>
+      <div class="card-options time-options">
+        <button type="button" class="quick-time-btn" data-action="click->time-picker#selectQuick" data-time="17:00">
+          <div class="card-option-body"><span class="quick-date-label">5:00 PM</span></div>
+        </button>
+        <button type="button" class="quick-time-btn" data-action="click->time-picker#selectQuick" data-time="18:00">
+          <div class="card-option-body"><span class="quick-date-label">6:00 PM</span></div>
+        </button>
+        <button type="button" class="quick-time-btn" data-action="click->time-picker#selectQuick" data-time="19:00">
+          <div class="card-option-body">
+            <span class="quick-date-label">7:00 PM</span>
+            <span class="quick-date-sub">most popular</span>
+          </div>
+        </button>
+        <button type="button" class="quick-time-btn" data-action="click->time-picker#showCustom">
+          <div class="card-option-body"><span class="quick-date-label">Other&hellip;</span></div>
+        </button>
+      </div>
+      <div class="custom-time-wrapper" data-time-picker-target="custom" style="display:none;">
+        <input type="time"
+               class="onboarding-input"
+               data-action="change->time-picker#selectCustom"
+               data-time-picker-target="customInput">
+      </div>
+    </div>
+
     <%= f.submit "Next \u2192", class: "btn-onboarding-primary", data: { date_picker_target: "submit" }, disabled: session[:ob_date].blank? %>
   <% end %>
 </div>

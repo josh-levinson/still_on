@@ -24,6 +24,8 @@ class SendQuorumAlertJob < ApplicationJob
 
   def send_organizer_alert(event, date_str, count)
     organizer = event.created_by
+    return unless NotificationPreference.allows?(organizer, :quorum_alerts)
+
     phone = organizer.phone_verified_at.present? ? organizer.phone_number.presence : nil
     email = organizer.email.presence
 
@@ -47,6 +49,7 @@ class SendQuorumAlertJob < ApplicationJob
 
     occurrence.rsvps.where(status: %w[attending maybe]).includes(:user).each do |rsvp|
       if rsvp.user.present?
+        next unless NotificationPreference.allows?(rsvp.user, :quorum_alerts)
         phone = rsvp.user.phone_verified_at.present? ? rsvp.user.phone_number.presence : nil
         email = rsvp.user.email.presence
       else

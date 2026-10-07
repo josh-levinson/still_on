@@ -27,6 +27,15 @@ class ScheduleNotificationsJobTest < ActiveSupport::TestCase
     end
   end
 
+  test "enqueues RSVP reminders using group's custom reminder_days_before" do
+    @group.update!(reminder_days_before: 5)
+    occurrence = create_occurrence(@event, start_time: 5.days.from_now.change(hour: 19), end_time: 5.days.from_now.change(hour: 21))
+
+    assert_enqueued_with(job: SendRsvpReminderJob, args: [ occurrence.id ]) do
+      ScheduleNotificationsJob.perform_now
+    end
+  end
+
   test "does not enqueue RSVP reminder for occurrences too far out" do
     create_occurrence(@event, start_time: 5.days.from_now, end_time: 5.days.from_now + 2.hours)
 
@@ -69,6 +78,110 @@ class ScheduleNotificationsJobTest < ActiveSupport::TestCase
     create_occurrence(@event, start_time: 2.days.from_now.change(hour: 19), end_time: 2.days.from_now.change(hour: 21), status: "cancelled")
 
     assert_no_enqueued_jobs only: SendRsvpReminderJob do
+      ScheduleNotificationsJob.perform_now
+    end
+  end
+
+  test "uses group time zone to bound the same-day event reminder window" do
+    # Cron fires at 8am UTC = 4am EDT. Group in EDT has an event at 10pm EDT today
+    # (= 2am UTC tomorrow). Without tz-aware bounds the event would fall outside
+    # Time.current.end_of_day (23:59 UTC today) and be missed.
+    edt = ActiveSupport::TimeZone["Eastern Time (US & Canada)"]
+    edt_group = create_group(@user, time_zone: edt.name)
+    edt_event = create_event(edt_group, @user)
+
+    travel_to Time.utc(2026, 5, 1, 8, 0) do
+      occurrence = create_occurrence(edt_event,
+        start_time: edt.local(2026, 5, 1, 22),
+        end_time:   edt.local(2026, 5, 1, 23))
+
+      assert_enqueued_with(job: SendEventReminderJob, args: [ occurrence.id ]) do
+        ScheduleNotificationsJob.perform_now
+      end
+    end
+  end
+
+  test "defers same-day event reminders to 9am local instead of firing immediately" do
+    edt = ActiveSupport::TimeZone["Eastern Time (US & Canada)"]
+    edt_group = create_group(@user, time_zone: edt.name)
+    edt_event = create_event(edt_group, @user)
+
+    travel_to Time.utc(2026, 5, 1, 8, 0) do # 4am EDT
+      occurrence = create_occurrence(edt_event,
+        start_time: edt.local(2026, 5, 1, 19),
+        end_time:   edt.local(2026, 5, 1, 21))
+
+      ScheduleNotificationsJob.perform_now
+
+      job = enqueued_jobs.find { |j| j["job_class"] == "SendEventReminderJob" && j["arguments"] == [ occurrence.id ] }
+      assert job, "expected SendEventReminderJob to be enqueued"
+
+      expected = edt.local(2026, 5, 1, 9)
+      assert_in_delta expected.to_f, Time.parse(job["scheduled_at"]).to_f, 1
+    end
+  end
+
+  test "uses group time zone to bound the RSVP reminder window" do
+    # 2 days from now at 11pm EDT = 3am UTC three days from now — outside the
+    # UTC-based 2-days-out window but inside the EDT-local one.
+    edt = ActiveSupport::TimeZone["Eastern Time (US & Canada)"]
+    edt_group = create_group(@user, time_zone: edt.name)
+    edt_event = create_event(edt_group, @user)
+
+    travel_to Time.utc(2026, 5, 1, 8, 0) do
+      occurrence = create_occurrence(edt_event,
+        start_time: edt.local(2026, 5, 3, 23),
+        end_time:   edt.local(2026, 5, 3, 23, 30))
+
+      assert_enqueued_with(job: SendRsvpReminderJob, args: [ occurrence.id ]) do
+        ScheduleNotificationsJob.perform_now
+      end
+    end
+  end
+
+  test "delivers immediately when local time is already past the morning threshold" do
+    # Group in UTC, cron fires at noon UTC — past the 9am local threshold,
+    # so wait_until should fall back to current time rather than tomorrow 9am.
+    travel_to Time.utc(2026, 5, 1, 12, 0) do
+      occurrence = create_occurrence(@event, start_time: 4.hours.from_now, end_time: 6.hours.from_now)
+
+      ScheduleNotificationsJob.perform_now
+
+      job = enqueued_jobs.find { |j| j["job_class"] == "SendEventReminderJob" && j["arguments"] == [ occurrence.id ] }
+      assert job
+      assert_in_delta Time.current.to_f, Time.parse(job["scheduled_at"]).to_f, 1
+    end
+  end
+
+  test "does not enqueue any reminders for an indefinitely paused group" do
+    travel_to Time.current.noon do
+      event = create_event(@group, @user, quorum: 3)
+      create_occurrence(event, start_time: 2.days.from_now.change(hour: 19), end_time: 2.days.from_now.change(hour: 21))
+      create_occurrence(event, start_time: 4.hours.from_now, end_time: 6.hours.from_now)
+      create_occurrence(event, start_time: 25.hours.from_now, end_time: 27.hours.from_now)
+      @group.pause!
+
+      assert_no_enqueued_jobs only: [ SendRsvpReminderJob, SendEventReminderJob, SendQuorumAlertJob ] do
+        ScheduleNotificationsJob.perform_now
+      end
+    end
+  end
+
+  test "does not enqueue reminders for occurrences before a paused group's resume date" do
+    create_occurrence(@event, start_time: 2.days.from_now.change(hour: 19), end_time: 2.days.from_now.change(hour: 21))
+    @group.pause!(until_date: 5.days.from_now.to_date)
+
+    assert_no_enqueued_jobs only: SendRsvpReminderJob do
+      ScheduleNotificationsJob.perform_now
+    end
+  end
+
+  test "enqueues reminders for occurrences on or after a paused group's resume date" do
+    @group.update!(reminder_days_before: 5)
+    occurrence = create_occurrence(@event, start_time: 5.days.from_now.change(hour: 19), end_time: 5.days.from_now.change(hour: 21))
+    @group.pause!(until_date: 5.days.from_now.to_date)
+
+    assert_enqueued_with(job: SendRsvpReminderJob, args: [ occurrence.id ]) do
       ScheduleNotificationsJob.perform_now
     end
   end

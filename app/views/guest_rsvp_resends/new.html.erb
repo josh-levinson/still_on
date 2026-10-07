@@ -1,12 +1,12 @@
 <% content_for :title, "Get your RSVP link" %>
+<% content_for :hide_nav_cta, true %>
 
 <div class="rsvp-page">
   <div class="rsvp-shell">
 
-    <div class="rsvp-event-header">
-      <div class="rsvp-fire"></div>
+    <div class="rsvp-intro">
       <h1 class="rsvp-event-title">Get your RSVP link</h1>
-      <p class="rsvp-group-name">Enter the phone number you used to RSVP and we'll text you your links.</p>
+      <p>Enter the phone number you used to RSVP and we'll text you your links.</p>
     </div>
 
     <% if notice.present? %>
@@ -28,7 +28,7 @@
               data: { action: "input->phone-input#format", phone_input_target: "display" } %>
       </div>
 
-      <%= submit_tag "Text me my links \u2192", class: "rsvp-submit-btn" %>
+      <%= submit_tag "Text me my links", class: "rsvp-submit-btn" %>
     <% end %>
 
   </div>

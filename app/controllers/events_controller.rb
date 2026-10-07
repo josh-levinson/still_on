@@ -1,6 +1,7 @@
 class EventsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_group
+  around_action :use_group_timezone
   before_action :set_event, only: [ :show, :edit, :update, :destroy ]
   before_action :authorize_event_admin, only: [ :edit, :update, :destroy ]
 
@@ -65,5 +66,9 @@ class EventsController < ApplicationController
       :title, :description, :location, :default_duration_minutes,
       :recurrence_type, :recurrence_rule, :is_active, :quorum
     )
+  end
+
+  def use_group_timezone
+    Time.use_zone(@group.time_zone) { yield }
   end
 end

@@ -1,0 +1,27 @@
+<div class="dashboard">
+  <div class="dashboard-header">
+    <h1>Hi, <%= current_user.first_name.presence || current_user.full_name %></h1>
+    <%= link_to "+ New hangout", new_hangout_path, class: "btn btn-primary" %>
+  </div>
+
+  <% if @organized_groups.empty? && @attending_groups.empty? %>
+    <div class="empty-state">
+      <p>You don't have any hangouts yet.</p>
+      <%= link_to "Start your first hangout", new_hangout_path, class: "btn btn-primary" %>
+    </div>
+  <% end %>
+
+  <% if @organized_groups.any? %>
+    <section class="dashboard-section">
+      <h2 class="dashboard-section-title">You organize</h2>
+      <%= render partial: "organizer_card", collection: @organized_groups, as: :group %>
+    </section>
+  <% end %>
+
+  <% if @attending_groups.any? %>
+    <section class="dashboard-section">
+      <h2 class="dashboard-section-title">You're in</h2>
+      <%= render partial: "attendee_card", collection: @attending_groups, as: :group %>
+    </section>
+  <% end %>
+</div>

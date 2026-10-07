@@ -31,6 +31,7 @@ class SendEventChangeNotificationJob < ApplicationJob
     occurrence.rsvps.where(status: %w[attending maybe]).includes(:user).filter_map do |rsvp|
       if rsvp.user.present?
         next if rsvp.user.phone_verified_at.blank? && rsvp.user.email.blank?
+        next unless NotificationPreference.allows?(rsvp.user, :event_change_notifications)
 
         phone = rsvp.user.phone_verified_at.present? ? rsvp.user.phone_number.presence : nil
         email = rsvp.user.email.presence
@@ -66,8 +67,8 @@ class SendEventChangeNotificationJob < ApplicationJob
   end
 
   def rsvp_url_for(occurrence, phone: nil)
-    token = occurrence.invite_token(phone: phone)
-    host = Rails.application.credentials.dig(:app, :host) || ENV["APP_HOST"] || "localhost:3000"
-    Rails.application.routes.url_helpers.guest_rsvp_url(token, host: host)
+    token = phone.present? ? GuestInviteToken.for(occurrence, phone).token : occurrence.invite_token
+    url_options = Rails.application.config.action_mailer.default_url_options
+    Rails.application.routes.url_helpers.guest_rsvp_url(token, **url_options)
   end
 end

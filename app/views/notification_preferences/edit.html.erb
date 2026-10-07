@@ -1,0 +1,66 @@
+<% content_for :title, "Notification Settings" %>
+
+<div class="settings-page">
+  <h1>Notification Settings</h1>
+  <p class="text-muted">Choose which notifications you'd like to receive via SMS or email.</p>
+
+  <%= form_with model: @notification_preference, url: notification_preference_path, method: :patch do |f| %>
+    <div class="card">
+      <div class="settings-list">
+        <div class="settings-row">
+          <div class="settings-row-label">
+            <strong>"Still on?" reminders</strong>
+            <p>Sent before each event to collect RSVPs</p>
+          </div>
+          <div class="settings-row-control">
+            <%= f.check_box :rsvp_reminders, class: "toggle-checkbox" %>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-label">
+            <strong>Day-of reminders</strong>
+            <p>Sent the morning of events you've RSVPd to</p>
+          </div>
+          <div class="settings-row-control">
+            <%= f.check_box :event_day_reminders, class: "toggle-checkbox" %>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-label">
+            <strong>Quorum alerts</strong>
+            <p>Sent when an event is below the attendance threshold</p>
+          </div>
+          <div class="settings-row-control">
+            <%= f.check_box :quorum_alerts, class: "toggle-checkbox" %>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-label">
+            <strong>Cancellation notices</strong>
+            <p>Sent when an event you RSVPd to is cancelled</p>
+          </div>
+          <div class="settings-row-control">
+            <%= f.check_box :cancellation_notifications, class: "toggle-checkbox" %>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-label">
+            <strong>Event change alerts</strong>
+            <p>Sent when an event's time or location changes</p>
+          </div>
+          <div class="settings-row-control">
+            <%= f.check_box :event_change_notifications, class: "toggle-checkbox" %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <%= f.submit "Save preferences", class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>

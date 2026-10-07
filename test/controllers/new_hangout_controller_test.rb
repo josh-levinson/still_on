@@ -161,6 +161,44 @@ class NewHangoutControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "submit_date stores submitted time in session" do
+    sign_in(@user)
+    post new_hangout_submit_name_path, params: { hangout_name: "Drinks" }
+    post new_hangout_submit_date_path, params: { date: 1.week.from_now.to_date.to_s, time: "14:30" }
+    assert_equal "14:30", session[:nh_time]
+  end
+
+  test "submit_date defaults to 19:00 when no time param" do
+    sign_in(@user)
+    post new_hangout_submit_name_path, params: { hangout_name: "Drinks" }
+    post new_hangout_submit_date_path, params: { date: 1.week.from_now.to_date.to_s }
+    assert_equal "19:00", session[:nh_time]
+  end
+
+  test "submit_date sanitizes invalid time to 19:00" do
+    sign_in(@user)
+    post new_hangout_submit_name_path, params: { hangout_name: "Drinks" }
+    post new_hangout_submit_date_path, params: { date: 1.week.from_now.to_date.to_s, time: "garbage" }
+    assert_equal "19:00", session[:nh_time]
+  end
+
+  test "submit_date sanitizes out-of-range time to 19:00" do
+    sign_in(@user)
+    post new_hangout_submit_name_path, params: { hangout_name: "Drinks" }
+    post new_hangout_submit_date_path, params: { date: 1.week.from_now.to_date.to_s, time: "25:00" }
+    assert_equal "19:00", session[:nh_time]
+  end
+
+  test "submit_cadence creates occurrence at the submitted time" do
+    sign_in(@user)
+    post new_hangout_submit_name_path, params: { hangout_name: "Morning Run" }
+    post new_hangout_submit_date_path, params: { date: 1.week.from_now.to_date.to_s, time: "08:00" }
+    post new_hangout_submit_cadence_path, params: { cadence: "none" }
+    occurrence = EventOccurrence.order(:created_at).last
+    assert_equal 8, occurrence.start_time.in_time_zone("UTC").hour
+    assert_equal 0, occurrence.start_time.in_time_zone("UTC").min
+  end
+
   # ---- GET /hangouts/new/cadence ----
 
   test "cadence renders step 3 when date is in session" do
@@ -220,6 +258,28 @@ class NewHangoutControllerTest < ActionDispatch::IntegrationTest
     complete_wizard(cadence: "weekly")
     event = Event.order(:created_at).last
     assert_not_nil event.recurrence_rule
+  end
+
+  test "submit_cadence with biweekly cadence schedules every other week" do
+    occurrence = complete_wizard(cadence: "biweekly")
+    event = Event.order(:created_at).last
+    assert_equal "biweekly", event.recurrence_type
+    next_two = event.schedule.next_occurrences(2, occurrence.start_time)
+    assert_equal [ occurrence.start_time + 2.weeks, occurrence.start_time + 4.weeks ], next_two
+  end
+
+  test "cadence offers every other week" do
+    setup_wizard
+    get new_hangout_cadence_path
+    assert_select "[data-cadence-value=biweekly]"
+  end
+
+  test "invite shows every other week for biweekly cadence and a Discord share button" do
+    complete_wizard(cadence: "biweekly")
+    get new_hangout_invite_path
+    assert_response :success
+    assert_match /Every other week/, response.body
+    assert_select "button.share-btn-discord[data-clipboard-text-param*=?]", "RSVP for Friday Night"
   end
 
   test "submit_cadence with monthly cadence builds recurrence schedule with nth_weekday" do

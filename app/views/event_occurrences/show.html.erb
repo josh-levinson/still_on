@@ -44,25 +44,24 @@
             Copy
           </button>
         </div>
-        <div class="invite-share-btns">
-          <a href="sms:&body=<%= ERB::Util.url_encode("Hey! RSVP for #{@event.title} here: #{guest_rsvp_url(@event_occurrence.invite_token)}") %>"
-             class="share-btn">
-            📱 iMessage
-          </a>
-          <a href="https://wa.me/?text=<%= ERB::Util.url_encode("Hey! RSVP for #{@event.title} here: #{guest_rsvp_url(@event_occurrence.invite_token)}") %>"
-             target="_blank"
-             rel="noopener"
-             class="share-btn">
-            💬 WhatsApp
-          </a>
-        </div>
+        <%= render "shared/share_buttons", title: @event.title, url: guest_rsvp_url(@event_occurrence.invite_token) %>
       </div>
     <% end %>
 
     <div class="occurrence-actions">
       <% if @event.created_by == current_user || @group.created_by == current_user %>
         <%= link_to "Edit Occurrence", edit_group_event_event_occurrence_path(@group.slug, @event, @event_occurrence), class: "btn btn-secondary" %>
-        <% if @event_occurrence.status == "scheduled" %>
+        <% if @event_occurrence.status == "scheduled" && @event_occurrence.start_time > Time.current %>
+          <%= button_to "Send RSVP Reminder",
+              send_rsvp_reminder_group_event_event_occurrence_path(@group.slug, @event, @event_occurrence),
+              method: :post,
+              data: { confirm: "Send a 'Still on?' nudge to everyone who hasn't RSVPd yet?" },
+              class: "btn btn-primary" %>
+          <%= button_to "Send Day-of Reminder",
+              send_event_reminder_group_event_event_occurrence_path(@group.slug, @event, @event_occurrence),
+              method: :post,
+              data: { confirm: "Send a day-of reminder to all confirmed attendees?" },
+              class: "btn btn-secondary" %>
           <%= button_to "Cancel Occurrence",
               cancel_group_event_event_occurrence_path(@group.slug, @event, @event_occurrence),
               method: :patch,
