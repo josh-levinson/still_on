@@ -34,9 +34,6 @@ gem "bootsnap", require: false
 # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
 gem "thruster", require: false
 
-# Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-gem "image_processing", "~> 2.0"
-
 gem "dotenv-rails", groups: [ :development, :test ]
 
 group :development, :test do
@@ -67,7 +64,7 @@ group :test do
   gem "simplecov", require: false
 end
 
-gem "twilio-ruby", "~> 7.10"
+gem "twilio-ruby", "~> 7.11"
 gem "ice_cube"
 
 gem "honeybadger", "~> 6.9"
