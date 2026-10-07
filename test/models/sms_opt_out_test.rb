@@ -1,6 +1,12 @@
 require "test_helper"
 
 class SmsOptOutTest < ActiveSupport::TestCase
+  test "opt_in! removes an existing opt-out" do
+    SmsOptOut.opt_out!("+15550001010")
+    SmsOptOut.opt_in!("+15550001010")
+    assert_not SmsOptOut.opted_out?("+15550001010")
+  end
+
   test "opted_out? returns false when phone has not opted out" do
     assert_not SmsOptOut.opted_out?("+15550001001")
   end

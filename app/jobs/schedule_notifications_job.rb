@@ -47,9 +47,12 @@ class ScheduleNotificationsJob < ApplicationJob
   end
 
   def occurrences_for(group, window)
-    EventOccurrence.scheduled
+    scope = EventOccurrence.scheduled
       .joins(:event)
       .where(events: { group_id: group.id }, start_time: window)
+    return scope unless group.paused?
+
+    group.resumes_at ? scope.where(start_time: group.resumes_at..) : scope.none
   end
 
   def local_delivery_time(group)

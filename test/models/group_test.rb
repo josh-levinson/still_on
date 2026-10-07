@@ -65,10 +65,115 @@ class GroupTest < ActiveSupport::TestCase
     end
   end
 
+  test "destroying group removes guest invite tokens for its occurrences" do
+    group = create_group(@user)
+    occurrence = create_occurrence(create_event(group, @user))
+    GuestInviteToken.for(occurrence, "+15555550123")
+    assert_difference "GuestInviteToken.count", -1 do
+      group.destroy
+    end
+  end
+
   test "has many members through group_memberships" do
     group = create_group(@user)
     member = create_user
     GroupMembership.create!(group: group, user: member)
     assert_includes group.members, member
+  end
+
+  # --- pausing ---
+
+  test "a new group is not paused" do
+    group = create_group(@user)
+    assert_not group.paused?
+    assert_nil group.resumes_at
+  end
+
+  test "pause! without a date pauses indefinitely" do
+    group = create_group(@user)
+    group.pause!
+    assert group.paused?
+    assert group.paused_during?(1.year.from_now)
+    assert_nil group.resumes_at
+  end
+
+  test "pause! with a date pauses until the start of that day in the group time zone" do
+    group = create_group(@user, time_zone: "Pacific Time (US & Canada)")
+    resume_date = 10.days.from_now.in_time_zone(group.time_zone).to_date
+    group.pause!(until_date: resume_date)
+
+    resumes_at = resume_date.in_time_zone("Pacific Time (US & Canada)")
+    assert_equal resumes_at, group.resumes_at
+    assert group.paused?
+    assert group.paused_during?(resumes_at - 1.minute)
+    assert_not group.paused_during?(resumes_at)
+  end
+
+  test "pause lifts automatically once the resume date arrives" do
+    group = create_group(@user)
+    group.pause!(until_date: 3.days.from_now.to_date)
+    travel 4.days do
+      assert_not group.paused?
+    end
+  end
+
+  test "resume! clears the pause" do
+    group = create_group(@user)
+    group.pause!(until_date: 3.days.from_now.to_date)
+    group.resume!
+    assert_not group.paused?
+    assert_nil group.paused_at
+    assert_nil group.paused_until
+  end
+
+  test "paused_until must be in the future" do
+    group = create_group(@user)
+    today = Time.current.in_time_zone(group.time_zone).to_date
+    assert_raises(ActiveRecord::RecordInvalid) { group.pause!(until_date: today) }
+    assert_includes group.errors[:paused_until], "must be in the future"
+  end
+
+  test "an elapsed paused_until does not block unrelated updates" do
+    group = create_group(@user)
+    group.pause!(until_date: 2.days.from_now.to_date)
+    travel 5.days do
+      assert group.update(name: "Renamed")
+    end
+  end
+
+  # --- next_occurrence ---
+
+  test "next_occurrence returns the soonest scheduled upcoming occurrence across events" do
+    group = create_group(@user)
+    weekly = create_event(group, @user)
+    one_off = create_event(group, @user, recurrence_type: "none")
+    create_occurrence(weekly, start_time: 1.day.ago, end_time: 1.day.ago + 1.hour)
+    create_occurrence(weekly, start_time: 2.days.from_now, end_time: 2.days.from_now + 1.hour, status: "cancelled")
+    later = create_occurrence(weekly, start_time: 5.days.from_now, end_time: 5.days.from_now + 1.hour)
+    sooner = create_occurrence(one_off, start_time: 3.days.from_now, end_time: 3.days.from_now + 1.hour)
+
+    assert_equal sooner, group.next_occurrence
+    sooner.update!(status: "cancelled")
+    assert_equal later, group.next_occurrence
+  end
+
+  test "next_occurrence is nil when nothing is scheduled" do
+    assert_nil create_group(@user).next_occurrence
+  end
+
+  test "full? counts members and SMS subscribers together" do
+    group = create_group(create_user)
+    GroupMembership.create!(group: group, user: group.created_by)
+    GuestGroupSubscription.insert_all(
+      Array.new(Group::MAX_PEOPLE - 2) { |i| { group_id: group.id, phone_number: "+1555900#{format("%04d", i)}" } }
+    )
+    assert_not group.full?
+
+    GuestGroupSubscription.subscribe(group: group, phone_number: "+15559990000")
+    assert group.full?
+
+    membership = GroupMembership.new(group: group, user: create_user)
+    assert_not membership.valid?
+    assert_includes membership.errors[:group], "is full"
   end
 end

@@ -96,4 +96,28 @@ class GenerateRecurringOccurrencesJobTest < ActiveSupport::TestCase
     assert_not_nil occurrence
     assert_equal 120.minutes, occurrence.end_time - occurrence.start_time
   end
+
+  test "skips occurrences for an indefinitely paused group" do
+    event = create_event(@group, @user, recurrence_type: "weekly")
+    event.build_schedule(3.days.from_now.change(hour: 19, min: 0, sec: 0))
+    event.save!
+    @group.pause!
+
+    assert_no_difference "EventOccurrence.count" do
+      GenerateRecurringOccurrencesJob.perform_now
+    end
+  end
+
+  test "only creates occurrences after a paused group's resume date" do
+    event = create_event(@group, @user, recurrence_type: "weekly")
+    event.build_schedule(3.days.from_now.change(hour: 19, min: 0, sec: 0))
+    event.save!
+    @group.pause!(until_date: 15.days.from_now.to_date)
+
+    GenerateRecurringOccurrencesJob.perform_now
+
+    times = event.event_occurrences.pluck(:start_time)
+    assert times.any?
+    assert times.all? { |t| t >= @group.resumes_at }
+  end
 end

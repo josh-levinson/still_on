@@ -76,7 +76,7 @@ The application is built around a hierarchical event management system:
 
 - **Users**: Authenticated via phone number + SMS OTP (Devise was removed). Fields: first_name, last_name, username, avatar_url, phone_number, phone_verified_at. Only organizers have accounts.
 - **Groups**: Collections of members (id: uuid, slug: unique, is_private flag, created_by references Users)
-- **Events**: Templates/series belonging to Groups. Can be recurring (recurrence_type: none/daily/weekly/monthly, recurrence_rule stores pattern)
+- **Events**: Templates/series belonging to Groups. Can be recurring (recurrence_type: none/daily/weekly/biweekly/monthly, recurrence_rule stores pattern)
 - **EventOccurrences**: Specific instances of Events (start_time, end_time, status: scheduled/cancelled/completed, max_attendees). Can override parent Event's location.
 - **RSVPs**: Responses scoped to specific EventOccurrences, not Events — enables per-instance attendance tracking (status: attending/declined/maybe, guest_count for +1s)
 - **GroupMemberships**: Join table connecting Users to Groups
@@ -87,12 +87,27 @@ All core domain tables use UUID primary keys for scalability and security.
 Guests receive a signed token link. The token encodes the EventOccurrence and optionally a phone number. RSVPs from guests are stored with a lightweight guest record that can be claimed/merged if they later create an account. This is the primary interaction path for most people who use the app.
 
 ### Organizer auth flow
-Organizers sign up (or sign in) via phone number + SMS OTP. The onboarding wizard collects first name, hangout name, date, and cadence — then creates the User, Group, Event, and first EventOccurrence in one step. Returning users sign in through the same phone/verify flow at `/onboarding/phone`.
+Organizers sign up (or sign in) via phone number + SMS OTP. The onboarding wizard collects first name, hangout name, date, and cadence — then creates the User, Group, Event, and first EventOccurrence in one step. Returning users sign in through the same phone/verify flow at `/onboarding/phone`. The session cookie (`config/initializers/session_store.rb`) lasts 60 days from the last visit, so organizers rarely need a new code. In development, `config.x.otp_sms` is off and codes are written to the Rails log instead of texted; run with `SEND_OTP_SMS=1` to send real texts.
 
 ### Background jobs
-Two jobs run on a daily cron schedule (configured in `config/recurring.yml`):
-- `GenerateRecurringOccurrencesJob` — runs at 6am, generates EventOccurrence records for recurring events up to 30 days out
-- `ScheduleNotificationsJob` — runs at 8am, enqueues SMS reminders: RSVP prompts 2 days before each occurrence (to non-RSVPd members), and day-of confirmations to attending/maybe guests
+One cron entry in `config/recurring.yml` runs `DailyTasksJob` at 8am `America/New_York` (pinned because the Railway server runs in UTC). It runs these two jobs in order, then pings a single Honeybadger check-in:
+- `GenerateRecurringOccurrencesJob` generates EventOccurrence records for recurring events up to 30 days out
+- `ScheduleNotificationsJob` enqueues SMS reminders: RSVP prompts 2 days before each occurrence (to non-RSVPd members), and day-of confirmations to attending/maybe guests
+
+### Monitoring
+Honeybadger (`config/honeybadger.yml`, key from `HONEYBADGER_API_KEY`) catches unhandled exceptions. Errors that are rescued but still matter go through `Rails.error.report(e, handled: true)`. `SmsService#send_message` reports every send failure itself and re-raises, so callers shouldn't report again. Carrier-side delivery failures arrive later on `POST /twilio/status` (the status callback is only requested when `config.x.twilio_status_callbacks` is on, i.e. production). Account-wide Twilio errors arrive on `POST /twilio/debugger`, which must be set as the webhook URL in the Twilio Console (Monitor → Errors → Webhook). Spend alerts come from Twilio Usage Triggers (Console → Usage → Triggers) whose callback URL is `POST /twilio/usage`; these are fingerprinted by usage category. All three are sent with `Honeybadger.notify`, and the first two are fingerprinted by Twilio error code. They forward only codes and SIDs, never the payload, which can contain phone numbers. Use `SmsService.mask` for phone numbers in log lines. `DailyTasksJob` calls `check_in(:daily_tasks)` only after both daily jobs succeed, which pings the Honeybadger check-in whose ID is in `HONEYBADGER_CHECKIN_DAILY_TASKS` (no-op when unset). The Honeybadger plan allows one check-in, so new scheduled work should run inside `DailyTasksJob` rather than get its own check-in. `:phone` is in `filter_parameters`, so phone numbers stay out of logs and error reports.
+
+### Analytics
+Ahoy (`config/initializers/ahoy.rb`) records server-side events only, in `ahoy_visits`/`ahoy_events`: an "Onboarding step" event on each onboarding GET step, plus "RSVP page viewed" and "RSVP submitted" in `GuestRsvpsController`. No IPs or geocoding are stored, and `/rsvp/:token` URLs are scrubbed before they're saved. `AnalyticsReport` turns the events into funnels; print them with `bin/rails "analytics:report[DAYS]"`. The analytics cookies are listed on `/privacy`, so update that page when tracking changes.
+
+### Dashboard
+`/dashboard` (`DashboardController#show`) shows one card per hangout (group), split by the user's role. **You organize** covers groups they created or co-organize. Each card shows the next occurrence, an RSVP tally (`EventOccurrence#awaiting_reply_count` counts members plus SMS subscribers who haven't replied), a Nudge button (sends an RSVP reminder), the invite link, and pause/quorum warnings. **You're in** covers groups they're a member of, subscribed to as a guest (by phone), or have RSVP'd to, so guests who claimed an account see their hangouts, with one-tap Going/Maybe/Can't buttons. The Nudge and RSVP actions `redirect_back_or_to` the occurrence page, so they return to the dashboard. Full management (events, members, pausing) lives on the group page.
+
+### Pausing a group
+Organizers can pause a group (`Group#pause!`, optional `paused_until` resume date; `GroupPausesController`). While paused, `GenerateRecurringOccurrencesJob` skips occurrences inside the pause window and `ScheduleNotificationsJob` sends no automated reminders for them. Nothing is deleted, and the pause lifts on its own at the start of `paused_until` in the group's time zone. Existing occurrences are left as they are. Manual reminder buttons still work.
+
+### SMS compliance
+Legal pages live in `PagesController`: `/terms`, `/privacy`, `/sms` (SMS Program page, used for carrier campaign review). Keep the consent copy quoted on `/sms` in sync with the actual copy on `onboarding/phone` and `guest_rsvps/show`. `SmsService` prefixes every text with "StillOn: " and swaps curly quotes, dashes and ellipses for plain ASCII, because one non-GSM-7 character makes Twilio send the whole text as UCS-2 at 2–3x the segments. Emoji still trigger UCS-2, so keep them out of message templates. Groups are capped at `Group::MAX_PEOPLE` (members plus SMS subscribers, via `LimitedByGroupSize`) to bound per-group SMS cost. A guest who RSVPs to a full group is still recorded but not subscribed. Opt-in checkboxes must default to unchecked unless the phone is already subscribed. STOP-type replies create an `SmsOptOut`; START/YES/UNSTOP remove it.
 
 ### Public vs. private groups
 Groups have an `is_private` flag. Public groups are browsable via `/groups/discover`. Private group show pages are restricted to members.
@@ -108,6 +123,7 @@ Groups have an `is_private` flag. Public groups are browsable via `/groups/disco
 - **Propshaft**: Asset pipeline
 - **IceCube**: Recurrence scheduling for recurring events
 - **Twilio**: SMS delivery for OTP auth and event reminders
+- **Resend**: email fallback when an SMS fails or a guest gave only an email. Production sends through its HTTPS API (`delivery_method = :resend`, key in `RESEND_API_KEY`) because Railway blocks outbound SMTP. The from address is `noreply@stillon.app`, so the domain must be verified in Resend.
 - **Kamal**: Deployment via Docker
 - **Thruster**: HTTP caching/compression for Puma
 
@@ -138,7 +154,9 @@ All steps must pass for CI to succeed.
 
 ## Code Style
 
-Follows **rubocop-rails-omakase** conventions. The `.rubocop.yml` inherits from the omakase gem with minimal overrides.
+Follows **rubocop-rails-omakase** conventions.
+
+Styling lives in `app/assets/stylesheets/application.css` and uses the theme tokens at the top of `:root` (`--bg`, `--surface`, `--text`, `--text-muted`, `--text-subtle`, `--border`, `--border-strong`, `--accent`, `--focus-ring`). Don't hardcode greys: `--text-subtle` is the dimmest text that meets WCAG AA (4.5:1), and input/control borders use `--border-strong` (3:1). Font sizes are in `rem`, with 13px (`0.8125rem`) as the minimum. The look is "Group chat": warm cream background, Bricolage Grotesque everywhere, 2px ink outlines (`--border-strong`) on controls and cards, and a hard offset shadow (`--ink-shadow`) on primary buttons and selected choices. Labels are sentence case, not uppercase. Status colours have tokens too (`--going`, `--maybe`, and `--success-*`, `--danger-*`, `--warning-*`, `--info-*` bg/text/border sets); use those instead of new hex values. Don't dim text with `opacity`, and don't remove focus outlines without replacing them. There's a dark theme (deep navy, cream ink outlines and shadows, navy text on bright fills) right after `:root`. Visitors pick Auto/Light/Dark with the footer switch (`shared/_theme_switcher`, `theme_controller.js`, `ThemesController`). The choice is stored in a `theme` cookie and rendered as `data-theme` on `<html>`, and Auto follows the OS. The dark token set appears twice, once under `:root[data-theme="dark"]` and once in the `prefers-color-scheme` media query, and the two must stay identical. Any new colour needs a token with a value in the light and dark sets. Text on `--accent`/`--going` uses `--on-accent`, and text on `--maybe` uses `--on-maybe`. The `.rubocop.yml` inherits from the omakase gem with minimal overrides.
 
 ---
 

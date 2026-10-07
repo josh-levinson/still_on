@@ -1,4 +1,12 @@
 module ApplicationHelper
+  # Explicit theme choices. Anything else means "follow the device setting".
+  THEMES = %w[light dark].freeze
+  THEME_COLORS = { "light" => "#fff3dc", "dark" => "#0f1733" }.freeze
+
+  def theme_preference
+    THEMES.include?(cookies[:theme]) ? cookies[:theme] : "system"
+  end
+
   def google_calendar_url(event_occurrence, event)
     start_utc = event_occurrence.start_time.utc.strftime("%Y%m%dT%H%M%SZ")
     end_utc   = event_occurrence.end_time.utc.strftime("%Y%m%dT%H%M%SZ")

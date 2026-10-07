@@ -17,6 +17,15 @@ module StillOn
     config.autoload_lib(ignore: %w[assets tasks])
     config.active_record.schema_format = :ruby
 
+    # No image attachments, so Active Storage never needs a variant processor.
+    config.active_storage.variant_processor = :disabled
+
+    # Whether SmsService asks Twilio for delivery status callbacks. Turned on in production.
+    config.x.twilio_status_callbacks = false
+
+    # Whether sign-in codes are texted. Off in development, where the code is logged instead.
+    config.x.otp_sms = true
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

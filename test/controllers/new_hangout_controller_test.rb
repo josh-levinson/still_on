@@ -260,6 +260,28 @@ class NewHangoutControllerTest < ActionDispatch::IntegrationTest
     assert_not_nil event.recurrence_rule
   end
 
+  test "submit_cadence with biweekly cadence schedules every other week" do
+    occurrence = complete_wizard(cadence: "biweekly")
+    event = Event.order(:created_at).last
+    assert_equal "biweekly", event.recurrence_type
+    next_two = event.schedule.next_occurrences(2, occurrence.start_time)
+    assert_equal [ occurrence.start_time + 2.weeks, occurrence.start_time + 4.weeks ], next_two
+  end
+
+  test "cadence offers every other week" do
+    setup_wizard
+    get new_hangout_cadence_path
+    assert_select "[data-cadence-value=biweekly]"
+  end
+
+  test "invite shows every other week for biweekly cadence and a Discord share button" do
+    complete_wizard(cadence: "biweekly")
+    get new_hangout_invite_path
+    assert_response :success
+    assert_match /Every other week/, response.body
+    assert_select "button.share-btn-discord[data-clipboard-text-param*=?]", "RSVP for Friday Night"
+  end
+
   test "submit_cadence with monthly cadence builds recurrence schedule with nth_weekday" do
     complete_wizard(cadence: "monthly")
     event = Event.order(:created_at).last

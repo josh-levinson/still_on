@@ -59,6 +59,7 @@ class EventOccurrencesControllerTest < ActionDispatch::IntegrationTest
     sign_in(@organizer)
     get group_event_event_occurrence_path(@group, @event, @occurrence)
     assert_select ".invite-share-section"
+    assert_select ".invite-share-section button.share-btn-discord"
   end
 
   test "show does not include share RSVP link for non-organizer" do
@@ -253,6 +254,13 @@ class EventOccurrencesControllerTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to group_event_event_occurrence_path(@group, @event, @occurrence)
     assert_match /rsvp reminder will be sent/i, flash[:notice]
+  end
+
+  test "send_rsvp_reminder returns to the dashboard when sent from there" do
+    sign_in(@organizer)
+    post send_rsvp_reminder_group_event_event_occurrence_path(@group, @event, @occurrence),
+      headers: { "HTTP_REFERER" => dashboard_url }
+    assert_redirected_to dashboard_url
   end
 
   test "send_rsvp_reminder is forbidden for non-organizer" do

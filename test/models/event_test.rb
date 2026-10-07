@@ -32,7 +32,7 @@ class EventTest < ActiveSupport::TestCase
   end
 
   test "accepts all valid recurrence types" do
-    %w[none daily weekly monthly].each do |type|
+    %w[none daily weekly biweekly monthly].each do |type|
       event = Event.new(group: @group, created_by: @user, title: "Recurring", recurrence_type: type)
       assert event.valid?, "Expected #{type} to be valid, got: #{event.errors.full_messages}"
     end
@@ -93,6 +93,14 @@ class EventTest < ActiveSupport::TestCase
     event.save!
     assert_not_nil event.schedule
     assert event.schedule.recurrence_rules.any?
+  end
+
+  test "build_schedule for biweekly repeats every other week on the start day" do
+    event = create_event(@group, @user, recurrence_type: "biweekly")
+    start = Time.zone.local(2030, 1, 4, 19, 0) # a Friday
+    event.build_schedule(start)
+    event.save!
+    assert_equal [ start + 2.weeks, start + 4.weeks ], event.reload.next_occurrences(2, after: start)
   end
 
   test "next_occurrences returns upcoming times" do

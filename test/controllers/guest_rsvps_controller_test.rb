@@ -13,9 +13,63 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
 
   # --- show ---
 
+  test "show tracks an RSVP page view without storing the token" do
+    get guest_rsvp_path(@phone_token)
+
+    event = Ahoy::Event.last
+    assert_equal "RSVP page viewed", event.name
+    assert_equal({ "occurrence_id" => @occurrence.id, "personal_link" => true, "already_responded" => false }, event.properties)
+    assert_includes event.visit.landing_page, "/rsvp/FILTERED"
+    assert_not_includes event.visit.landing_page, @phone_token
+  end
+
+  test "create tracks new and updated RSVPs" do
+    post guest_rsvp_path(@token), params: { rsvp: { status: "attending", guest_name: "New Guest", guest_count: 0 } }
+    post guest_rsvp_path(@token), params: { rsvp: { status: "maybe" } }
+
+    submitted = Ahoy::Event.where(name: "RSVP submitted").order(:time).map(&:properties)
+    assert_equal [ [ "attending", false ], [ "maybe", true ] ], submitted.map { |p| [ p["status"], p["updated"] ] }
+  end
+
   test "show renders the RSVP page for a valid token" do
     get guest_rsvp_path(@token)
     assert_response :success
+  end
+
+  test "show asks as the organizer and lists who's going by first name" do
+    @organizer.update!(first_name: "Josh")
+    @event.update!(description: "Bring snacks")
+    create_rsvp(@occurrence, guest_name: "Sam Smith", guest_count: 1)
+    create_rsvp(@occurrence, guest_name: "Priya")
+    create_rsvp(@occurrence, guest_name: "Nope", status: "declined")
+
+    get guest_rsvp_path(@token)
+
+    assert_select ".rsvp-avatar", "J"
+    assert_select ".rsvp-bubble", /still on\?/
+    assert_select ".rsvp-bubble", /Bring snacks/
+    assert_select ".rsvp-going-heading", /3 in so far/
+    assert_select ".rsvp-going-name:not(.rsvp-going-you)", 2
+    assert_select ".rsvp-going-name", "Sam +1"
+    assert_select ".rsvp-going-you", "you?"
+    assert_select ".navbar a", text: "Get Started", count: 0
+  end
+
+  test "show handles an organizer without a first name and nobody going" do
+    @organizer.update!(first_name: nil)
+
+    get guest_rsvp_path(@token)
+
+    assert_select ".rsvp-ask-from", /Your organizer/
+    assert_select ".rsvp-going-heading", /No one's in yet/
+  end
+
+  test "show drops the you? chip once the guest is in" do
+    post guest_rsvp_path(@token), params: { rsvp: { status: "attending", guest_name: "Me", guest_count: 0 } }
+    follow_redirect!
+
+    assert_select ".rsvp-going-name", "Me"
+    assert_select ".rsvp-going-you", count: 0
   end
 
   test "show returns 404 for an invalid token" do
@@ -59,6 +113,15 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to guest_rsvp_path(@token)
     assert_match /you're in/i, flash[:notice]
+  end
+
+  test "show finds existing RSVP via session after name-only submission" do
+    post guest_rsvp_path(@token), params: {
+      rsvp: { status: "attending", guest_name: "No Phone Guest", guest_count: 0 }
+    }
+    follow_redirect!
+    assert_response :success
+    assert_select ".rsvp-confirmed"
   end
 
   test "create saves a declined RSVP and shows appropriate notice" do
@@ -163,6 +226,60 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
         send_future_reminders: "1"
       }
     end
+  end
+
+  test "create still saves the RSVP but explains when the reminder list is full" do
+    GuestGroupSubscription.insert_all(
+      Array.new(Group::MAX_PEOPLE) { |i| { group_id: @group.id, phone_number: "+1555900#{format("%04d", i)}" } }
+    )
+
+    assert_difference "Rsvp.count", 1 do
+      post guest_rsvp_path(@phone_token), params: {
+        rsvp: { status: "attending", guest_name: "Late Guest", guest_phone: @phone, guest_count: 0 },
+        send_future_reminders: "1"
+      }
+    end
+    assert_not GuestGroupSubscription.subscribed?(group: @group, phone_number: @phone)
+    assert_match "reminder list is full", flash[:notice]
+  end
+
+  test "updating an RSVP explains when the reminder list is full" do
+    post guest_rsvp_path(@phone_token), params: {
+      rsvp: { status: "attending", guest_name: "Late Guest", guest_phone: @phone, guest_count: 0 }
+    }
+    GuestGroupSubscription.insert_all(
+      Array.new(Group::MAX_PEOPLE) { |i| { group_id: @group.id, phone_number: "+1555900#{format("%04d", i)}" } }
+    )
+
+    post guest_rsvp_path(@phone_token), params: { rsvp: { status: "maybe" }, send_future_reminders: "1" }
+
+    assert_equal "RSVP updated! This group's reminder list is full, so we can't text you about future hangouts.", flash[:notice]
+  end
+
+  test "future reminders checkbox is unchecked by default for a prefilled phone" do
+    get guest_rsvp_path(@phone_token)
+    assert_select "input#send_future_reminders:not([checked])"
+  end
+
+  test "future reminders checkbox is checked when the prefilled phone is already subscribed" do
+    GuestGroupSubscription.subscribe(group: @group, phone_number: @phone)
+    get guest_rsvp_path(@phone_token)
+    assert_select "input#send_future_reminders[checked]"
+  end
+
+  test "future reminders checkbox is unchecked by default without a phone" do
+    get guest_rsvp_path(@token)
+    assert_select "input#send_future_reminders:not([checked])"
+  end
+
+  test "future reminders checkbox is checked when the cookie phone is already subscribed" do
+    GuestGroupSubscription.subscribe(group: @group, phone_number: @phone)
+    post guest_rsvp_path(@token), params: {
+      rsvp: { status: "attending", guest_name: "Cookie Sub", guest_phone: @phone, guest_count: 0 },
+      send_future_reminders: "1"
+    }
+    get guest_rsvp_path(@token)
+    assert_select "input#send_future_reminders[checked]"
   end
 
   # --- cookie fallback in find_existing_rsvp ---

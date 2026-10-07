@@ -12,6 +12,7 @@
       <%= @date.strftime("%A, %B %-d") %> &middot;
       <% case @cadence
          when "weekly" %>Weekly
+      <% when "biweekly" %>Every other week
       <% when "monthly" %>Monthly
       <% else %>One-time
       <% end %>
@@ -27,18 +28,7 @@
     </button>
   </div>
 
-  <div class="invite-share-btns">
-    <a href="sms:&body=<%= ERB::Util.url_encode("Hey! RSVP for #{@hangout_name} here: #{@invite_url}") %>"
-       class="share-btn">
-      📱 iMessage
-    </a>
-    <a href="https://wa.me/?text=<%= ERB::Util.url_encode("Hey! RSVP for #{@hangout_name} here: #{@invite_url}") %>"
-       target="_blank"
-       rel="noopener"
-       class="share-btn">
-      💬 WhatsApp
-    </a>
-  </div>
+  <%= render "shared/share_buttons", title: @hangout_name, url: @invite_url %>
 
   <%= link_to "Go to my hangout \u2192",
         group_event_event_occurrence_path(@occurrence.event.group, @occurrence.event, @occurrence),

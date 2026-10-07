@@ -43,7 +43,12 @@ Rails.application.routes.draw do
 
   get  "sms",     to: "pages#sms",     as: :sms_info
   get  "privacy", to: "pages#privacy", as: :privacy
-  post "twilio/sms", to: "twilio_webhooks#sms", as: :twilio_sms_webhook
+  get  "terms",   to: "pages#terms",   as: :terms
+  patch "theme",  to: "themes#update", as: :theme
+  post "twilio/sms",      to: "twilio_webhooks#sms",      as: :twilio_sms_webhook
+  post "twilio/status",   to: "twilio_webhooks#status",   as: :twilio_status_webhook
+  post "twilio/debugger", to: "twilio_webhooks#debugger", as: :twilio_debugger_webhook
+  post "twilio/usage",    to: "twilio_webhooks#usage",    as: :twilio_usage_webhook
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
@@ -53,7 +58,7 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  get "dashboard", to: "posts#index", as: :dashboard
+  get "dashboard", to: "dashboard#show", as: :dashboard
 
   resource :user, only: [ :edit, :update ]
   resource :notification_preference, only: [ :edit, :update ]
@@ -74,6 +79,7 @@ Rails.application.routes.draw do
       get :discover
     end
     resource :membership, only: [ :create, :destroy ], controller: "group_memberships"
+    resource :pause, only: [ :create, :destroy ], controller: "group_pauses"
     resources :group_memberships, only: [], param: :user_id do
       member do
         post :promote

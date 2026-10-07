@@ -27,6 +27,16 @@
 
       <button type="button"
               class="cadence-btn"
+              data-cadence-value="biweekly"
+              data-action="click->cadence#select">
+        <div class="card-option-body">
+          <span class="cadence-label">Every other week</span>
+          <span class="cadence-sub">Every other <%= @day_name || "week" %></span>
+        </div>
+      </button>
+
+      <button type="button"
+              class="cadence-btn"
               data-cadence-value="monthly"
               data-action="click->cadence#select">
         <div class="card-option-body">

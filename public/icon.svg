@@ -1,23 +1,9 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#f5d78e" stop-opacity="1"/>
-      <stop offset="40%" stop-color="#e8a030" stop-opacity="0.6"/>
-      <stop offset="100%" stop-color="#e87010" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="core" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#fff8e8"/>
-      <stop offset="60%" stop-color="#e8c06a"/>
-      <stop offset="100%" stop-color="#d4943a"/>
-    </radialGradient>
-  </defs>
-
-  <!-- Dark rounded background -->
-  <rect width="512" height="512" rx="108" fill="#0d0d0d"/>
-
-  <!-- Outer glow -->
-  <circle cx="256" cy="256" r="160" fill="url(#glow)"/>
-
-  <!-- Ember core -->
-  <circle cx="256" cy="256" r="58" fill="url(#core)"/>
+  <!-- "Group chat" theme: cream tile, accent speech bubble with ink outline and hard offset shadow -->
+  <rect width="512" height="512" rx="112" fill="#fff3dc"/>
+  <g transform="translate(256 256) scale(0.92) translate(-263 -268)" stroke-linejoin="round">
+    <path transform="translate(16 16)" fill="#1f1a17" d="M160 112H352A60 60 0 0 1 412 172V292A60 60 0 0 1 352 352H222L136 414L160 352A60 60 0 0 1 100 292V172A60 60 0 0 1 160 112Z"/>
+    <path fill="#b3341c" stroke="#1f1a17" stroke-width="16" d="M160 112H352A60 60 0 0 1 412 172V292A60 60 0 0 1 352 352H222L136 414L160 352A60 60 0 0 1 100 292V172A60 60 0 0 1 160 112Z"/>
+    <path fill="none" stroke="#ffffff" stroke-width="36" stroke-linecap="round" d="M188 234L236 282L326 192"/>
+  </g>
 </svg>

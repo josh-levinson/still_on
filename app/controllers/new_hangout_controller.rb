@@ -2,7 +2,7 @@ class NewHangoutController < ApplicationController
   layout "onboarding"
   before_action :authenticate_user!
 
-  CADENCES = %w[none weekly monthly].freeze
+  CADENCES = %w[none weekly biweekly monthly].freeze
 
   def name
     @step = 1

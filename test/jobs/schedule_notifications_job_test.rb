@@ -152,4 +152,37 @@ class ScheduleNotificationsJobTest < ActiveSupport::TestCase
       assert_in_delta Time.current.to_f, Time.parse(job["scheduled_at"]).to_f, 1
     end
   end
+
+  test "does not enqueue any reminders for an indefinitely paused group" do
+    travel_to Time.current.noon do
+      event = create_event(@group, @user, quorum: 3)
+      create_occurrence(event, start_time: 2.days.from_now.change(hour: 19), end_time: 2.days.from_now.change(hour: 21))
+      create_occurrence(event, start_time: 4.hours.from_now, end_time: 6.hours.from_now)
+      create_occurrence(event, start_time: 25.hours.from_now, end_time: 27.hours.from_now)
+      @group.pause!
+
+      assert_no_enqueued_jobs only: [ SendRsvpReminderJob, SendEventReminderJob, SendQuorumAlertJob ] do
+        ScheduleNotificationsJob.perform_now
+      end
+    end
+  end
+
+  test "does not enqueue reminders for occurrences before a paused group's resume date" do
+    create_occurrence(@event, start_time: 2.days.from_now.change(hour: 19), end_time: 2.days.from_now.change(hour: 21))
+    @group.pause!(until_date: 5.days.from_now.to_date)
+
+    assert_no_enqueued_jobs only: SendRsvpReminderJob do
+      ScheduleNotificationsJob.perform_now
+    end
+  end
+
+  test "enqueues reminders for occurrences on or after a paused group's resume date" do
+    @group.update!(reminder_days_before: 5)
+    occurrence = create_occurrence(@event, start_time: 5.days.from_now.change(hour: 19), end_time: 5.days.from_now.change(hour: 21))
+    @group.pause!(until_date: 5.days.from_now.to_date)
+
+    assert_enqueued_with(job: SendRsvpReminderJob, args: [ occurrence.id ]) do
+      ScheduleNotificationsJob.perform_now
+    end
+  end
 end

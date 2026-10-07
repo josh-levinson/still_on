@@ -1,6 +1,7 @@
 class EventOccurrence < ApplicationRecord
   belongs_to :event
   has_many :rsvps, dependent: :destroy
+  has_many :guest_invite_tokens, dependent: :delete_all
 
   before_create :ensure_invite_token
 
@@ -17,6 +18,11 @@ class EventOccurrence < ApplicationRecord
     rsvps.where(status: "attending").sum("1 + guest_count")
   end
 
+  # Who's going, oldest reply first, for the "who's in" list on the RSVP page.
+  def attending_rsvps
+    rsvps.where(status: "attending").includes(:user).order(:created_at)
+  end
+
   def maybe_count
     rsvps.where(status: "maybe").count
   end
@@ -31,6 +37,24 @@ class EventOccurrence < ApplicationRecord
 
   def no_response_count(member_count)
     [ member_count - responded_count, 0 ].max
+  end
+
+  # Members and SMS subscribers who haven't RSVP'd yet: the people an RSVP
+  # reminder would go to.
+  def awaiting_reply_count
+    group = event.group
+    user_ids = rsvps.where.not(user_id: nil).pluck(:user_id)
+    member_ids = group.group_memberships.pluck(:user_id)
+    member_phones = User.where(id: member_ids).where.not(phone_number: nil).pluck(:phone_number)
+    replied_phones = rsvps.where.not(guest_phone: nil).pluck(:guest_phone) +
+      User.where(id: user_ids).where.not(phone_number: nil).pluck(:phone_number)
+
+    unreplied_members = (member_ids - user_ids).size
+    unreplied_subscribers = group.guest_group_subscriptions
+      .where.not(phone_number: member_phones + replied_phones)
+      .count
+
+    unreplied_members + unreplied_subscribers
   end
 
   def full?

@@ -15,12 +15,13 @@
           inputmode: "tel",
           autocomplete: "tel-national",
           class: "onboarding-input phone-field",
+          aria: { label: "Phone number" },
           data: { action: "input->phone-input#format", phone_input_target: "display" },
           required: true,
           autofocus: true %>
 
     <%= f.submit "Send code \u2192", class: "btn-onboarding-primary" %>
 
-    <p class="ob-annotation ob-sms-consent">By continuing, you agree to receive SMS messages from StillOn, including a verification code and event reminders. Msg &amp; data rates may apply. Reply STOP to opt out.</p>
+    <p class="ob-annotation ob-sms-consent">By continuing, you agree to the StillOn <%= link_to "Terms", terms_path %> and <%= link_to "Privacy Policy", privacy_path %> and to receive SMS messages from StillOn, including verification codes and hangout reminders. Message frequency varies. Msg &amp; data rates may apply. Reply HELP for help, STOP to opt out.</p>
   <% end %>
 </div>
