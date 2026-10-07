@@ -30,6 +30,14 @@ class SmsServiceTest < ActiveSupport::TestCase
     assert_equal "StillOn: Already branded", @received.first[:body]
   end
 
+  test "send_message swaps curly quotes and dashes for GSM-7 characters" do
+    SmsService.new(client: @client_mock).send_message(
+      to: "+15559999999", body: "Still on for Josh\u2019s \u201Cpoker\u201D night \u2014 8\u20139pm\u2026"
+    )
+
+    assert_equal %(StillOn: Still on for Josh's "poker" night - 8-9pm...), @received.first[:body]
+  end
+
   test "self.send_message class method delegates to instance" do
     ENV["TWILIO_FROM_NUMBER"] = "+15550001111"
     Twilio::REST::Client.stub(:new, @client_mock) do

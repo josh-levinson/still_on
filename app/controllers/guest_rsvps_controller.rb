@@ -21,9 +21,9 @@ class GuestRsvpsController < ApplicationController
     if @existing_rsvp
       if @existing_rsvp.update(rsvp_params)
         save_phone_cookie(@existing_rsvp.guest_phone)
-        update_future_reminder_subscription(@existing_rsvp.guest_phone)
+        subscribed = update_future_reminder_subscription(@existing_rsvp.guest_phone)
         track_rsvp(@existing_rsvp, updated: true)
-        redirect_to guest_rsvp_path(@token), notice: "RSVP updated!"
+        redirect_to guest_rsvp_path(@token), notice: with_reminders_full_note("RSVP updated!", subscribed)
       else
         @rsvp = @existing_rsvp
         @cookie_phone = cookies[:guest_phone]
@@ -46,9 +46,9 @@ class GuestRsvpsController < ApplicationController
     if @rsvp.save
       session[:recent_rsvp_id] = @rsvp.id
       save_phone_cookie(@rsvp.guest_phone)
-      update_future_reminder_subscription(@rsvp.guest_phone)
+      subscribed = update_future_reminder_subscription(@rsvp.guest_phone)
       track_rsvp(@rsvp, updated: false)
-      redirect_to guest_rsvp_path(@token), notice: rsvp_confirmation_message(@rsvp)
+      redirect_to guest_rsvp_path(@token), notice: with_reminders_full_note(rsvp_confirmation_message(@rsvp), subscribed)
     else
       @cookie_phone = cookies[:guest_phone]
       render :show, status: :unprocessable_entity
@@ -110,15 +110,22 @@ class GuestRsvpsController < ApplicationController
     current_user ? permitted.except(:guest_name, :guest_phone, :email) : permitted
   end
 
+  # Returns false only when the guest asked for reminders and the group is full.
   def update_future_reminder_subscription(phone)
-    return if current_user
-    return if phone.blank?
+    return true if current_user || phone.blank?
 
     if params[:send_future_reminders] == "1"
-      GuestGroupSubscription.subscribe(group: @group, phone_number: phone)
+      GuestGroupSubscription.subscribe(group: @group, phone_number: phone).persisted?
     else
       GuestGroupSubscription.unsubscribe(group: @group, phone_number: phone)
+      true
     end
+  end
+
+  def with_reminders_full_note(message, subscribed)
+    return message if subscribed
+
+    "#{message} This group's reminder list is full, so we can't text you about future hangouts."
   end
 
   def use_group_timezone

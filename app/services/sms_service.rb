@@ -2,6 +2,17 @@ class SmsService
   # Carriers expect every message to identify the sender.
   PREFIX = "StillOn: ".freeze
 
+  # Curly quotes and dashes (which iPhone keyboards insert by default) aren't in
+  # the GSM-7 alphabet. One of them makes Twilio send the whole text as UCS-2,
+  # which fits 70 characters per segment instead of 160 and so costs 2-3x.
+  GSM_SUBSTITUTIONS = {
+    "\u2018" => "'", "\u2019" => "'", "\u201A" => "'", "\u2032" => "'",
+    "\u201C" => '"', "\u201D" => '"', "\u201E" => '"', "\u2033" => '"',
+    "\u2013" => "-", "\u2014" => "-", "\u2212" => "-",
+    "\u2026" => "...", "\u00A0" => " ", "\u2009" => " ", "\u202F" => " "
+  }.freeze
+  GSM_SUBSTITUTION_PATTERN = Regexp.union(GSM_SUBSTITUTIONS.keys).freeze
+
   def self.send_message(to:, body:)
     new.send_message(to:, body:)
   end
@@ -34,6 +45,7 @@ class SmsService
   private
 
   def branded(body)
+    body = body.gsub(GSM_SUBSTITUTION_PATTERN, GSM_SUBSTITUTIONS)
     body.start_with?(PREFIX) ? body : "#{PREFIX}#{body}"
   end
 

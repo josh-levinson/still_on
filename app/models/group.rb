@@ -1,4 +1,8 @@
 class Group < ApplicationRecord
+  # Members and SMS subscribers both get automated texts, so capping them
+  # together bounds what one group can cost in Twilio fees.
+  MAX_PEOPLE = 50
+
   belongs_to :created_by, class_name: "User"
   has_many :group_memberships, dependent: :destroy
   has_many :members, through: :group_memberships, source: :user
@@ -23,6 +27,10 @@ class Group < ApplicationRecord
   def member?(user)
     return false unless user
     members.include?(user)
+  end
+
+  def full?
+    group_memberships.count + guest_group_subscriptions.count >= MAX_PEOPLE
   end
 
   def organizer?(user)

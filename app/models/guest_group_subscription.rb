@@ -1,4 +1,6 @@
 class GuestGroupSubscription < ApplicationRecord
+  include LimitedByGroupSize
+
   belongs_to :group
 
   validates :phone_number, presence: true

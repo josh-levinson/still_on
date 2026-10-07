@@ -17,6 +17,17 @@ Target first niche: tabletop game groups (D&D campaigns, board game nights) — 
 - [x] **Account enumeration on sign-in** — `sessions#submit_phone` always goes to the verify step with neutral copy; unknown numbers just get no text.
 - [x] **Product analytics** — self-hosted Ahoy (server-side events only, no IPs, RSVP tokens scrubbed from URLs). `bin/rails "analytics:report[30]"` prints the onboarding funnel and guest RSVP conversion.
 
+### SMS cost and monetization
+Analysis and open decisions live in the "StillOn: SMS costs and monetization" doc: https://claude.ai/code/artifact/244db28c-1802-4463-9a07-01a6e44185ea
+- [x] **GSM-7 normalization** — `SmsService` swaps curly quotes, dashes and ellipses so texts stay at 160 chars/segment instead of 70.
+- [x] **Group size cap** — `Group::MAX_PEOPLE` (50) counts members plus SMS subscribers together.
+- [ ] Move `occurrence.notes` out of SMS bodies onto the RSVP page
+- [ ] "Share to group chat" as the free reminder option
+- [ ] Day-of reminder opt-in or email-first
+- [ ] Back off after 3 ignored reminders
+- [ ] Hard spending cap in the Twilio Console
+- [ ] Organizer subscription (free vs. paid tiers)
+
 ### Go-to-market
 - [ ] Game-group landing page copy variant (e.g. "Know by Wednesday if Friday's session is happening")
 - [ ] Soft launch with 3–5 real game groups; watch onboarding drop-off and guest RSVP rates

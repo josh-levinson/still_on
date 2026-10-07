@@ -160,4 +160,20 @@ class GroupTest < ActiveSupport::TestCase
   test "next_occurrence is nil when nothing is scheduled" do
     assert_nil create_group(@user).next_occurrence
   end
+
+  test "full? counts members and SMS subscribers together" do
+    group = create_group(create_user)
+    GroupMembership.create!(group: group, user: group.created_by)
+    GuestGroupSubscription.insert_all(
+      Array.new(Group::MAX_PEOPLE - 2) { |i| { group_id: group.id, phone_number: "+1555900#{format("%04d", i)}" } }
+    )
+    assert_not group.full?
+
+    GuestGroupSubscription.subscribe(group: group, phone_number: "+15559990000")
+    assert group.full?
+
+    membership = GroupMembership.new(group: group, user: create_user)
+    assert_not membership.valid?
+    assert_includes membership.errors[:group], "is full"
+  end
 end

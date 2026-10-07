@@ -13,6 +13,11 @@ class GroupMembershipsController < ApplicationController
       return
     end
 
+    if @group.full?
+      redirect_to group_path(@group.slug), alert: "This group is full."
+      return
+    end
+
     @group.group_memberships.create!(user: current_user)
     redirect_to group_path(@group.slug), notice: "You have joined #{@group.name}."
   end

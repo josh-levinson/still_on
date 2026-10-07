@@ -228,6 +228,34 @@ class GuestRsvpsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "create still saves the RSVP but explains when the reminder list is full" do
+    GuestGroupSubscription.insert_all(
+      Array.new(Group::MAX_PEOPLE) { |i| { group_id: @group.id, phone_number: "+1555900#{format("%04d", i)}" } }
+    )
+
+    assert_difference "Rsvp.count", 1 do
+      post guest_rsvp_path(@phone_token), params: {
+        rsvp: { status: "attending", guest_name: "Late Guest", guest_phone: @phone, guest_count: 0 },
+        send_future_reminders: "1"
+      }
+    end
+    assert_not GuestGroupSubscription.subscribed?(group: @group, phone_number: @phone)
+    assert_match "reminder list is full", flash[:notice]
+  end
+
+  test "updating an RSVP explains when the reminder list is full" do
+    post guest_rsvp_path(@phone_token), params: {
+      rsvp: { status: "attending", guest_name: "Late Guest", guest_phone: @phone, guest_count: 0 }
+    }
+    GuestGroupSubscription.insert_all(
+      Array.new(Group::MAX_PEOPLE) { |i| { group_id: @group.id, phone_number: "+1555900#{format("%04d", i)}" } }
+    )
+
+    post guest_rsvp_path(@phone_token), params: { rsvp: { status: "maybe" }, send_future_reminders: "1" }
+
+    assert_equal "RSVP updated! This group's reminder list is full, so we can't text you about future hangouts.", flash[:notice]
+  end
+
   test "future reminders checkbox is unchecked by default for a prefilled phone" do
     get guest_rsvp_path(@phone_token)
     assert_select "input#send_future_reminders:not([checked])"
