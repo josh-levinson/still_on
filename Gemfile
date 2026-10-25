@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.1.3"
+gem "rails", "~> 8.1.4"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
 # Use PostgreSQL as the database for Active Record
@@ -64,11 +64,11 @@ group :test do
   gem "simplecov", require: false
 end
 
-gem "twilio-ruby", "~> 7.11"
+gem "twilio-ruby", "~> 7.12"
 gem "ice_cube"
 
-gem "honeybadger", "~> 6.9"
+gem "honeybadger", "~> 6.10"
 
 gem "ahoy_matey", "~> 5.5"
 
-gem "resend", "~> 1.17"
+gem "resend", "~> 1.18"
